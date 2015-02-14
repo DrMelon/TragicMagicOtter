@@ -23,7 +23,8 @@ namespace TragicMagic
 		// Setup the rotation of the HUD according to which wizard it belongs to
 		// IN: (scene_game) The current scene, (rotation) The rotation of this HUD (90 or -90)
 		// OUT: N/A
-		public HUDClass( Scene_GameClass scene_game, float rotation ) : base()
+		public HUDClass( Scene_GameClass scene_game, float rotation )
+			: base()
 		{
 			Scene_Game = scene_game;
 			Rotation = rotation;

@@ -27,7 +27,8 @@ namespace TragicMagic
 		// Store the Leap Motion Controller warning HUD entities
 		public Entity[] HUDElement_Leap;
 
-		public HUDHandlerClass( Scene_GameClass scene_game ) : base()
+		public HUDHandlerClass( Scene_GameClass scene_game )
+			: base()
 		{
 			// Reference to the current scene
 			Scene_Game = scene_game;
