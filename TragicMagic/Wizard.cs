@@ -11,6 +11,12 @@ using Leap;
 // Handle movement, combos & attacking of a player
 // Depends on: GameWands, ComboSystem
 
+<<<<<<< HEAD
+=======
+// TODO:
+// Movement functions
+
+>>>>>>> origin/master
 namespace TragicMagic
 {
 	enum WizardTypeStruct
@@ -27,6 +33,11 @@ namespace TragicMagic
 
 		// Store a reference to the GameWands to query tool positions
 		public GameWandsClass GameWands;
+
+        // Store a reference to an Otter player session, so we can read controls and input.
+        public Session LinkedSession;
+        // Store control inputs here
+        public String ComboInputs = "";
 
 		// The wizard type (light or dark)
 		public WizardTypeStruct WizardType;
@@ -61,8 +72,14 @@ namespace TragicMagic
 		// IN: (gamewands) Reference to the Leap tool game state handler, (wizardtype) Light or dark wizard,
 		//     (position) The position of this wizard on screen
 		// OUT: N/A
+<<<<<<< HEAD
 		public WizardClass( GameWandsClass gamewands, WizardTypeStruct wizardtype, Vector2 position, float angle ) : base()
+=======
+		public WizardClass( Session playsession, GameWandsClass gamewands, WizardTypeStruct wizardtype, Vector2 position, float angle )
+			: base()
+>>>>>>> origin/master
 		{
+            LinkedSession = playsession;
 			GameWands = gamewands;
 			WizardType = wizardtype;
 			Position = position;
@@ -132,7 +149,88 @@ namespace TragicMagic
 			Body.SetPosition( Position.X, Position.Y );
 			Wand.SetPosition( Position.X + WandOffset.X, Position.Y + WandOffset.Y );
 			Wand.Angle = Angle + ( WandAngle * WandAngleDirection );
+
+
+            CheckControls();
+
+
 		}
+
+        public void CheckControls()
+        {
+            if (LinkedSession != null)
+            {
+                // Element Buttons (Just Pressed)
+                if (LinkedSession.Controller.A.Pressed)
+                {
+                    ComboInputs += "A";
+                }
+                if (LinkedSession.Controller.B.Pressed)
+                {
+                    ComboInputs += "B";
+                }
+                if (LinkedSession.Controller.X.Pressed)
+                {
+                    ComboInputs += "X";
+                }
+                if (LinkedSession.Controller.Y.Pressed)
+                {
+                    ComboInputs += "Y";
+                }
+
+                // Movement (While Held)
+                if (LinkedSession.Controller.Left.Down)
+                {
+                    //TODO: Move Wizard Left. Movement funcs not implemented yet.
+                }
+                if (LinkedSession.Controller.Right.Down)
+                {
+                    //TODO: Move Wizard Right. Movement funcs not implemented yet.
+                }
+                if (LinkedSession.Controller.Up.Down)
+                {
+                    //TODO: Move Wizard Up. Movement funcs not implemented yet.
+                }
+                if (LinkedSession.Controller.Down.Down)
+                {
+                    //TODO: Move Wizard Down. Movement funcs not implemented yet.
+                    //DEBUG: Using this to cast a spell
+                    TryToCastSpell();
+                }
+
+                // Update Input strings to only be 10 in length; trim off the leading characters
+                if (ComboInputs.Length > 10)
+                {
+                    ComboInputs = ComboInputs.Substring(1, 10);
+                }
+
+                
+
+            }
+        }
+
+        public void TryToCastSpell()
+        {
+            // Player tried to cast a spell; send their current combo to the spell-checker (lol)
+            SpellInformation whatSpell = ComboSystem.Instance.CheckSpell(ComboInputs);
+
+            this.Game.Debugger.Log("", LinkedSession.Name + ": Trying to cast with: " + ComboInputs);
+
+            // If we actually cast a spell, do something with it!
+            if (whatSpell != null)
+            {
+                // Write into ingame debug console (open with @)
+
+                this.Game.Debugger.Log("", LinkedSession.Name + ": " + whatSpell.spellName + " just got cast!\n");
+
+                //TODO: Here we'd read the spell info and build a spell entity from it & add it to the scene.
+            }
+
+            // Now blank out the combo inputs, ready for another go.
+            ComboInputs = "";
+        }
+
+        
 
 		// Cleanup any objects belonging solely to this wizard
 		// IN: N/A

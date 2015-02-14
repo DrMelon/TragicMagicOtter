@@ -28,21 +28,30 @@ namespace TragicMagic
 		//private PulseCircleClass LeapWarning = null;
 
 		// Store the two wizard players
+<<<<<<< HEAD
 		private List<WizardClass> Wizards;
+=======
+        private List<WizardClass> Wizards;
+        // Store the players' input strings.
+        private String lightWizardInput = "";
+        private String darkWizardInput = "";
+        //TODO: Input strings should probably exist inside wizard class,
+        // along with a reference to the relevant session.
+>>>>>>> origin/master
 
 		// Store the handler of player HUDs
 		private HUDHandlerClass HUDHandler;
 
-		public Scene_GameClass()
+		public Scene_GameClass(Game game)
 		{
-			Initialize();
+            Initialize(game);
 		}
 
 		~Scene_GameClass()
 		{
 		}
 
-		public void Initialize()
+		public void Initialize(Game game)
 		{
 			// Set the reference to LeapController within the GameWands class & add to game update
 			GameWands.LeapController = LeapController;
@@ -55,6 +64,7 @@ namespace TragicMagic
 			Wizards = new List<WizardClass>();
 
 			// Light wizard on the right
+<<<<<<< HEAD
 			Wizards.Add(
 				new WizardClass(
 					GameWands, // Reference to Leap Motion tool handler
@@ -82,6 +92,51 @@ namespace TragicMagic
 
 			// Add a reference of this scene to the HUDHandler
 			HUDHandler = new HUDHandlerClass( this );
+=======
+			Wizards.Add(new WizardClass(
+                game.Session("LightWizard"),
+				GameWands,
+				WizardTypeStruct.WIZARD_LIGHT,
+				new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
+				90
+			));
+
+			// Dark wizard on the left
+			Wizards.Add(new WizardClass(
+                game.Session("DarkWizard"),
+				GameWands,
+				WizardTypeStruct.WIZARD_DARK,
+				new Vector2( wizardoffset, Game.Instance.HalfHeight ),
+				-90
+			));
+
+            // Add the wizards to the scene.
+            foreach(WizardClass wiz in Wizards)
+            {
+                Add(wiz);
+            }
+
+            
+
+
+			// Initialize grid of pulsing circles
+			//int radius = 6;
+			//int size = 16;
+			//int offsetx = Game.Instance.HalfWidth;
+			//int offsety = Game.Instance.HalfHeight;
+			//for ( int x = -radius; x < radius; x++ )
+			//{
+			//	for ( int y = -radius; y < radius; y++ )
+			//	{
+			//		float speed = ( x * y ) / radius;
+			//		PulseCircleClass pulser = new PulseCircleClass( ( x * size ) + offsetx, ( y * size ) + offsety, speed );
+			//		{
+			//			pulser.LeapController = LeapController;
+			//		}
+			//		Add( pulser );
+			//	}
+			//}
+>>>>>>> origin/master
 		}
 
 		public override void Update()
@@ -115,5 +170,11 @@ namespace TragicMagic
 				HUDHandler.RemoveLeapWarning();
 			}
 		}
+
+
+
+        
+
+
 	}
 }
