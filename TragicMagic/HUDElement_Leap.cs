@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Leap;
 
 // Matthew Cormack @johnjoemcbob
-// 13/02/2015
-// A coloured circle which pulses between white and black
-// If a hand is detected, the circle will change to a shade of red
+// 14/02/2015
+// A HUD element which appears when there is no Leap Motion Controller device found,
+// with instructions for the user to plug the device in
 // Depends on: ClampedSpeedValue
 
 namespace TragicMagic

@@ -36,9 +36,8 @@ namespace TragicMagic
 		// Store the handler of player HUDs
 		private HUDHandlerClass HUDHandler;
 
-		public Scene_GameClass( Game game )
+		public Scene_GameClass()
 		{
-			Initialize( game );
 		}
 
 		~Scene_GameClass()
