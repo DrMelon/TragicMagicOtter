@@ -24,7 +24,7 @@ namespace TragicMagic
 			Leap.Controller LeapController;
 
 			// Game scene
-			Scene_GameClass Scene_Game;
+			Scene_GameClass Scene_Game; // We want to initialize this after the game is initialized
 
 			// Initialize
 			{
@@ -43,7 +43,7 @@ namespace TragicMagic
 
 
 
-				// Initialize player sessions & scene
+				// Initialize player sessions
                 game.AddSession( "LightWizard" );
                 game.AddSession( "DarkWizard" );
 
@@ -78,13 +78,14 @@ namespace TragicMagic
                 //game.Session("LightWizard").Controller.B.AddButton( XBOX_B )
 
 
-				Scene_Game = new Scene_GameClass();
+                // Initialize Scene
+				Scene_Game = new Scene_GameClass(game);
 				{
 					Scene_Game.LeapController = LeapController;
 				}
+
+                game.FirstScene = Scene_Game;
 				
-                
-				game.FirstScene = Scene_Game;
 			}
 			// Update
 			{

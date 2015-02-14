@@ -38,16 +38,16 @@ namespace TragicMagic
 		// Store the two wizard HUDs
 		//private HUDClass[] HUD;
 
-		public Scene_GameClass()
+		public Scene_GameClass(Game game)
 		{
-			Initialize();
+            Initialize(game);
 		}
 
 		~Scene_GameClass()
 		{
 		}
 
-		public void Initialize()
+		public void Initialize(Game game)
 		{
 			// Set the reference to LeapController within the GameWands class & add to game update
 			GameWands.LeapController = LeapController;
@@ -61,6 +61,7 @@ namespace TragicMagic
 
 			// Light wizard on the right
 			Wizards.Add(new WizardClass(
+                game.Session("LightWizard"),
 				GameWands,
 				WizardTypeStruct.WIZARD_LIGHT,
 				new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
@@ -69,6 +70,7 @@ namespace TragicMagic
 
 			// Dark wizard on the left
 			Wizards.Add(new WizardClass(
+                game.Session("DarkWizard"),
 				GameWands,
 				WizardTypeStruct.WIZARD_DARK,
 				new Vector2( wizardoffset, Game.Instance.HalfHeight ),
@@ -119,9 +121,6 @@ namespace TragicMagic
 
 			// Display errors if the Leap device is missing
 			Update_CheckLeap();
-
-            // Update keypresses
-            Update_CheckControls();
 		}
 
 		// Check the count of Leap Motion Devices & display a warning if there are none
@@ -148,102 +147,6 @@ namespace TragicMagic
 			}
 		}
 
-
-        // Check the player inputs, see if anything has been pressed.
-        // Called from main game update every frame.
-        // IN: N/A
-        // OUT: N/A
-        private void Update_CheckControls()
-        {
-            // Checking Element Buttons (Only When Just Pressed)
-            if (this.Game.Session("LightWizard").Controller.A.Pressed)
-            {
-                lightWizardInput += "A";
-            }
-            if (this.Game.Session("LightWizard").Controller.B.Pressed)
-            {
-                lightWizardInput += "B";
-            }
-            if (this.Game.Session("LightWizard").Controller.X.Pressed)
-            {
-                lightWizardInput += "X";
-            }
-            if (this.Game.Session("LightWizard").Controller.Y.Pressed)
-            {
-                lightWizardInput += "Y";
-            }
-            if (this.Game.Session("DarkWizard").Controller.A.Pressed)
-            {
-                darkWizardInput += "A";
-            }
-            if (this.Game.Session("DarkWizard").Controller.B.Pressed)
-            {
-                darkWizardInput += "B";
-            }
-            if (this.Game.Session("DarkWizard").Controller.X.Pressed)
-            {
-                darkWizardInput += "X";
-            }
-            if (this.Game.Session("DarkWizard").Controller.Y.Pressed)
-            {
-                darkWizardInput += "Y";
-            }
-
-            // Checking Movement (While Held)
-            if(this.Game.Session("LightWizard").Controller.Left.Down)
-            {
-                //TODO: Move Light Wizard Left. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("LightWizard").Controller.Right.Down)
-            {
-                //TODO: Move Light Wizard Right. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("LightWizard").Controller.Up.Down)
-            {
-                //TODO: Move Light Wizard Up. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("LightWizard").Controller.Down.Down)
-            {
-                //TODO: Move Light Wizard Down. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("DarkWizard").Controller.Left.Down)
-            {
-                //TODO: Move Dark Wizard Left. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("DarkWizard").Controller.Right.Down)
-            {
-                //TODO: Move Dark Wizard Right. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("DarkWizard").Controller.Up.Down)
-            {
-                //TODO: Move Dark Wizard Up. Movement funcs not implemented yet.
-            }
-            if (this.Game.Session("DarkWizard").Controller.Down.Down)
-            {
-                //TODO: Move Dark Wizard Down. Movement funcs not implemented yet.
-            }
-
-
-            // Update Input strings to only be 10 in length; trim off the leading characters
-            if(lightWizardInput.Length > 10)
-            {
-                lightWizardInput = lightWizardInput.Substring(1, 10);
-            }
-            if (darkWizardInput.Length > 10)
-            {
-                darkWizardInput = darkWizardInput.Substring(1, 10);
-            }
-
-            //DEBUG: Checking combo system works - writes to debugger, open with ~ or ` key
-            SpellInformation whatSpell = ComboSystem.Instance.CheckSpell(lightWizardInput);
-            if(whatSpell != null)
-            {
-               Debugger.Log("", whatSpell.spellName + " just got cast!\n");
-            }
-            
-
-
-        }
 
 
         
