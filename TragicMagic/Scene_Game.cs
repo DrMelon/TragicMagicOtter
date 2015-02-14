@@ -12,19 +12,18 @@ namespace TragicMagic
 	{
 		public Leap.Controller LeapController;
 
+		private PulseSphere LeapWarning = null;
+
 		public Scene_Game()
+		{
+		}
+
+		~Scene_Game()
 		{
 		}
 
 		public void Initialize()
 		{
-			GameManager gamemanager = new GameManager();
-			{
-				gamemanager.OtterScene = this;
-				gamemanager.LeapController = LeapController;
-			}
-			Add( gamemanager );
-
 			int radius = 6;
 			int size = 16;
 			int offsetx = Game.Instance.HalfWidth;
@@ -43,9 +42,35 @@ namespace TragicMagic
 			}
 		}
 
-		~Scene_Game()
+		public override void Update()
 		{
-			RemoveAll();
+			base.Update();
+
+			Update_CheckLeap();
+		}
+
+		// Check the count of Leap Motion Devices & display a warning if there are none
+		// NOTE: Called from main game update every frame
+		// IN: N/A
+		// OUT: N/A
+		private void Update_CheckLeap()
+		{
+			if ( ( LeapController == null ) || ( LeapController.Devices.Count == 0 ) ) // No devices connected
+			{
+				if ( LeapWarning == null ) // Does not exist yet
+				{
+					LeapWarning = new PulseSphere( 250, 250, 100 ); // Placeholder for actual warning graphic
+					Add( LeapWarning );
+				}
+			}
+			else // Atleast 1 device connected
+			{
+				if ( LeapWarning != null ) // Not already disposed of
+				{
+					Remove( LeapWarning );
+					LeapWarning = null; // Disregard reference to pulser, flag for garbage collect
+				}
+			}
 		}
 	}
 }

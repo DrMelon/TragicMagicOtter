@@ -15,10 +15,10 @@ namespace TragicMagic
 			Game game = new Game( "Game", 1920, 1080, 60, true );
 
 			// Initialize Leap Motion Controller
-			LeapListenerClass LeapListener;
+			Leap.Listener LeapListener;
 			Leap.Controller LeapController;
 
-			LeapListener = new LeapListenerClass();
+			LeapListener = new Leap.Listener();
 			LeapController = new Leap.Controller();
 			LeapController.AddListener( LeapListener );
 
