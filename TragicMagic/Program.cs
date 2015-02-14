@@ -48,7 +48,8 @@ namespace TragicMagic
 				{
 					Scene_Game.LeapController = LeapController;
 				}
-				Scene_Game.Initialize();
+				
+                
 				game.FirstScene = Scene_Game;
 			}
 			// Update

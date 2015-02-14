@@ -28,7 +28,8 @@ namespace TragicMagic
 		private PulseCircleClass LeapWarning = null;
 
 		// Store the two wizard players
-		private WizardClass[] Wizard;
+        private List<WizardClass> Wizards;
+		
 
 		// Store the two wizard HUDs
 		//private HUDClass[] HUD;
@@ -51,32 +52,31 @@ namespace TragicMagic
 			// Initialize the two wizard players
 			float wizardoffset = 256;
 
-			int wizards = 1; // This is just for fun
-			Wizard = new WizardClass[WIZARDS * wizards];
-			{
-				for ( int wizard = 0; wizard < wizards; wizard++ )
-				{
-					int id = wizard * WIZARDS;
-					// Light wizard on the right
-					Wizard[id] = new WizardClass(
-						GameWands,
-						WizardTypeStruct.WIZARD_LIGHT,
-						new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
-						90
-					);
-					Add( Wizard[id] );
+            // Create new wizard list
+            Wizards = new List<WizardClass>();
 
-					id++;
-					// Dark wizard on the left
-					Wizard[id] = new WizardClass(
-						GameWands,
-						WizardTypeStruct.WIZARD_DARK,
-						new Vector2( wizardoffset, Game.Instance.HalfHeight ),
-						-90
-					);
-					Add( Wizard[id] );
-				}
-			}
+			// Light wizard on the right
+			Wizards.Add(new WizardClass(
+				GameWands,
+				WizardTypeStruct.WIZARD_LIGHT,
+				new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
+				90
+			));
+
+			// Dark wizard on the left
+			Wizards.Add(new WizardClass(
+				GameWands,
+				WizardTypeStruct.WIZARD_DARK,
+				new Vector2( wizardoffset, Game.Instance.HalfHeight ),
+				-90
+			));
+
+            // Add the wizards to the scene.
+            foreach(WizardClass wiz in Wizards)
+            {
+                Add(wiz);
+            }
+
 
 			// Initialize grid of pulsing circles
 			//int radius = 6;
@@ -102,11 +102,14 @@ namespace TragicMagic
 			base.Update();
 
 			// Update the rotation of the wand based on Leap tool tracking
-			for ( short wizard = 0; wizard < WIZARDS; wizard++ )
-			{
-				Wizard[wizard].WandDirection = GameWands.Wand[wizard].Direction;
-				Wizard[wizard].WandAngle = GameWands.Wand[wizard].Direction.X * WAND_ROTATE_MAX;
-			}
+            foreach(WizardClass wiz in Wizards)
+            {
+                // Suggest changing GameWands.Wand[] to be a list too, but for now this is OK
+                wiz.WandDirection = GameWands.Wand[Wizards.IndexOf(wiz)].Direction;
+                wiz.WandAngle = GameWands.Wand[Wizards.IndexOf(wiz)].Direction.X * WAND_ROTATE_MAX;
+            }
+
+          
 
 			// Display errors if the Leap device is missing
 			Update_CheckLeap();

@@ -78,8 +78,6 @@ namespace TragicMagic
 			Cleanup();
 		}
 
-        
-
 		public override void Added()
 		{
 			base.Added();
@@ -93,7 +91,6 @@ namespace TragicMagic
 					wizardtypeimage = "dark";
 					WandOffset *= -1;
 					WandAngleDirection *= -1;
-                    
 				}
 			}
 
@@ -143,7 +140,6 @@ namespace TragicMagic
 		// Cleanup any objects belonging solely to this wizard
 		// IN: N/A
 		// OUT: N/A
-        
 		public void Cleanup()
 		{
 			// Remove the wizard body sprite
