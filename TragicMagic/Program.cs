@@ -41,6 +41,8 @@ namespace TragicMagic
 				LeapController = new Leap.Controller();
 				LeapController.AddListener( LeapListener );
 
+
+
 				// Initialize player sessions & scene
                 game.AddSession( "LightWizard" );
                 game.AddSession( "DarkWizard" );

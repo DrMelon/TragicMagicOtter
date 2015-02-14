@@ -11,7 +11,7 @@ using TragicMagic;
 //@Purpose: Provides a singleton class for looking up spells by combos.
 //@Usage: Example usage is as follows:
 /////////////////////////////////////////
-//         SpellInformation whatSpellDidIJustCast = ComboSystem::Instance.CheckSpell(myInput);
+//         SpellInformation whatSpellDidIJustCast = ComboSystem.Instance.CheckSpell(myInput);
 //         Wizard.CastSpell(whatSpellDidIJustCast);
 /////////////////////////////////////////
 //
@@ -44,6 +44,8 @@ namespace TragicMagic
         //Constructor is always private in singleton pattern.
         private ComboSystem() 
         {
+            spellDictionary = new Dictionary<string,SpellInformation>();
+
             // Temporary spell definitions here;
             //TODO: Make these load from files or spell creator or something.
 
