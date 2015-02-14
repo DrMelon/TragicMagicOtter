@@ -23,7 +23,7 @@ namespace TragicMagic
 		public Func<int> OnMaximum = DefaultMaximum;
 		public Func<int> OnMinimum = DefaultMinimum;
 
-		public void Update()
+		public virtual void Update()
 		{
 			// If the value exceeds the range
 			if ( Value > Maximum )

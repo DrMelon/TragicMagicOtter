@@ -11,9 +11,6 @@ using Leap;
 // Handle movement, combos & attacking of a player
 // Depends on: GameWands, ComboSystem
 
-// TODO:
-// Fix multiple rendering wizards
-
 namespace TragicMagic
 {
 	enum WizardTypeStruct
@@ -64,8 +61,7 @@ namespace TragicMagic
 		// IN: (gamewands) Reference to the Leap tool game state handler, (wizardtype) Light or dark wizard,
 		//     (position) The position of this wizard on screen
 		// OUT: N/A
-		public WizardClass( GameWandsClass gamewands, WizardTypeStruct wizardtype, Vector2 position, float angle )
-			: base()
+		public WizardClass( GameWandsClass gamewands, WizardTypeStruct wizardtype, Vector2 position, float angle ) : base()
 		{
 			GameWands = gamewands;
 			WizardType = wizardtype;
@@ -77,8 +73,6 @@ namespace TragicMagic
 		{
 			Cleanup();
 		}
-
-        
 
 		public override void Added()
 		{
@@ -93,7 +87,7 @@ namespace TragicMagic
 					wizardtypeimage = "dark";
 					WandOffset *= -1;
 					WandAngleDirection *= -1;
-                    
+
 				}
 			}
 
@@ -143,7 +137,6 @@ namespace TragicMagic
 		// Cleanup any objects belonging solely to this wizard
 		// IN: N/A
 		// OUT: N/A
-        
 		public void Cleanup()
 		{
 			// Remove the wizard body sprite

@@ -10,7 +10,7 @@ using Leap;
 // 13/02/2015
 // A coloured circle which pulses between white and black
 // If a hand is detected, the circle will change to a shade of red
-// Depends on: ClampedValue, Leap.Controller
+// Depends on: ClampedValue
 
 namespace TragicMagic
 {
@@ -29,21 +29,21 @@ namespace TragicMagic
 		// Speed of colour fading
 		public float Speed = 1;
 
-		// Store a reference to the LeapController to query for hands
-		public Leap.Controller LeapController;
-
 		// The coloured circle image to display
 		Otter.Image Image_Circle = Otter.Image.CreateCircle( 7 );
 
-		public PulseCircleClass() : base()
+		public PulseCircleClass()
+			: base()
 		{
-			Image_Circle.SetPosition( 250, 250 );
+			X = 250;
+			Y = 250;
 		}
 
 		public PulseCircleClass( float x, float y, float speed = 1 )
 			: base()
 		{
-			Image_Circle.SetPosition( x, y );
+			X = x;
+			Y = y;
 			Speed = speed;
 		}
 
@@ -52,7 +52,7 @@ namespace TragicMagic
 			base.Added();
 
 			// Initialize circle
-			SetGraphic( Image_Circle );
+			AddGraphic( Image_Circle );
 			Image_Circle.CenterOrigin();
 
 			// Initialize clamped colours
@@ -88,18 +88,8 @@ namespace TragicMagic
 			Image_Circle.Color.G = Util.ScaleClamp( G.Value, 0, 100, 1, 0 );
 			Image_Circle.Color.B = Util.ScaleClamp( B.Value, 0, 100, 1, 0 );
 
-			// If there is a Leap hand present, turn to a shade of red
-			if ( LeapController != null )
-			{
-				Leap.Frame frame = LeapController.Frame();
-				{
-					if ( frame.Hands.Count > 0 )
-					{
-						Image_Circle.Color.R = 1;
-					}
-				}
-				frame.Dispose();
-			}
+			// Update the image position
+			Image_Circle.SetPosition( X, Y );
 		}
 
 		// Function to change the direction of fading when the red value is clamped

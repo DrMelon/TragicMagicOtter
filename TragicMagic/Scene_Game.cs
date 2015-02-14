@@ -9,7 +9,7 @@ using Leap;
 // Matthew Cormack @johnjoemcbob
 // 13/02/15
 // Main game scene, contains gameplay
-// Depends on: Leap.Controller, GameWands, PulseCircle, Wizard
+// Depends on: Leap.Controller, GameWands, Wizard, HUDHandler
 
 namespace TragicMagic
 {
@@ -25,14 +25,13 @@ namespace TragicMagic
 		// Store a reference to the GameWands to query tool positions
 		public GameWandsClass GameWands = new GameWandsClass();
 
-		private PulseCircleClass LeapWarning = null;
+		//private PulseCircleClass LeapWarning = null;
 
 		// Store the two wizard players
-        private List<WizardClass> Wizards;
-		
+		private List<WizardClass> Wizards;
 
-		// Store the two wizard HUDs
-		//private HUDClass[] HUD;
+		// Store the handler of player HUDs
+		private HUDHandlerClass HUDHandler;
 
 		public Scene_GameClass()
 		{
@@ -52,49 +51,37 @@ namespace TragicMagic
 			// Initialize the two wizard players
 			float wizardoffset = 256;
 
-            // Create new wizard list
-            Wizards = new List<WizardClass>();
+			// Create new wizard list
+			Wizards = new List<WizardClass>();
 
 			// Light wizard on the right
-			Wizards.Add(new WizardClass(
-				GameWands,
-				WizardTypeStruct.WIZARD_LIGHT,
-				new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
-				90
-			));
+			Wizards.Add(
+				new WizardClass(
+					GameWands, // Reference to Leap Motion tool handler
+					WizardTypeStruct.WIZARD_LIGHT, // Type
+					new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ), // Position
+					90 // Rotation
+				)
+			);
 
 			// Dark wizard on the left
-			Wizards.Add(new WizardClass(
-				GameWands,
-				WizardTypeStruct.WIZARD_DARK,
-				new Vector2( wizardoffset, Game.Instance.HalfHeight ),
-				-90
-			));
+			Wizards.Add(
+				new WizardClass(
+					GameWands, // Reference to Leap Motion tool handler
+					WizardTypeStruct.WIZARD_DARK, // Type
+					new Vector2( wizardoffset, Game.Instance.HalfHeight ), // Position
+					-90 // Rotation
+				)
+			);
 
-            // Add the wizards to the scene.
-            foreach(WizardClass wiz in Wizards)
-            {
-                Add(wiz);
-            }
+			// Add the wizards to the scene
+			foreach ( WizardClass wiz in Wizards )
+			{
+				Add( wiz );
+			}
 
-
-			// Initialize grid of pulsing circles
-			//int radius = 6;
-			//int size = 16;
-			//int offsetx = Game.Instance.HalfWidth;
-			//int offsety = Game.Instance.HalfHeight;
-			//for ( int x = -radius; x < radius; x++ )
-			//{
-			//	for ( int y = -radius; y < radius; y++ )
-			//	{
-			//		float speed = ( x * y ) / radius;
-			//		PulseCircleClass pulser = new PulseCircleClass( ( x * size ) + offsetx, ( y * size ) + offsety, speed );
-			//		{
-			//			pulser.LeapController = LeapController;
-			//		}
-			//		Add( pulser );
-			//	}
-			//}
+			// Add a reference of this scene to the HUDHandler
+			HUDHandler = new HUDHandlerClass( this );
 		}
 
 		public override void Update()
@@ -102,14 +89,12 @@ namespace TragicMagic
 			base.Update();
 
 			// Update the rotation of the wand based on Leap tool tracking
-            foreach(WizardClass wiz in Wizards)
-            {
-                // Suggest changing GameWands.Wand[] to be a list too, but for now this is OK
-                wiz.WandDirection = GameWands.Wand[Wizards.IndexOf(wiz)].Direction;
-                wiz.WandAngle = GameWands.Wand[Wizards.IndexOf(wiz)].Direction.X * WAND_ROTATE_MAX;
-            }
-
-          
+			foreach ( WizardClass wiz in Wizards )
+			{
+				int wand = Wizards.IndexOf( wiz );
+				wiz.WandDirection = GameWands.Wand[wand].Direction;
+				wiz.WandAngle = GameWands.Wand[wand].Direction.X * WAND_ROTATE_MAX;
+			}
 
 			// Display errors if the Leap device is missing
 			Update_CheckLeap();
@@ -123,19 +108,11 @@ namespace TragicMagic
 		{
 			if ( ( LeapController == null ) || ( LeapController.Devices.Count == 0 ) ) // No devices connected
 			{
-				if ( LeapWarning == null ) // Does not exist yet
-				{
-					LeapWarning = new PulseCircleClass( 250, 250, 100 ); // Placeholder for actual warning graphic
-					Add( LeapWarning );
-				}
+				HUDHandler.AddLeapWarning();
 			}
 			else // Atleast 1 device connected
 			{
-				if ( LeapWarning != null ) // Not already disposed of
-				{
-					Remove( LeapWarning );
-					LeapWarning = null; // Disregard reference to pulser, flag for garbage collect
-				}
+				HUDHandler.RemoveLeapWarning();
 			}
 		}
 	}
