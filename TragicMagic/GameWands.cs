@@ -14,7 +14,6 @@ using Leap;
 
 // TODO:
 // More advanced identification if 2 tools are present to find the one closest to the side of the player
-// Ensure wands on either side always point at the other wizard
 // Better spell casting identification
 
 namespace TragicMagic
@@ -99,9 +98,23 @@ namespace TragicMagic
 
 						// Has updated wands this frame, now ensure they point in the right direction
 						{
-							// TOOD: Ensure wands on either side always point at the other wizard
-							// Based on wand id
+							// NOTE: This does not get inverted, as it is actually based on which side of the Leap the player is on,
+							//       so it should be the same whether the light wizard is id 0 or the dark wizard is
+							short wand = 0;
 
+							// Player with the Leap cable extending to their right (default light wizard)
+							wand = 0;
+							if ( Wand[wand].Direction.Y < 0 ) // Direction y (z in 3d space) should always be negative for this player's aiming wand
+							{
+								Wand[wand].Direction *= -1; // If not, correct it
+							}
+
+							// Player with the Leap cable extending to their left (default dark wizard)
+							wand = 1;
+							if ( Wand[wand].Direction.Y > 0 ) // Direction y (z in 3d space) should always be positive for this player's aiming wand
+							{
+								Wand[wand].Direction *= -1; // If not, correct it
+							}
 						}
 					}
 				}
