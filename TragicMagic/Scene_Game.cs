@@ -6,10 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Leap;
 
+// Matthew Cormack @johnjoemcbob
+// 13/02/15
+// Main game scene, contains gameplay
+// Depends on: Leap.Controller, GameWands, PulseCircle, Wizard
+
 namespace TragicMagic
 {
 	class Scene_GameClass : Scene
 	{
+		// Defines
+		private const short WIZARDS = 2;
+		private const float WAND_ROTATE_MAX = 45;
+
 		// Store a reference to the LeapController object to pass to children
 		public Leap.Controller LeapController;
 
@@ -43,11 +52,11 @@ namespace TragicMagic
 			float wizardoffset = 256;
 
 			int wizards = 1; // This is just for fun
-			Wizard = new WizardClass[2*wizards];
+			Wizard = new WizardClass[WIZARDS * wizards];
 			{
 				for ( int wizard = 0; wizard < wizards; wizard++ )
 				{
-					int id = wizard * 2;
+					int id = wizard * WIZARDS;
 					// Light wizard on the right
 					Wizard[id] = new WizardClass(
 						GameWands,
@@ -92,6 +101,14 @@ namespace TragicMagic
 		{
 			base.Update();
 
+			// Update the rotation of the wand based on Leap tool tracking
+			for ( short wizard = 0; wizard < WIZARDS; wizard++ )
+			{
+				Wizard[wizard].WandDirection = GameWands.Wand[wizard].Direction;
+				Wizard[wizard].WandAngle = GameWands.Wand[wizard].Direction.X * WAND_ROTATE_MAX;
+			}
+
+			// Display errors if the Leap device is missing
 			Update_CheckLeap();
 		}
 

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Leap;
 
-// Matthew Cormack
+// Matthew Cormack @johnjoemcbob
 // 13/02/2015
 // A coloured circle which pulses between white and black
 // If a hand is detected, the circle will change to a shade of red

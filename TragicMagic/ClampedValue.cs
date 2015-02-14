@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// Matthew Cormack
+// Matthew Cormack @johnjoemcbob
 // 13/02/15
 // Represents a clampable scalar value between a minimum and a maximum, with
 // extra functionality provided by OnMinimum and OnMaximum callbacks
