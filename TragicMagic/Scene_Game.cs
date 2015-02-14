@@ -8,38 +8,84 @@ using Leap;
 
 namespace TragicMagic
 {
-	class Scene_Game : Scene
+	class Scene_GameClass : Scene
 	{
+		// Store a reference to the LeapController object to pass to children
 		public Leap.Controller LeapController;
 
-		private PulseSphere LeapWarning = null;
+		// Store a reference to the GameWands to query tool positions
+		public GameWandsClass GameWands = new GameWandsClass();
 
-		public Scene_Game()
+		private PulseCircleClass LeapWarning = null;
+
+		// Store the two wizard players
+		private WizardClass[] Wizard;
+
+		// Store the two wizard HUDs
+		//private HUDClass[] HUD;
+
+		public Scene_GameClass()
 		{
+			Initialize();
 		}
 
-		~Scene_Game()
+		~Scene_GameClass()
 		{
 		}
 
 		public void Initialize()
 		{
-			int radius = 6;
-			int size = 16;
-			int offsetx = Game.Instance.HalfWidth;
-			int offsety = Game.Instance.HalfHeight;
-			for ( int x = -radius; x < radius; x++ )
+			// Set the reference to LeapController within the GameWands class & add to game update
+			GameWands.LeapController = LeapController;
+			Add( GameWands );
+
+			// Initialize the two wizard players
+			float wizardoffset = 256;
+
+			int wizards = 1; // This is just for fun
+			Wizard = new WizardClass[2*wizards];
 			{
-				for ( int y = -radius; y < radius; y++ )
+				for ( int wizard = 0; wizard < wizards; wizard++ )
 				{
-					float speed = ( x * y ) / radius;
-					PulseSphere pulser = new PulseSphere( ( x * size ) + offsetx, ( y * size ) + offsety, speed );
-					{
-						pulser.LeapController = LeapController;
-					}
-					Add( pulser );
+					int id = wizard * 2;
+					// Light wizard on the right
+					Wizard[id] = new WizardClass(
+						GameWands,
+						WizardTypeStruct.WIZARD_LIGHT,
+						new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
+						90
+					);
+					Add( Wizard[id] );
+
+					id++;
+					// Dark wizard on the left
+					Wizard[id] = new WizardClass(
+						GameWands,
+						WizardTypeStruct.WIZARD_DARK,
+						new Vector2( wizardoffset, Game.Instance.HalfHeight ),
+						-90
+					);
+					Add( Wizard[id] );
 				}
 			}
+
+			// Initialize grid of pulsing circles
+			//int radius = 6;
+			//int size = 16;
+			//int offsetx = Game.Instance.HalfWidth;
+			//int offsety = Game.Instance.HalfHeight;
+			//for ( int x = -radius; x < radius; x++ )
+			//{
+			//	for ( int y = -radius; y < radius; y++ )
+			//	{
+			//		float speed = ( x * y ) / radius;
+			//		PulseCircleClass pulser = new PulseCircleClass( ( x * size ) + offsetx, ( y * size ) + offsety, speed );
+			//		{
+			//			pulser.LeapController = LeapController;
+			//		}
+			//		Add( pulser );
+			//	}
+			//}
 		}
 
 		public override void Update()
@@ -59,7 +105,7 @@ namespace TragicMagic
 			{
 				if ( LeapWarning == null ) // Does not exist yet
 				{
-					LeapWarning = new PulseSphere( 250, 250, 100 ); // Placeholder for actual warning graphic
+					LeapWarning = new PulseCircleClass( 250, 250, 100 ); // Placeholder for actual warning graphic
 					Add( LeapWarning );
 				}
 			}

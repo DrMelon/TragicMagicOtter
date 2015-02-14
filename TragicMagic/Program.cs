@@ -24,12 +24,12 @@ namespace TragicMagic
 
             game.AddSession( "Battle" );
 
-			Scene_Game scene_game = new Scene_Game();
+			Scene_GameClass Scene_Game = new Scene_GameClass();
 			{
-				scene_game.LeapController = LeapController;
+				Scene_Game.LeapController = LeapController;
 			}
-			scene_game.Initialize();
-            game.FirstScene = scene_game;
+			Scene_Game.Initialize();
+			game.FirstScene = Scene_Game;
 
 			game.Start();
 
