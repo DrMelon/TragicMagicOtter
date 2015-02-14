@@ -19,6 +19,7 @@ namespace TragicMagic
 		// The Leap Motion Controller image to display
 		private Otter.Image Image_Leap;
 		private Otter.Image Image_LeapCable;
+		private Otter.Image Image_LeapCable_Background;
 
 		// The clamped value of the cable offset from the Leap device
 		private ClampedSpeedValueClass Cable;
@@ -40,6 +41,16 @@ namespace TragicMagic
 		public override void Added()
 		{
 			base.Added();
+
+			// Initialize the background Leap cable image
+			Image_LeapCable_Background = new Otter.Image( "../../resources/leap/leapcableback.png" );
+			{
+				Image_LeapCable_Background.X = X;
+				Image_LeapCable_Background.Y = Y;
+				Image_LeapCable_Background.CenterOrigin();
+				Image_LeapCable_Background.OriginX = Image_LeapCable_Background.Width + 32;
+			}
+			AddGraphic( Image_LeapCable_Background );
 
 			// Initialize the Leap cable image
 			Image_LeapCable = new Otter.Image( "../../resources/leap/leapcable.png" );
