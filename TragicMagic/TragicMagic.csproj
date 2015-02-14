@@ -47,11 +47,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClampedValue.cs" />
+    <Compile Include="ComboSystem.cs" />
     <Compile Include="GameWands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PulseCircle.cs" />
     <Compile Include="Scene_Game.cs" />
+    <Compile Include="SpellInformation.cs" />
     <Compile Include="Wizard.cs" />
   </ItemGroup>
   <ItemGroup>
