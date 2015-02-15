@@ -43,7 +43,7 @@ namespace TragicMagic
 		// Add an entity to this HUD, with rotation and translation offsets
 		// IN: (entity) The entity representing the HUD element
 		// OUT: N/A
-		public void Add( Entity entity )
+		public void Add( HUDElementClass entity )
 		{
 			// Must be added to the scene before the graphics exist
 			Scene_Game.Add( entity );
@@ -73,9 +73,13 @@ namespace TragicMagic
 		// Remove an entity from this HUD
 		// IN: (entity) The entity representing the HUD element
 		// OUT: N/A
-		public void Remove( Entity entity )
+		public void Remove( HUDElementClass entity )
 		{
-			Scene_Game.Remove( entity );
+			bool removenow = entity.Remove(); // Perform individual element preremove functionality
+			if ( removenow )
+			{
+				Scene_Game.Remove( entity );
+			}
 		}
 	}
 }

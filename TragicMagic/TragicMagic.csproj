@@ -57,6 +57,7 @@
     <Compile Include="ComboSystem.cs" />
     <Compile Include="GameWands.cs" />
     <Compile Include="HUD.cs" />
+    <Compile Include="HUDElement.cs" />
     <Compile Include="HUDElement_Leap.cs" />
     <Compile Include="HUDHandler.cs" />
     <Compile Include="Program.cs" />

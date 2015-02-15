@@ -25,7 +25,7 @@ namespace TragicMagic
 		public HUDClass[] HUD;
 
 		// Store the Leap Motion Controller warning HUD entities
-		public Entity[] HUDElement_Leap;
+		public HUDElementClass[] HUDElement_Leap;
 
 		public HUDHandlerClass( Scene_GameClass scene_game )
 			: base()
@@ -41,7 +41,7 @@ namespace TragicMagic
 			}
 
 			// Leap Motion Controller warning objects
-			HUDElement_Leap = new Entity[HUDS];
+			HUDElement_Leap = new HUDElementClass[HUDS];
 		}
 
 		public override void Added()
@@ -57,7 +57,7 @@ namespace TragicMagic
 		// Add an entity to both HUDs
 		// IN: (entity1) The entity representing the first HUD element, (entity2) The entity representing the second HUD element
 		// OUT: N/A
-		public void Add( Entity entity1, Entity entity2 )
+		public void Add( HUDElementClass entity1, HUDElementClass entity2 )
 		{
 			HUD[0].Add( entity1 );
 			HUD[1].Add( entity2 );
@@ -70,16 +70,16 @@ namespace TragicMagic
 		{
 			if ( HUDElement_Leap[0] != null ) { return; }; // Already added
 
-			HUDElement_Leap[0] = new HUDElement_LeapClass( Game.Instance.HalfHeight / 2, 25 );
-			HUDElement_Leap[1] = new HUDElement_LeapClass( Game.Instance.HalfHeight / 2, 25 );
+			HUDElement_Leap[0] = new HUDElement_LeapClass( Scene_Game, Game.Instance.HalfHeight / 2, 25 );
+			HUDElement_Leap[1] = new HUDElement_LeapClass( Scene_Game, Game.Instance.HalfHeight / 2, 25 );
 
-			Add( (Entity) HUDElement_Leap[0], (Entity) HUDElement_Leap[1] );
+			Add( HUDElement_Leap[0], HUDElement_Leap[1] );
 		}
 
 		// Remove an entity from both HUDs
 		// IN: (entity1) The entity representing the first HUD element, (entity2) The entity representing the second HUD element
 		// OUT: N/A
-		public void Remove( Entity entity1, Entity entity2 )
+		public void Remove( HUDElementClass entity1, HUDElementClass entity2 )
 		{
 			HUD[0].Remove( entity1 );
 			HUD[1].Remove( entity2 );

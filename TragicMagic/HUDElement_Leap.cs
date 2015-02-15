@@ -14,25 +14,27 @@ using Leap;
 
 namespace TragicMagic
 {
-	class HUDElement_LeapClass : Entity
+	class HUDElement_LeapClass : HUDElementClass
 	{
 		// The Leap Motion Controller image to display
-		private Otter.Image Image_Leap;
-		private Otter.Image Image_LeapCable;
 		private Otter.Image Image_LeapCable_Background;
+		private Otter.Image Image_LeapCable;
+		private Otter.Image Image_Leap;
 
 		// The clamped value of the cable offset from the Leap device
 		private ClampedSpeedValueClass Cable;
 
-		public HUDElement_LeapClass()
-			: base()
-		{
-			X = 250;
-			Y = 250;
-		}
+		// The clamped value of the fade amount of the images
+		private ClampedSpeedValueClass Alpha;
 
-		public HUDElement_LeapClass( float x, float y, float speed = 1 )
-			: base()
+		// The flag for fading out this element when removed
+		private bool FadeOut = false;
+
+		// Constructor for this HUD element, hold a reference to the scene and setup positioning
+		// IN: (scene_game) Reference to the current scene, (x) The x position of the element,
+		//     (y) The y position of the element, (speed) The speed for the Leap cable to move at
+		public HUDElement_LeapClass( Scene_GameClass scene_game, float x = 0, float y = 0, float speed = 1 )
+			: base( scene_game )
 		{
 			X = x;
 			Y = y;
@@ -77,14 +79,68 @@ namespace TragicMagic
 			Cable.Value = 32;
 			Cable.Minimum = -6;
 			Cable.Maximum = 32;
+
+			// Initialize the cable offset
+			Alpha = new ClampedSpeedValueClass();
+			Alpha.Value = 0;
+			Alpha.Minimum = 0;
+			Alpha.Maximum = 1;
+			Alpha.Speed = 0.03f;
+
+			// Update the images to have this initial alpha value
+			foreach ( Graphic graphic in Graphics )
+			{
+				graphic.Alpha = Alpha.Value;
+			}
 		}
 
 		public override void Update()
 		{
 			base.Update();
 
+			if ( FadeOut ) // Fade out at the end of the animation
+			{
+				Alpha.Update();
+
+				// Update the images to have this new alpha value
+				foreach ( Graphic graphic in Graphics )
+				{
+					graphic.Alpha = Alpha.Value;
+				}
+
+				// Remove from scene when done
+				if ( Alpha.Value <= 0 )
+				{
+					Scene_Game.Remove( this );
+				}
+			}
+			else // Fade in at the start of the animation
+			{
+				if ( Image_LeapCable_Background.Alpha < 1 ) // Still fading in
+				{
+					Alpha.Update();
+
+					// Update the images to have this new alpha value
+					foreach ( Graphic graphic in Graphics )
+					{
+						graphic.Alpha = Alpha.Value;
+					}
+				}
+			}
+
+			// Move the cable using the clamped moving value
 			Cable.Update();
 			Image_LeapCable.OriginX = Image_LeapCable.Width + Cable.Value;
+		}
+
+		// Return whether or not the element should actually be removed at this point
+		// NOTE: Useful for fade out animations, etc
+		// IN: N/A
+		// OUT: (bool) True to remove from scene
+		public override bool Remove()
+		{
+			FadeOut = true;
+			return false;
 		}
 	}
 }
