@@ -65,7 +65,16 @@ namespace TragicMagic
 			}
 			foreach ( Graphic graphic in entity.Graphics ) // Update each graphic
 			{
-				graphic.SetPosition( entity.X, entity.Y );
+				float offx = graphic.X - x;
+				float offy = graphic.Y - y;
+				{
+					if ( Rotation < 0 ) // Place on other side of screen
+					{
+						offx *= -1;
+						offy *= -1;
+					}
+				}
+				graphic.SetPosition( entity.X + offx, entity.Y + offy );
 				graphic.Angle = -Rotation;
 			}
 		}

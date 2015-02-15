@@ -10,16 +10,20 @@ using Leap;
 // 14/02/2015
 // A HUD element which appears when there is no Leap Motion Controller device found,
 // with instructions for the user to plug the device in
-// Depends on: ClampedSpeedValue
+// Depends on: HUDElement, ClampedSpeedValue
 
 namespace TragicMagic
 {
 	class HUDElement_LeapClass : HUDElementClass
 	{
+		// Defines
+		private const float FADE_SPEED = 0.03f;
+
 		// The Leap Motion Controller image to display
 		private Otter.Image Image_LeapCable_Background;
 		private Otter.Image Image_LeapCable;
 		private Otter.Image Image_Leap;
+		private Otter.Text Text_Warning;
 
 		// The clamped value of the cable offset from the Leap device
 		private ClampedSpeedValueClass Cable;
@@ -74,18 +78,30 @@ namespace TragicMagic
 			}
 			AddGraphic( Image_Leap );
 
+			Text_Warning = new Otter.Text( "Plug in Leap Motion Controller device", 16 );
+			{
+				Text_Warning.X = X + 55;
+				Text_Warning.Y = Y;
+				Text_Warning.CenterOrigin();
+			}
+			AddGraphic( Text_Warning );
+
 			// Initialize the cable offset
 			Cable = new ClampedSpeedValueClass();
-			Cable.Value = 32;
-			Cable.Minimum = -6;
-			Cable.Maximum = 32;
+			{
+				Cable.Value = 32;
+				Cable.Minimum = -6;
+				Cable.Maximum = 32;
+			}
 
 			// Initialize the cable offset
 			Alpha = new ClampedSpeedValueClass();
-			Alpha.Value = 0;
-			Alpha.Minimum = 0;
-			Alpha.Maximum = 1;
-			Alpha.Speed = 0.03f;
+			{
+				Alpha.Value = 0;
+				Alpha.Minimum = 0;
+				Alpha.Maximum = 1;
+				Alpha.Speed = FADE_SPEED;
+			}
 
 			// Update the images to have this initial alpha value
 			foreach ( Graphic graphic in Graphics )
@@ -116,7 +132,7 @@ namespace TragicMagic
 			}
 			else // Fade in at the start of the animation
 			{
-				if ( Image_LeapCable_Background.Alpha < 1 ) // Still fading in
+				if ( Graphic.Alpha < 1 ) // Still fading in
 				{
 					Alpha.Update();
 
