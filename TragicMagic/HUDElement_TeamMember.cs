@@ -8,8 +8,8 @@ using Leap;
 
 // Matthew Cormack @johnjoemcbob
 // 14/02/2015
-// A HUD element which appears when there is no Leap Motion Controller device found,
-// with instructions for the user to plug the device in
+// A HUD element which shows information about an individual team member,
+// and displays their image
 // Depends on: HUDElement, ClampedSpeedValue
 
 namespace TragicMagic
@@ -38,9 +38,6 @@ namespace TragicMagic
 		private Otter.Text Text_Username;
 		private Otter.Text Text_Role;
 		private Otter.Text Text_Website;
-
-		// The clamped value of the cable offset from the Leap device
-		private ClampedSpeedValueClass Cable;
 
 		// The clamped value of the fade amount of the images
 		private ClampedSpeedValueClass Alpha;

@@ -51,7 +51,7 @@ namespace TragicMagic
 			Add( GameWands );
 
 			// Initialize the two wizard players
-			float wizardoffset = -256;
+			float wizardoffset = 256;
 
 			// Create new wizard list
 			Wizards = new List<WizardClass>();

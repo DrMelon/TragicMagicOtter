@@ -18,6 +18,11 @@ using Tweetinvi.Core.Interfaces.oAuth;
 using Tweetinvi.Core.Interfaces.Streaminvi;
 using Tweetinvi.Json;
 
+// Matthew Cormack @johnjoemcbob
+// 14/02/15
+// Tweetinvi API for uploading an image of the battle to Twitter
+// Depends on: N/A
+
 namespace TragicMagic
 {
 	class TweetinviClass

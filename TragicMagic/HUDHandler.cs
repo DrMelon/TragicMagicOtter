@@ -167,13 +167,13 @@ namespace TragicMagic
 				for ( short hud = 0; hud < HUDS; hud++ )
 				{
 					HUDElement_Team[member][hud] = new HUDElement_TeamMemberClass(
-							Scene_Game,
-							TeamMember[member].Name,
-							TeamMember[member].Username,
-							TeamMember[member].Role,
-							TeamMember[member].Website,
-							Game.Instance.HalfHeight / ( TEAM_MEMBERS + 1 ) * ( member + 1 ),
-							150 + ( ( member % 2 ) * 150 )
+							Scene_Game, // Reference to the current scene
+							TeamMember[member].Name, // Member name
+							TeamMember[member].Username, // Member username
+							TeamMember[member].Role, // Member role
+							TeamMember[member].Website, // Member website
+							Game.Instance.HalfHeight / ( TEAM_MEMBERS + 1 ) * ( member + 1 ), // X
+							150 + ( ( member % 2 ) * 150 ) // Y, Offset even team members for spacing
 					);
 				}
 
