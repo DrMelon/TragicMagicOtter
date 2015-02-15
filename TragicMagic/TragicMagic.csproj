@@ -44,6 +44,12 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tweetinvi">
+      <HintPath>Tweetinvi\Tweetinvi.dll</HintPath>
+    </Reference>
+    <Reference Include="Tweetinvi.Core">
+      <HintPath>Tweetinvi\Tweetinvi.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClampedSpeedValue.cs" />
@@ -58,6 +64,7 @@
     <Compile Include="PulseCircle.cs" />
     <Compile Include="Scene_Game.cs" />
     <Compile Include="SpellInformation.cs" />
+    <Compile Include="Tweetinvi.cs" />
     <Compile Include="Wizard.cs" />
   </ItemGroup>
   <ItemGroup>

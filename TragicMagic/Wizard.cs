@@ -135,10 +135,6 @@ namespace TragicMagic
 		{
 			base.Update();
 
-			//Position.X += Rand.Float( -10, 10 );
-			//Position.Y += Rand.Float( -10, 10 );
-
-			// TODO: Fix multiple rendering (tried UpdateLast & UpdateFirst - no change)
 			// Keep body & wand attached to each other
 			Body.SetPosition( Position.X, Position.Y );
 			Wand.SetPosition( Position.X + WandOffset.X, Position.Y + WandOffset.Y );
@@ -217,8 +213,6 @@ namespace TragicMagic
 			// Now blank out the combo inputs, ready for another go.
 			ComboInputs = "";
 		}
-
-
 
 		// Cleanup any objects belonging solely to this wizard
 		// IN: N/A

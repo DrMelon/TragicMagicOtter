@@ -83,6 +83,9 @@ namespace TragicMagic
 				Scene_Game.Initialize( game );
 
 				game.FirstScene = Scene_Game;
+
+				// Test tweeting interface
+				TweetinviClass test = new TweetinviClass();
 			}
 			// Update
 			{
