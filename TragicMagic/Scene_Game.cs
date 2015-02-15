@@ -27,14 +27,10 @@ namespace TragicMagic
 
 		// Store the two wizard players
 		private List<WizardClass> Wizards;
-		// Store the players' input strings.
-		private String lightWizardInput = "";
-		private String darkWizardInput = "";
-		//TODO: Input strings should probably exist inside wizard class,
-		// along with a reference to the relevant session.
 
 		// Store the handler of player HUDs
 		private HUDHandlerClass HUDHandler;
+
 
 		public Scene_GameClass()
 		{
@@ -82,6 +78,9 @@ namespace TragicMagic
 			// Add a reference of this scene to the HUDHandler
 			HUDHandler = new HUDHandlerClass( this );
 			Add( HUDHandler );
+
+
+
 		}
 
 		public override void Update()
