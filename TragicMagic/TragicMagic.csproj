@@ -61,6 +61,7 @@
     <Compile Include="HUDElement_Leap.cs" />
     <Compile Include="HUDElement_TeamMember.cs" />
     <Compile Include="HUDHandler.cs" />
+    <Compile Include="ParticleSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PulseCircle.cs" />
