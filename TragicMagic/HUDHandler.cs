@@ -13,19 +13,10 @@ using System.Threading.Tasks;
 
 namespace TragicMagic
 {
-	struct TeamMemberStruct
-	{
-		public string Name;
-		public string Username;
-		public string Role;
-		public string Website;
-	}
-
 	class HUDHandlerClass : Entity
 	{
 		// Defines
 		private const short HUDS = 2;
-		private const short TEAM_MEMBERS = 5;
 
 		// Hold a reference to the current scene in order to add new entities to it
 		public Scene_GameClass Scene_Game;
@@ -37,10 +28,7 @@ namespace TragicMagic
 		public HUDElementClass[] HUDElement_Leap;
 
 		// Store the Team Member credit HUD entities
-		public HUDElementClass[][] HUDElement_Team;
-
-		// Store the Team Member information
-		public TeamMemberStruct[] TeamMember;
+		public HUDElementClass[] HUDElement_Team;
 
 		public HUDHandlerClass( Scene_GameClass scene_game )
 			: base()
@@ -57,55 +45,9 @@ namespace TragicMagic
 
 			// Leap Motion Controller warning objects
 			HUDElement_Leap = new HUDElementClass[HUDS];
-			HUDElement_Team = new HUDElementClass[TEAM_MEMBERS][];
-			{
-				// Initialize each team member to have 2 HUD elements, one for each side
-				for ( short member = 0; member < TEAM_MEMBERS; member++ )
-				{
-					HUDElement_Team[member] = new HUDElementClass[HUDS];
-				}
-			}
 
-			// Initialize Team Member information
-			TeamMember = new TeamMemberStruct[TEAM_MEMBERS];
-			{
-				short member = 0;
-
-				// Matthew
-				TeamMember[member].Name = "Matthew Cormack";
-				TeamMember[member].Username = "johnjoemcbob";
-				TeamMember[member].Role = "Programmer";
-				TeamMember[member].Website = "www.johnjoemcbob.com";
-				member++;
-
-				// Jordan
-				TeamMember[member].Name = "Jordan Brown";
-				TeamMember[member].Username = "DrMelon";
-				TeamMember[member].Role = "Programmer";
-				TeamMember[member].Website = "www.doctor-melon.com";
-				member++;
-
-				// Sean
-				TeamMember[member].Name = "Sean Thurmond";
-				TeamMember[member].Username = "_Inu_";
-				TeamMember[member].Role = "Programmer";
-				TeamMember[member].Website = "www.carpevenatus.com";
-				member++;
-
-				// Max
-				TeamMember[member].Name = "Max Wrighton";
-				TeamMember[member].Username = "MaxWrighton";
-				TeamMember[member].Role = "Designer";
-				TeamMember[member].Website = "www.maxwrighton.com";
-				member++;
-
-				// Pip
-				TeamMember[member].Name = "Pip Snaith";
-				TeamMember[member].Username = "pipsnaith";
-				TeamMember[member].Role = "Artist";
-				TeamMember[member].Website = "";
-				member++;
-			}
+			// Team display objects
+			HUDElement_Team = new HUDElementClass[HUDS];
 		}
 
 		public override void Added()
@@ -160,25 +102,18 @@ namespace TragicMagic
 		// OUT: N/A
 		public void AddTeam()
 		{
-			if ( HUDElement_Team[0][0] != null ) { return; }; // Already added
+			if ( HUDElement_Team[0] != null ) { return; }; // Already added
 
-			for ( short member = 0; member < TEAM_MEMBERS; member++ )
+			for ( short hud = 0; hud < HUDS; hud++ )
 			{
-				for ( short hud = 0; hud < HUDS; hud++ )
-				{
-					HUDElement_Team[member][hud] = new HUDElement_TeamMemberClass(
-							Scene_Game, // Reference to the current scene
-							TeamMember[member].Name, // Member name
-							TeamMember[member].Username, // Member username
-							TeamMember[member].Role, // Member role
-							TeamMember[member].Website, // Member website
-							Game.Instance.HalfHeight / ( TEAM_MEMBERS + 1 ) * ( member + 1 ), // X
-							150 + ( ( member % 2 ) * 150 ) // Y, Offset even team members for spacing
-					);
-				}
-
-				Add( HUDElement_Team[member][0], HUDElement_Team[member][1] );
+				HUDElement_Team[hud] = new HUDElement_TeamClass(
+					Scene_Game, // Reference to the current scene
+					0, // Position X
+					200 // Position Y
+				);
 			}
+
+			Add( HUDElement_Team[0], HUDElement_Team[1] );
 		}
 
 		// Remove the Leap Motion Controller missing warning from the HUDs
@@ -186,17 +121,14 @@ namespace TragicMagic
 		// OUT: N/A
 		public void RemoveTeam()
 		{
-			if ( HUDElement_Team[0][0] == null ) { return; }; // Already removed
+			if ( HUDElement_Team[0] == null ) { return; }; // Already removed
 
-			for ( short member = 0; member < TEAM_MEMBERS; member++ )
+			Remove( HUDElement_Team[0], HUDElement_Team[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDS; hud++ )
 			{
-				Remove( HUDElement_Team[member][0], HUDElement_Team[member][1] );
-
-				// Flag both HUD elements for garbage collection
-				for ( short hud = 0; hud < HUDS; hud++ )
-				{
-					HUDElement_Team[member][hud] = null;
-				}
+				HUDElement_Team[hud] = null;
 			}
 		}
 

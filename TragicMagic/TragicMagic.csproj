@@ -59,6 +59,7 @@
     <Compile Include="HUD.cs" />
     <Compile Include="HUDElement.cs" />
     <Compile Include="HUDElement_Leap.cs" />
+    <Compile Include="HUDElement_Team.cs" />
     <Compile Include="HUDElement_TeamMember.cs" />
     <Compile Include="HUDHandler.cs" />
     <Compile Include="ParticleSystem.cs" />

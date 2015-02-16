@@ -31,7 +31,6 @@ namespace TragicMagic
 		// Store the handler of player HUDs
 		private HUDHandlerClass HUDHandler;
 
-
 		public Scene_GameClass()
 		{
 		}
@@ -44,6 +43,7 @@ namespace TragicMagic
 		{
 			// Set the reference to LeapController within the GameWands class & add to game update
 			GameWands.LeapController = LeapController;
+			GameWands.OnCast = OnCast;
 			Add( GameWands );
 
 			// Initialize the two wizard players
@@ -78,9 +78,6 @@ namespace TragicMagic
 			// Add a reference of this scene to the HUDHandler
 			HUDHandler = new HUDHandlerClass( this );
 			Add( HUDHandler );
-
-
-
 		}
 
 		public override void Update()
@@ -113,6 +110,16 @@ namespace TragicMagic
 			{
 				HUDHandler.RemoveLeapWarning();
 			}
+		}
+
+		// Scene callback for OnCast, sends cast command to wizards
+		// IN: (wizard) The wizard casting the spell, (speed) The speed of the casting wand action
+		//     (wand) The state of the wand at the time of casting
+		// OUT: (int) Meaningless
+		private int OnCast( short wizard, float speed, WandInformation wand )
+		{
+			Wizards[wizard].TryToCastSpell();
+			return 0;
 		}
 	}
 }

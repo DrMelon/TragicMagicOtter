@@ -56,7 +56,7 @@ namespace TragicMagic
 				Image_LeapCable_Background.CenterOrigin();
 				Image_LeapCable_Background.OriginX = Image_LeapCable_Background.Width + 32;
 			}
-			AddGraphic( Image_LeapCable_Background );
+			Parent.AddGraphic( Image_LeapCable_Background );
 
 			// Initialize the Leap cable image
 			Image_LeapCable = new Otter.Image( "../../resources/leap/leapcable.png" );
@@ -66,7 +66,7 @@ namespace TragicMagic
 				Image_LeapCable.CenterOrigin();
 				Image_LeapCable.OriginX = Image_LeapCable.Width + 32;
 			}
-			AddGraphic( Image_LeapCable );
+			Parent.AddGraphic( Image_LeapCable );
 
 			// Initialize the Leap controller image
 			Image_Leap = new Otter.Image( "../../resources/leap/leapmotion.png" );
@@ -76,7 +76,7 @@ namespace TragicMagic
 				Image_Leap.CenterOrigin();
 				Image_Leap.OriginX = 0;
 			}
-			AddGraphic( Image_Leap );
+			Parent.AddGraphic( Image_Leap );
 
 			Text_Warning = new Otter.Text( "Plug in Leap Motion Controller device", 16 );
 			{
@@ -84,7 +84,7 @@ namespace TragicMagic
 				Text_Warning.Y = Y;
 				Text_Warning.CenterOrigin();
 			}
-			AddGraphic( Text_Warning );
+			Parent.AddGraphic( Text_Warning );
 
 			// Initialize the cable offset
 			Cable = new ClampedSpeedValueClass();
@@ -104,7 +104,7 @@ namespace TragicMagic
 			}
 
 			// Update the images to have this initial alpha value
-			foreach ( Graphic graphic in Graphics )
+			foreach ( Graphic graphic in Parent.Graphics )
 			{
 				graphic.Alpha = Alpha.Value;
 			}
@@ -119,7 +119,7 @@ namespace TragicMagic
 				Alpha.Update();
 
 				// Update the images to have this new alpha value
-				foreach ( Graphic graphic in Graphics )
+				foreach ( Graphic graphic in Parent.Graphics )
 				{
 					graphic.Alpha = Alpha.Value;
 				}
@@ -132,12 +132,12 @@ namespace TragicMagic
 			}
 			else // Fade in at the start of the animation
 			{
-				if ( Graphic.Alpha < 1 ) // Still fading in
+				if ( Parent.Graphic.Alpha < 1 ) // Still fading in
 				{
 					Alpha.Update();
 
 					// Update the images to have this new alpha value
-					foreach ( Graphic graphic in Graphics )
+					foreach ( Graphic graphic in Parent.Graphics )
 					{
 						graphic.Alpha = Alpha.Value;
 					}

@@ -18,10 +18,14 @@ namespace TragicMagic
 		// Reference to the current scene
 		public Scene_GameClass Scene_Game;
 
+		// Reference to the parent of this HUD element (which all graphics are added to)
+		public HUDElementClass Parent;
+
 		public HUDElementClass( Scene_GameClass scene_game )
 			: base()
 		{
 			Scene_Game = scene_game;
+			Parent = this;
 		}
 
 		// Return whether or not the element should actually be removed at this point

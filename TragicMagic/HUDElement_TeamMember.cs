@@ -77,7 +77,7 @@ namespace TragicMagic
 				Image_Avatar.CenterOrigin();
 				Image_Avatar.OriginY += IMAGE_OFFSET_TEXT;
 			}
-			AddGraphic( Image_Avatar );
+			Parent.AddGraphic( Image_Avatar );
 
 			// Store the y offset for text elements
 			float offsety = ( IMAGE_OFFSET_TEXT * Image_Avatar.Width * Image_Avatar.ScaleX );
@@ -92,7 +92,7 @@ namespace TragicMagic
 				// Add to the offset for the next text
 				offsety += Text_Name.Height * TEXT_OFFSET_SCALE;
 			}
-			AddGraphic( Text_Name );
+			Parent.AddGraphic( Text_Name );
 
 			// Initialize the Team Member's twitter username
 			Text_Username = new Otter.Text( "@" + Username, FONT_SIZE );
@@ -104,7 +104,7 @@ namespace TragicMagic
 				// Add to the offset for the next text
 				offsety += Text_Username.Height * TEXT_OFFSET_SCALE;
 			}
-			AddGraphic( Text_Username );
+			Parent.AddGraphic( Text_Username );
 
 			// Initialize the Team Member's role
 			Text_Role = new Otter.Text( Role, FONT_SIZE );
@@ -116,7 +116,7 @@ namespace TragicMagic
 				// Add to the offset for the next text
 				offsety += Text_Role.Height * TEXT_OFFSET_SCALE;
 			}
-			AddGraphic( Text_Role );
+			Parent.AddGraphic( Text_Role );
 
 			// Initialize the Team Member's website url
 			Text_Website = new Otter.Text( Website, FONT_SIZE );
@@ -128,7 +128,7 @@ namespace TragicMagic
 				// Add to the offset for the next text
 				offsety += Text_Website.Height * TEXT_OFFSET_SCALE;
 			}
-			AddGraphic( Text_Website );
+			Parent.AddGraphic( Text_Website );
 
 			// Initialize the cable offset
 			Alpha = new ClampedSpeedValueClass();
@@ -140,7 +140,7 @@ namespace TragicMagic
 			}
 
 			// Update the images to have this initial alpha value
-			foreach ( Graphic graphic in Graphics )
+			foreach ( Graphic graphic in Parent.Graphics )
 			{
 				graphic.Alpha = Alpha.Value;
 			}
@@ -155,7 +155,7 @@ namespace TragicMagic
 				Alpha.Update();
 
 				// Update the images to have this new alpha value
-				foreach ( Graphic graphic in Graphics )
+				foreach ( Graphic graphic in Parent.Graphics )
 				{
 					graphic.Alpha = Alpha.Value;
 				}
@@ -168,12 +168,12 @@ namespace TragicMagic
 			}
 			else // Fade in at the start of the animation
 			{
-				if ( Graphic.Alpha < 1 ) // Still fading in
+				if ( Parent.Graphic.Alpha < 1 ) // Still fading in
 				{
 					Alpha.Update();
 
 					// Update the images to have this new alpha value
-					foreach ( Graphic graphic in Graphics )
+					foreach ( Graphic graphic in Parent.Graphics )
 					{
 						graphic.Alpha = Alpha.Value;
 					}
