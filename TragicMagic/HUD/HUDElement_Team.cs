@@ -36,6 +36,7 @@ namespace TragicMagic
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
 		// IN: (scene_game) Reference to the current scene, (x) The x position of the element,
 		//     (y) The y position of the element
+		// OUT: N/A
 		public HUDElement_TeamClass( Scene_GameClass scene_game, float x = 0, float y = 0 )
 			: base( scene_game )
 		{

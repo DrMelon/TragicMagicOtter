@@ -32,7 +32,7 @@ namespace TragicMagic
 		// The website url of this team member
 		public string Website = "";
 
-		// The Leap Motion Controller image to display
+		// The team member graphics to display
 		private Otter.Image Image_Avatar;
 		private Otter.Text Text_Name;
 		private Otter.Text Text_Username;
@@ -50,6 +50,7 @@ namespace TragicMagic
 		//     (username) The twitter username of this member, (role) The role of this member,
 		//     (website) The website of this member,
 		//     (x) The x position of the element, (y) The y position of the element
+		// OUT: N/A
 		public HUDElement_TeamMemberClass( Scene_GameClass scene_game, string name, string username, string role, string website, float x = 0, float y = 0 )
 			: base( scene_game )
 		{

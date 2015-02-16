@@ -93,9 +93,32 @@ namespace TragicMagic
             }
         }
 
-        
-
-
-
+		// Static function which will return the element represented by the queried button
+		// NOTE: Buttons are mapped to an Xbox controller
+		// IN: (button) The button to query
+		// OUT: (string) The full lowercase name of the element
+        public static string GetElement( char button )
+		{
+			string element = "";
+			{
+				if ( button == 'B' ) // Fire: B (Red)
+				{
+					element = "fire";
+				}
+				if ( button == 'A' ) // Earth: A (Green)
+				{
+					element = "earth";
+				}
+				if ( button == 'X' ) // Water: X (Blue)
+				{
+					element = "water";
+				}
+				if ( button == 'Y' ) // Lightning: Y (Yellow)
+				{
+					element = "lightning";
+				}
+			}
+			return element;
+		}
     }
 }

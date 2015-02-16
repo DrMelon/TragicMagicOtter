@@ -84,6 +84,13 @@ namespace TragicMagic
 		{
 			base.Update();
 
+			// Update the wizard combos TODO: Move this inside WizardClass
+			for ( short wizard = 0; wizard < WIZARDS; wizard++ )
+			{
+				HUDElement_ComboBarClass combobar = (HUDElement_ComboBarClass) HUDHandler.HUDElement_Combo[wizard];
+				combobar.UpdateElements( Wizards[wizard].ComboInputs );
+			}
+
 			// Update the rotation of the wand based on Leap tool tracking
 			foreach ( WizardClass wiz in Wizards )
 			{

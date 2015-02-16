@@ -30,6 +30,9 @@ namespace TragicMagic
 		// Store the Team Member credit HUD entities
 		public HUDElementClass[] HUDElement_Team;
 
+		// Store the combo bar HUD entities
+		public HUDElementClass[] HUDElement_Combo;
+
 		public HUDHandlerClass( Scene_GameClass scene_game )
 			: base()
 		{
@@ -48,6 +51,9 @@ namespace TragicMagic
 
 			// Team display objects
 			HUDElement_Team = new HUDElementClass[HUDS];
+
+			// Combo objects
+			HUDElement_Combo = new HUDElementClass[HUDS];
 		}
 
 		public override void Added()
@@ -55,6 +61,7 @@ namespace TragicMagic
 			base.Added();
 
 			AddTeam();
+			AddCombo();
 		}
 
 		public override void Update()
@@ -97,7 +104,7 @@ namespace TragicMagic
 			}
 		}
 
-		// Add the Leap Motion Controller missing warning to the HUDs
+		// Add the team credits to the HUDs
 		// IN: N/A
 		// OUT: N/A
 		public void AddTeam()
@@ -116,7 +123,7 @@ namespace TragicMagic
 			Add( HUDElement_Team[0], HUDElement_Team[1] );
 		}
 
-		// Remove the Leap Motion Controller missing warning from the HUDs
+		// Remove the team credits from the HUDs
 		// IN: N/A
 		// OUT: N/A
 		public void RemoveTeam()
@@ -129,6 +136,41 @@ namespace TragicMagic
 			for ( short hud = 0; hud < HUDS; hud++ )
 			{
 				HUDElement_Team[hud] = null;
+			}
+		}
+
+		// Add the combo bar to the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void AddCombo()
+		{
+			if ( HUDElement_Combo[0] != null ) { return; }; // Already added
+
+			for ( short hud = 0; hud < HUDS; hud++ )
+			{
+				HUDElement_Combo[hud] = new HUDElement_ComboBarClass(
+					Scene_Game, // Reference to the current scene
+					Game.Instance.HalfHeight / 2, // Position X
+					50 // Position Y
+				);
+			}
+
+			Add( HUDElement_Combo[0], HUDElement_Combo[1] );
+		}
+
+		// Remove the combo bar from the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void RemoveCombo()
+		{
+			if ( HUDElement_Combo[0] == null ) { return; }; // Already removed
+
+			Remove( HUDElement_Combo[0], HUDElement_Combo[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDS; hud++ )
+			{
+				HUDElement_Combo[hud] = null;
 			}
 		}
 
