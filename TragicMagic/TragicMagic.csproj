@@ -52,10 +52,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClampedSpeedValue.cs" />
-    <Compile Include="ClampedValue.cs" />
-    <Compile Include="ComboSystem.cs" />
-    <Compile Include="GameWands.cs" />
+    <Compile Include="math\ClampedSpeedValue.cs" />
+    <Compile Include="math\ClampedValue.cs" />
+    <Compile Include="wizard\ComboSystem.cs" />
+    <Compile Include="wizard\GameWands.cs" />
     <Compile Include="HUD\base\HUD.cs" />
     <Compile Include="HUD\base\HUDElement.cs" />
     <Compile Include="HUD\HUDElement_ComboBar.cs" />
@@ -68,9 +68,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HUD\PulseCircle.cs" />
     <Compile Include="Scene_Game.cs" />
-    <Compile Include="SpellInformation.cs" />
+    <Compile Include="wizard\SpellInformation.cs" />
     <Compile Include="Tweetinvi.cs" />
-    <Compile Include="Wizard.cs" />
+    <Compile Include="wizard\Wizard.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
