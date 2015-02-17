@@ -29,7 +29,7 @@ namespace TragicMagic
 		// Defines
 		private const short WANDS = 2;
 		private const float CAST_SPEED = 20; // NOTE: Above 30/40 seems to be good
-		private const float CAST_BETWEEN = 10; // Minimum time between casts
+		public const float CAST_BETWEEN = 10; // Minimum time between casts
 
 		// Store reference to the LeapController to query for tool tracking positions
 		public Leap.Controller LeapController;

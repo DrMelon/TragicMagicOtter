@@ -35,11 +35,11 @@ namespace TragicMagic
 		private bool FadeOut = false;
 
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
-		// IN: (scene_game) Reference to the current scene, (x) The x position of the element,
+		// IN: (scene_current) Reference to the current scene, (x) The x position of the element,
 		//     (y) The y position of the element, (speed) The speed for the Leap cable to move at
 		// OUT: N/A
-		public HUDElement_LeapClass( Scene_GameClass scene_game, float x = 0, float y = 0, float speed = 1 )
-			: base( scene_game )
+		public HUDElement_LeapClass( Scene scene_current, float x = 0, float y = 0, float speed = 1 )
+			: base( scene_current )
 		{
 			X = x;
 			Y = y;
@@ -128,7 +128,7 @@ namespace TragicMagic
 				// Remove from scene when done
 				if ( Alpha.Value <= 0 )
 				{
-					Scene_Game.Remove( this );
+					CurrentScene.Remove( this );
 				}
 			}
 			else // Fade in at the start of the animation

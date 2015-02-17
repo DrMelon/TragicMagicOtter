@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Leap;
 
 // Matthew Cormack @johnjoemcbob
-// 14/02/2015
+// 16/02/2015
 // A HUD element which shows information about all team members,
 // and displays their images
 // Depends on: HUDElement, HUDElement_TeamMember
@@ -33,12 +33,15 @@ namespace TragicMagic
 		// Store the Team Member information
 		public TeamMemberStruct[] TeamMember;
 
+		// FadeOut Team Members when removed
+		private bool FadeOut = false;
+
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
-		// IN: (scene_game) Reference to the current scene, (x) The x position of the element,
+		// IN: (scene_current) Reference to the current scene, (x) The x position of the element,
 		//     (y) The y position of the element
 		// OUT: N/A
-		public HUDElement_TeamClass( Scene_GameClass scene_game, float x = 0, float y = 0 )
-			: base( scene_game )
+		public HUDElement_TeamClass( Scene scene_current, float x = 0, float y = 0 )
+			: base( scene_current )
 		{
 			// Position
 			X = x;
@@ -98,7 +101,7 @@ namespace TragicMagic
 			for ( short member = 0; member < TEAM_MEMBERS; member++ )
 			{
 				HUDElement_TeamMember[member] = new HUDElement_TeamMemberClass(
-						Scene_Game, // Reference to the current scene
+						CurrentScene, // Reference to the current scene
 						TeamMember[member].Name, // Member name
 						TeamMember[member].Username, // Member username
 						TeamMember[member].Role, // Member role
@@ -107,13 +110,24 @@ namespace TragicMagic
 						( Game.Instance.Height / ( TEAM_MEMBERS + 1 ) * ( member + 1 ) ) + Y // X
 				);
 				HUDElement_TeamMember[member].Parent = this;
-				Scene_Game.Add( HUDElement_TeamMember[member] );
+				CurrentScene.Add( HUDElement_TeamMember[member] );
 			}
 		}
 
 		public override void Update()
 		{
 			base.Update();
+
+			if ( FadeOut ) // Fade out individual team members when removed, then ensure they are deleted
+			{
+				if ( Graphic.Alpha <= 0 ) // Check the first member's first graphic (they all fade the same)
+				{
+					for ( short member = 0; member < TEAM_MEMBERS; member++ )
+					{
+						HUDElement_TeamMember[member] = null;
+					}
+				}
+			}
 		}
 
 		// Return whether or not the element should actually be removed at this point
@@ -126,8 +140,9 @@ namespace TragicMagic
 			{
 				HUDElement_TeamMember[member].Remove();
 			}
+			FadeOut = true;
 
-			return true;
+			return false;
 		}
 	}
 }

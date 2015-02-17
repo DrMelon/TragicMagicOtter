@@ -16,7 +16,7 @@ namespace TragicMagic
 	class Scene_GameClass : Scene
 	{
 		// Defines
-		private const short WIZARDS = 2;
+		public const short WIZARDS = 2;
 		private const float WAND_ROTATE_MAX = 45;
 
 		// Store a reference to the LeapController object to pass to children
@@ -26,10 +26,13 @@ namespace TragicMagic
 		public GameWandsClass GameWands = new GameWandsClass();
 
 		// Store the two wizard players
-		private List<WizardClass> Wizards;
+		public List<WizardClass> Wizards;
 
 		// Store the handler of player HUDs
-		private HUDHandlerClass HUDHandler;
+		public HUDHandlerClass HUDHandler;
+
+		// Store a state manager
+		private TragicStateManagerClass TragicStateManager = new TragicStateManagerClass();
 
 		public Scene_GameClass()
 		{
@@ -51,23 +54,24 @@ namespace TragicMagic
 
 			// Create new wizard list
 			Wizards = new List<WizardClass>();
+			{
+				Wizards.Add( new WizardClass(
+					game.Session( "LightWizard" ),
+					GameWands,
+					WizardTypeStruct.WIZARD_LIGHT,
+					new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
+					90
+				) );
 
-			Wizards.Add( new WizardClass(
-				game.Session( "LightWizard" ),
-				GameWands,
-				WizardTypeStruct.WIZARD_LIGHT,
-				new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
-				90
-			) );
-
-			// Dark wizard on the left
-			Wizards.Add( new WizardClass(
-				game.Session( "DarkWizard" ),
-				GameWands,
-				WizardTypeStruct.WIZARD_DARK,
-				new Vector2( wizardoffset, Game.Instance.HalfHeight ),
-				-90
-			) );
+				// Dark wizard on the left
+				Wizards.Add( new WizardClass(
+					game.Session( "DarkWizard" ),
+					GameWands,
+					WizardTypeStruct.WIZARD_DARK,
+					new Vector2( wizardoffset, Game.Instance.HalfHeight ),
+					-90
+				) );
+			}
 
 			// Add the wizards to the scene.
 			foreach ( WizardClass wiz in Wizards )
@@ -78,6 +82,10 @@ namespace TragicMagic
 			// Add a reference of this scene to the HUDHandler
 			HUDHandler = new HUDHandlerClass( this );
 			Add( HUDHandler );
+
+			// Setup state manager last
+			TragicStateManager.CurrentScene = this;
+			Add( TragicStateManager );
 		}
 
 		public override void Update()
@@ -88,7 +96,10 @@ namespace TragicMagic
 			for ( short wizard = 0; wizard < WIZARDS; wizard++ )
 			{
 				HUDElement_ComboBarClass combobar = (HUDElement_ComboBarClass) HUDHandler.HUDElement_Combo[wizard];
-				combobar.UpdateElements( Wizards[wizard].ComboInputs );
+				if ( combobar != null )
+				{
+					combobar.UpdateElements( Wizards[wizard].ComboInputs );
+				}
 			}
 
 			// Update the rotation of the wand based on Leap tool tracking

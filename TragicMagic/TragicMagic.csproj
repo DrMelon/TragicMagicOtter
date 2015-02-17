@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="math\ClampedSpeedValue.cs" />
     <Compile Include="math\ClampedValue.cs" />
+    <Compile Include="TragicStateManager.cs" />
     <Compile Include="wizard\ComboSystem.cs" />
     <Compile Include="wizard\GameWands.cs" />
     <Compile Include="HUD\base\HUD.cs" />

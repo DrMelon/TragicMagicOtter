@@ -15,18 +15,18 @@ namespace TragicMagic
 	class HUDClass : Entity
 	{
 		// Hold a reference to the current scene in order to add new entities to it
-		public Scene_GameClass Scene_Game;
+		public Scene CurrentScene;
 
 		// The rotation of this HUD
 		public float Rotation = 0;
 
 		// Setup the rotation of the HUD according to which wizard it belongs to
-		// IN: (scene_game) The current scene, (rotation) The rotation of this HUD (90 or -90)
+		// IN: (scene_current) The current scene, (rotation) The rotation of this HUD (90 or -90)
 		// OUT: N/A
-		public HUDClass( Scene_GameClass scene_game, float rotation )
+		public HUDClass( Scene scene_current, float rotation )
 			: base()
 		{
-			Scene_Game = scene_game;
+			CurrentScene = scene_current;
 			Rotation = rotation;
 		}
 
@@ -46,7 +46,7 @@ namespace TragicMagic
 		public void Add( HUDElementClass entity )
 		{
 			// Must be added to the scene before the graphics exist
-			Scene_Game.Add( entity );
+			CurrentScene.Add( entity );
 
 			// Move each graphic in relation to where this HUD is positioned
 			float x = entity.X;
@@ -87,7 +87,7 @@ namespace TragicMagic
 			bool removenow = entity.Remove(); // Perform individual element preremove functionality
 			if ( removenow )
 			{
-				Scene_Game.Remove( entity );
+				CurrentScene.Remove( entity );
 			}
 		}
 	}

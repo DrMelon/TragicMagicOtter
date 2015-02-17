@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Leap;
 
 // Matthew Cormack @johnjoemcbob
-// 14/02/2015
+// 16/02/2015
 // A HUD element which shows the currently entered combo elements
 // Depends on: HUDElement
 
@@ -23,11 +23,11 @@ namespace TragicMagic
 		private Otter.Image[] Image_Element;
 
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
-		// IN: (scene_game) Reference to the current scene, (x) The x position of the element,
+		// IN: (scene_current) Reference to the current scene, (x) The x position of the element,
 		//     (y) The y position of the element
 		// OUT: N/A
-		public HUDElement_ComboBarClass( Scene_GameClass scene_game, float x = 0, float y = 0 )
-			: base( scene_game )
+		public HUDElement_ComboBarClass( Scene scene_current, float x = 0, float y = 0 )
+			: base( scene_current )
 		{
 			// Position
 			X = x;
@@ -50,7 +50,6 @@ namespace TragicMagic
 					{
 						Image_Element[element].X = X;
 						Image_Element[element].Y = Y + ( Image_Element[element].Width * ELEMENT_OFFSET * offset );
-						//Image_Element[element].CenterOrigin();
 						Image_Element[element].Alpha = 0; // Don't display until a combo is entered
 					}
 					Parent.AddGraphic( Image_Element[element] );

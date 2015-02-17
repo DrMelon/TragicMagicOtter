@@ -46,13 +46,13 @@ namespace TragicMagic
 		private bool FadeOut = false;
 
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
-		// IN: (scene_game) Reference to the current scene, (name) The real name of this member,
+		// IN: (scene_current) Reference to the current scene, (name) The real name of this member,
 		//     (username) The twitter username of this member, (role) The role of this member,
 		//     (website) The website of this member,
 		//     (x) The x position of the element, (y) The y position of the element
 		// OUT: N/A
-		public HUDElement_TeamMemberClass( Scene_GameClass scene_game, string name, string username, string role, string website, float x = 0, float y = 0 )
-			: base( scene_game )
+		public HUDElement_TeamMemberClass( Scene scene_current, string name, string username, string role, string website, float x = 0, float y = 0 )
+			: base( scene_current )
 		{
 			// Unique information
 			Name = name; // Overwrite's Otter.Entity Name
@@ -164,7 +164,7 @@ namespace TragicMagic
 				// Remove from scene when done
 				if ( Alpha.Value <= 0 )
 				{
-					Scene_Game.Remove( this );
+					CurrentScene.Remove( this );
 				}
 			}
 			else // Fade in at the start of the animation

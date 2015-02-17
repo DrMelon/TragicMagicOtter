@@ -16,15 +16,15 @@ namespace TragicMagic
 	class HUDElementClass : Entity
 	{
 		// Reference to the current scene
-		public Scene_GameClass Scene_Game;
+		public Scene CurrentScene;
 
 		// Reference to the parent of this HUD element (which all graphics are added to)
 		public HUDElementClass Parent;
 
-		public HUDElementClass( Scene_GameClass scene_game )
+		public HUDElementClass( Scene scene_current )
 			: base()
 		{
-			Scene_Game = scene_game;
+			CurrentScene = scene_current;
 			Parent = this;
 		}
 
