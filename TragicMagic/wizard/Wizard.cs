@@ -25,8 +25,10 @@ namespace TragicMagic
 	class WizardClass : Entity
 	{
 		// Defines
-		private static Vector2 WANDOFFSET = new Vector2( -0.3f, -0.3f ); // Default is light (right hand) wizard
-		private const float SPRITESCALE = 0.2f; // Scale down the wizard body & wand sprites
+		private static Vector2 WAND_OFFSET = new Vector2( -0.3f, -0.3f ); // Default is light (right hand) wizard
+		private const float SPRITE_SCALE = 0.2f; // Scale down the wizard body & wand sprites
+		private const float HITBOX_SCALE = 0.5f; // Scale down the wizard hitbox
+		private const short COMBO_MAX = 10; // The maximum string of button presses held in a combo
 
 		// Store a reference to the GameWands to query tool positions
 		public GameWandsClass GameWands;
@@ -41,6 +43,7 @@ namespace TragicMagic
 
 		// The wizard position on screen
 		public Vector2 Position;
+		public Vector2 Destination;
 		public Vector2 WandOffset;
 
 		// The wizard angle (0 points straight up) on screen
@@ -57,6 +60,13 @@ namespace TragicMagic
 		// The wizard wand sprite
 		private Otter.Image Wand;
 
+		// The linear interpolation component for moving the wizard onscreen at round start
+		private ClampedSpeedValueClass ClampedPosition_X = new ClampedSpeedValueClass();
+		private ClampedSpeedValueClass ClampedPosition_Y = new ClampedSpeedValueClass();
+
+		// The shader to render the wizard with (TEST)
+		private Shader TestShader;
+
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
 		// OUT: N/A
@@ -68,15 +78,14 @@ namespace TragicMagic
 
 		// Pass in reference to the GameWands system & setup values unique to each wizard
 		// IN: (gamewands) Reference to the Leap tool game state handler, (wizardtype) Light or dark wizard,
-		//     (position) The position of this wizard on screen
+		//     (angle) The rotation of this wizard from 0 facing upwards
 		// OUT: N/A
-		public WizardClass( Session playsession, GameWandsClass gamewands, WizardTypeStruct wizardtype, Vector2 position, float angle )
+		public WizardClass( Session playsession, GameWandsClass gamewands, WizardTypeStruct wizardtype, float angle )
 			: base()
 		{
 			LinkedSession = playsession;
 			GameWands = gamewands;
 			WizardType = wizardtype;
-			Position = position;
 			Angle = angle;
 		}
 
@@ -89,9 +98,20 @@ namespace TragicMagic
 		{
 			base.Added();
 
+			// Initialize the wizard's shader
+			TestShader = new Shader( "../../shaders/video.fs" );
+
+			// Initialize the position interpolation objects
+			ClampedPosition_X.Speed = 5;
+			ClampedPosition_Y.Speed = 5;
+
+			// Initialize the position of the wizard
+			Position = new Vector2( 0, 0 );
+			Destination = new Vector2( 0, 0 );
+
 			// Initialize the wizard type unique variables
 			string wizardtypeimage = "light";
-			WandOffset = WANDOFFSET;
+			WandOffset = WAND_OFFSET;
 			{
 				if ( WizardType == WizardTypeStruct.WIZARD_DARK )
 				{
@@ -105,42 +125,59 @@ namespace TragicMagic
 			// Initialize the wizard's body sprite
 			Body = new Otter.Image( "../../resources/wizard_" + wizardtypeimage + ".png" );
 			{
-				Body.ScaleX = SPRITESCALE;
-				Body.ScaleY = SPRITESCALE;
+				Body.ScaleX = SPRITE_SCALE;
+				Body.ScaleY = SPRITE_SCALE;
 				Body.Angle = Angle;
-				Body.SetPosition( Position.X, Position.Y );
 				Body.CenterOrigin();
 			}
 			// Body graphic is added later after wand
 
 			// Initialize the wizard's wand sprite
-			WandOffset *= new Vector2( Body.Width * SPRITESCALE, Body.Height * SPRITESCALE ); // Multiply offset by the size of the wizard body
+			WandOffset *= new Vector2( Body.Width * SPRITE_SCALE, Body.Height * SPRITE_SCALE ); // Multiply offset by the size of the wizard body
 
 			Wand = new Otter.Image( "../../resources/wand_" + wizardtypeimage + ".png" );
 			{
-				Wand.ScaleX = SPRITESCALE;
-				Wand.ScaleY = SPRITESCALE;
+				Wand.ScaleX = SPRITE_SCALE;
+				Wand.ScaleY = SPRITE_SCALE;
 				Wand.Angle = Angle + WandAngle;
-				Wand.SetPosition( Position.X + WandOffset.X, Position.Y + WandOffset.Y );
 				Wand.CenterOrigin();
 				Wand.OriginY = Wand.Height;
+				Wand.Shader = TestShader;
 			}
 
 			// Add the graphics to the scene
 			AddGraphic( Wand ); // Add wand below wizard robes
 			AddGraphic( Body );
+
+			// Add a hitbox to the wizard
+			int size = (int) Math.Floor( Body.Width * Body.ScaleX * HITBOX_SCALE );
+            SetHitbox( size, size );
+			Hitbox.CenterOrigin();
 		}
 
 		public override void Update()
 		{
 			base.Update();
 
+			// Update the time parameter of the wizard's shader
+			TestShader.SetParameter( "Time", Game.Instance.Timer );
+
 			// Keep body & wand attached to each other
 			Body.SetPosition( Position.X, Position.Y );
 			Wand.SetPosition( Position.X + WandOffset.X, Position.Y + WandOffset.Y );
 			Wand.Angle = Angle + ( WandAngle * WandAngleDirection );
 
+			// Combo input
 			CheckControls();
+
+			// Move the wizard towards its destination
+			UpdateDestination();
+		}
+
+		public override void Render()
+		{
+			base.Render();
+			Hitbox.Render(); // Debug draw the hitbox
 		}
 
 		public void CheckControls()
@@ -186,10 +223,61 @@ namespace TragicMagic
 				}
 
 				// Update Input strings to only be 10 in length; trim off the leading characters
-				if ( ComboInputs.Length > 10 )
+				if ( ComboInputs.Length > COMBO_MAX )
 				{
-					ComboInputs = ComboInputs.Substring( 1, 10 );
+					ComboInputs = ComboInputs.Substring( 1, COMBO_MAX );
 				}
+			}
+		}
+
+		// Move the wizard towards its target destination
+		// NOTE: Called from main Update every frame
+		// IN: N/A
+		// OUT: N/A
+		public void UpdateDestination()
+		{
+			// Position X
+			float min = Destination.X; // Default destination is smaller
+			float max = X;
+			short dir = -1;
+			{
+				if ( Destination.X > X ) // Destination bigger, invert values
+				{
+					min = X;
+					max = Destination.X;
+					dir = 1;
+				}
+			}
+			ClampedPosition_X.Value = X;
+			ClampedPosition_X.Minimum = min;
+			ClampedPosition_X.Maximum = max;
+			ClampedPosition_X.Direction = dir;
+			if ( Math.Abs( min - max ) > 5 )
+			{
+				ClampedPosition_X.Update();
+				X = ClampedPosition_X.Value;
+			}
+
+			// Position Y
+			min = Destination.Y; // Default destination is smaller
+			max = Y;
+			dir = -1;
+			{
+				if ( Destination.Y > Y ) // Destination bigger, invert values
+				{
+					min = Y;
+					max = Destination.Y;
+					dir = 1;
+				}
+			}
+			ClampedPosition_Y.Value = Y;
+			ClampedPosition_Y.Minimum = min;
+			ClampedPosition_Y.Maximum = max;
+			ClampedPosition_Y.Direction = dir;
+			if ( Math.Abs( min - max ) > 5 )
+			{
+				ClampedPosition_Y.Update();
+				Y = ClampedPosition_Y.Value;
 			}
 		}
 

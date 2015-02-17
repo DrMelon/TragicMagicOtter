@@ -21,7 +21,7 @@ namespace TragicMagic
 		private const float IMAGE_OFFSET_TEXT = 0.65f;
 		private const float TEXT_OFFSET_SCALE = 1.2f;
 		private const int FONT_SIZE = 24;
-		private const float FADE_SPEED = 0.08f;
+		private const float FADE_SPEED = 0.01f;
 
 		// The username of this team member
 		public string Username = "";

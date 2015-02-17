@@ -59,7 +59,6 @@ namespace TragicMagic
 					game.Session( "LightWizard" ),
 					GameWands,
 					WizardTypeStruct.WIZARD_LIGHT,
-					new Vector2( Game.Instance.Width - wizardoffset, Game.Instance.HalfHeight ),
 					90
 				) );
 
@@ -68,7 +67,6 @@ namespace TragicMagic
 					game.Session( "DarkWizard" ),
 					GameWands,
 					WizardTypeStruct.WIZARD_DARK,
-					new Vector2( wizardoffset, Game.Instance.HalfHeight ),
 					-90
 				) );
 			}

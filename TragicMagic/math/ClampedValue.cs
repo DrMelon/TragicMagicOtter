@@ -20,8 +20,8 @@ namespace TragicMagic
 		public float Value = 0;
 
 		// Variable function callbacks
-		public Func<int> OnMaximum = DefaultMaximum;
 		public Func<int> OnMinimum = DefaultMinimum;
+		public Func<int> OnMaximum = DefaultMaximum;
 
 		public virtual void Update()
 		{

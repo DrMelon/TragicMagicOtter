@@ -5,6 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// Matthew Cormack @johnjoemcbob
+// 17/02/15
+// Handles the individual unique state logic & switching between them
+// Depends on: Scene_Game
+
 namespace TragicMagic
 {
 	// The states describing Tragic Magic
@@ -47,6 +52,20 @@ namespace TragicMagic
 		private void EnterMenu()
 		{
 			CurrentScene.HUDHandler.AddTeam();
+
+			// Reinitalize wizards to offscreen
+			foreach ( WizardClass wizard in CurrentScene.Wizards )
+			{
+				float wizardoffset = -256; // Offscreen
+				{
+					if ( wizard.Graphic.Angle > 0 ) // Light player
+					{
+						wizardoffset = Game.Instance.Width - wizardoffset;
+					}
+				}
+				wizard.SetPosition( wizardoffset, Game.Instance.HalfHeight );
+				wizard.Destination = new Vector2( wizard.X, wizard.Y );
+			}
 		}
 		private void UpdateMenu()
 		{
@@ -62,7 +81,7 @@ namespace TragicMagic
 					}
 				}
 			}
-			if ( play )
+			if ( play || Game.Instance.Session( "LightWizard" ).Controller.A.Pressed ) // TODO: Remove temp button start
 			{
 				TragicStateMachine.ChangeState( TragicState.Game );
 			}
@@ -76,6 +95,19 @@ namespace TragicMagic
 		private void EnterGame()
 		{
 			CurrentScene.HUDHandler.AddCombo();
+
+			// Move wizards towards starting point
+			foreach ( WizardClass wizard in CurrentScene.Wizards )
+			{
+				float wizardoffset = 256; // Onscreen
+				{
+					if ( wizard.Graphic.Angle > 0 ) // Light player
+					{
+						wizardoffset = Game.Instance.Width - wizardoffset;
+					}
+				}
+				wizard.Destination = new Vector2( wizardoffset, Game.Instance.HalfHeight );
+			}
 		}
 		private void UpdateGame()
 		{
