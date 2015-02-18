@@ -49,26 +49,26 @@ namespace TragicMagic
 
 				// Keyboard / IPAC Controls
 				// Movement
-				game.Session( "LightWizard" ).Controller.Up.AddKey( Key.W );    // Up for Player 1
-				game.Session( "LightWizard" ).Controller.Down.AddKey( Key.S );  // Down for Player 1
-				game.Session( "LightWizard" ).Controller.Left.AddKey( Key.A );  // Left for Player 1
-				game.Session( "LightWizard" ).Controller.Right.AddKey( Key.D ); // Right for Player 1
+				game.Session( "DarkWizard" ).Controller.Up.AddKey( Key.W );    // Up for Player 1
+				game.Session( "DarkWizard" ).Controller.Down.AddKey( Key.S );  // Down for Player 1
+				game.Session( "DarkWizard" ).Controller.Left.AddKey( Key.A );  // Left for Player 1
+				game.Session( "DarkWizard" ).Controller.Right.AddKey( Key.D ); // Right for Player 1
 
-				game.Session( "DarkWizard" ).Controller.Up.AddKey( Key.Up );    // Up for Player 2
-				game.Session( "DarkWizard" ).Controller.Down.AddKey( Key.Down );  // Down for Player 2
-				game.Session( "DarkWizard" ).Controller.Left.AddKey( Key.Left );  // Left for Player 2
-				game.Session( "DarkWizard" ).Controller.Right.AddKey( Key.Right ); // Right for Player 2
+				game.Session( "LightWizard" ).Controller.Up.AddKey( Key.Up );    // Up for Player 2
+				game.Session( "LightWizard" ).Controller.Down.AddKey( Key.Down );  // Down for Player 2
+				game.Session( "LightWizard" ).Controller.Left.AddKey( Key.Left );  // Left for Player 2
+				game.Session( "LightWizard" ).Controller.Right.AddKey( Key.Right ); // Right for Player 2
 
 				// Elements
-				game.Session( "LightWizard" ).Controller.B.AddKey( Key.Num1 ); // Fire Element Key for Player 1
-				game.Session( "LightWizard" ).Controller.A.AddKey( Key.Num2 ); // Earth Element Key for Player 1
-				game.Session( "LightWizard" ).Controller.Y.AddKey( Key.Num3 ); // Lightning Element Key for Player 1
-				game.Session( "LightWizard" ).Controller.X.AddKey( Key.Num4 ); // Water Element Key for Player 1
+				game.Session( "DarkWizard" ).Controller.B.AddKey( Key.Num1 ); // Fire Element Key for Player 1
+				game.Session( "DarkWizard" ).Controller.A.AddKey( Key.Num2 ); // Earth Element Key for Player 1
+				game.Session( "DarkWizard" ).Controller.Y.AddKey( Key.Num3 ); // Lightning Element Key for Player 1
+				game.Session( "DarkWizard" ).Controller.X.AddKey( Key.Num4 ); // Water Element Key for Player 1
 
-				game.Session( "DarkWizard" ).Controller.B.AddKey( Key.Num7 ); // Fire Element Key for Player 2
-				game.Session( "DarkWizard" ).Controller.A.AddKey( Key.Num8 ); // Earth Element Key for Player 2
-				game.Session( "DarkWizard" ).Controller.Y.AddKey( Key.Num9 ); // Lightning Element Key for Player 2
-				game.Session( "DarkWizard" ).Controller.X.AddKey( Key.Num0 ); // Water Element Key for Player 2
+				game.Session( "LightWizard" ).Controller.B.AddKey( Key.Num7 ); // Fire Element Key for Player 2
+				game.Session( "LightWizard" ).Controller.A.AddKey( Key.Num8 ); // Earth Element Key for Player 2
+				game.Session( "LightWizard" ).Controller.Y.AddKey( Key.Num9 ); // Lightning Element Key for Player 2
+				game.Session( "LightWizard" ).Controller.X.AddKey( Key.Num0 ); // Water Element Key for Player 2
 
 				// Xbox / Playstation Controller Controls
 				// TODO: Define Xbox controller buttons. 

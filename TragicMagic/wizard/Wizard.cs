@@ -30,6 +30,9 @@ namespace TragicMagic
 		private const float HITBOX_SCALE = 0.5f; // Scale down the wizard hitbox
 		private const short COMBO_MAX = 10; // The maximum string of button presses held in a combo
 
+		// Store a reference to the current scene
+		public Scene CurrentScene;
+
 		// Store a reference to the GameWands to query tool positions
 		public GameWandsClass GameWands;
 
@@ -40,6 +43,9 @@ namespace TragicMagic
 
 		// The wizard type (light or dark)
 		public WizardTypeStruct WizardType;
+
+		// The ID of this wizard
+		public int ID = 0;
 
 		// The wizard position on screen
 		public Vector2 Position;
@@ -67,6 +73,13 @@ namespace TragicMagic
 		// The shader to render the wizard with (TEST)
 		private Shader TestShader;
 
+		// The list of currently active projectiles
+		private List<SpellClass> Projectile = new List<SpellClass>();
+
+		// The clamped position of this wizard
+		private ClampedValueClass ClampedX = new ClampedValueClass();
+		private ClampedValueClass ClampedY = new ClampedValueClass();
+
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
 		// OUT: N/A
@@ -78,14 +91,15 @@ namespace TragicMagic
 
 		// Pass in reference to the GameWands system & setup values unique to each wizard
 		// IN: (gamewands) Reference to the Leap tool game state handler, (wizardtype) Light or dark wizard,
-		//     (angle) The rotation of this wizard from 0 facing upwards
+		//     (wizard) The ID of this wizard, (angle) The rotation of this wizard from 0 facing upwards
 		// OUT: N/A
-		public WizardClass( Session playsession, GameWandsClass gamewands, WizardTypeStruct wizardtype, float angle )
+		public WizardClass( Session playsession, GameWandsClass gamewands, WizardTypeStruct wizardtype, int wizard, float angle )
 			: base()
 		{
 			LinkedSession = playsession;
 			GameWands = gamewands;
 			WizardType = wizardtype;
+			ID = wizard;
 			Angle = angle;
 		}
 
@@ -99,7 +113,7 @@ namespace TragicMagic
 			base.Added();
 
 			// Initialize the wizard's shader
-			TestShader = new Shader( "../../shaders/video.fs" );
+			//TestShader = new Shader( "../../shaders/video.fs" );
 
 			// Initialize the position interpolation objects
 			ClampedPosition_X.Speed = 5;
@@ -142,7 +156,7 @@ namespace TragicMagic
 				Wand.Angle = Angle + WandAngle;
 				Wand.CenterOrigin();
 				Wand.OriginY = Wand.Height;
-				Wand.Shader = TestShader;
+				//Wand.Shader = TestShader;
 			}
 
 			// Add the graphics to the scene
@@ -151,8 +165,15 @@ namespace TragicMagic
 
 			// Add a hitbox to the wizard
 			int size = (int) Math.Floor( Body.Width * Body.ScaleX * HITBOX_SCALE );
-            SetHitbox( size, size );
+            SetHitbox( size, size, ( (int) ColliderType.Wizard ) + ID );
 			Hitbox.CenterOrigin();
+
+			// Initialize the clamped position of the wizard
+			ClampedX.Minimum = 0;
+			ClampedX.Maximum = Game.Instance.Width;
+
+			ClampedY.Minimum = 0;
+			ClampedY.Maximum = Game.Instance.Height;
 		}
 
 		public override void Update()
@@ -160,7 +181,7 @@ namespace TragicMagic
 			base.Update();
 
 			// Update the time parameter of the wizard's shader
-			TestShader.SetParameter( "Time", Game.Instance.Timer );
+			//TestShader.SetParameter( "Time", Game.Instance.Timer );
 
 			// Keep body & wand attached to each other
 			Body.SetPosition( Position.X, Position.Y );
@@ -294,6 +315,13 @@ namespace TragicMagic
 				// Write into ingame debug console (open with @)
 
 				this.Game.Debugger.Log( "", LinkedSession.Name + ": " + whatSpell.spellName + " just got cast!\n" );
+
+				// Spell test
+				SpellClass spell = new SpellClass( ID, X, Y );
+				{
+					CurrentScene.Add( spell );
+				}
+				Projectile.Add( spell );
 
 				//TODO: Here we'd read the spell info and build a spell entity from it & add it to the scene.
 			}

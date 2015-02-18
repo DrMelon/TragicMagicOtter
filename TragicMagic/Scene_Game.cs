@@ -13,6 +13,12 @@ using Leap;
 
 namespace TragicMagic
 {
+	enum ColliderType
+	{
+		Enviroment = 0,
+		Wizard, // This and the values after are used for separate wizard tags
+	}
+
 	class Scene_GameClass : Scene
 	{
 		// Defines
@@ -59,6 +65,7 @@ namespace TragicMagic
 					game.Session( "LightWizard" ),
 					GameWands,
 					WizardTypeStruct.WIZARD_LIGHT,
+					0,
 					90
 				) );
 
@@ -67,6 +74,7 @@ namespace TragicMagic
 					game.Session( "DarkWizard" ),
 					GameWands,
 					WizardTypeStruct.WIZARD_DARK,
+					1,
 					-90
 				) );
 			}
@@ -74,6 +82,7 @@ namespace TragicMagic
 			// Add the wizards to the scene.
 			foreach ( WizardClass wiz in Wizards )
 			{
+				wiz.CurrentScene = this;
 				Add( wiz );
 			}
 

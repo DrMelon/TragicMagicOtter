@@ -45,8 +45,8 @@ namespace TragicMagic
 			// Parent HUD objects
 			HUD = new HUDClass[HUDS];
 			{
-				HUD[0] = new HUDClass( CurrentScene, 90 );
-				HUD[1] = new HUDClass( CurrentScene, -90 );
+				HUD[0] = new HUDClass( CurrentScene, -90 );
+				HUD[1] = new HUDClass( CurrentScene, 90 );
 			}
 
 			// Leap Motion Controller warning objects

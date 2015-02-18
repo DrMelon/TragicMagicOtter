@@ -81,7 +81,7 @@ namespace TragicMagic
 					}
 				}
 			}
-			if ( play || Game.Instance.Session( "LightWizard" ).Controller.A.Pressed ) // TODO: Remove temp button start
+			if ( play || Game.Instance.Session( "DarkWizard" ).Controller.A.Pressed ) // TODO: Remove temp button start
 			{
 				TragicStateMachine.ChangeState( TragicState.Game );
 			}
