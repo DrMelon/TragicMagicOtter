@@ -9,7 +9,7 @@ using Leap;
 // Matthew Cormack @johnjoemcbob
 // 13/02/15
 // Main game scene, contains gameplay
-// Depends on: Leap.Controller, GameWands, Wizard, HUDHandler
+// Depends on: Leap.Controller, GameWands, Wizard, HUDHandler, TragicStateManager, Spell
 
 namespace TragicMagic
 {
@@ -36,6 +36,9 @@ namespace TragicMagic
 
 		// Store the handler of player HUDs
 		public HUDHandlerClass HUDHandler;
+
+		// The list of currently active projectiles
+		public List<SpellClass> Projectile = new List<SpellClass>();
 
 		// Store a state manager
 		private TragicStateManagerClass TragicStateManager = new TragicStateManagerClass();
@@ -119,6 +122,18 @@ namespace TragicMagic
 
 			// Display errors if the Leap device is missing
 			Update_CheckLeap();
+		}
+
+		// Reset any round specific game objects (i.e. spells) when the round ends
+		// IN: N/A
+		// OUT: N/A
+		public void Reset()
+		{
+			foreach ( SpellClass spell in Projectile )
+			{
+				Remove( spell );
+			}
+			Projectile.Clear();
 		}
 
 		// Check the count of Leap Motion Devices & display a warning if there are none

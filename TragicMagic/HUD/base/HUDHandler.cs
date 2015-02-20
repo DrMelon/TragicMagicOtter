@@ -16,10 +16,10 @@ namespace TragicMagic
 	class HUDHandlerClass : Entity
 	{
 		// Defines
-		private const short HUDS = 2;
+		public const short HUDs = 2;
 
 		// Hold a reference to the current scene in order to add new entities to it
-		public Scene CurrentScene;
+		public Scene_GameClass CurrentScene;
 
 		// Store the two wizard HUDs
 		public HUDClass[] HUD;
@@ -33,30 +33,48 @@ namespace TragicMagic
 		// Store the combo bar HUD entities
 		public HUDElementClass[] HUDElement_Combo;
 
+		// Store the game round timer HUD entities
+		public HUDElementClass[] HUDElement_Timer;
+
+		// Store the game round score HUD entities
+		public HUDElementClass[] HUDElement_Score;
+
+		// Store the game round end outcome HUD entities
+		public HUDElementClass[] HUDElement_Outcome;
+
 		// Setup the HUD objects, and their element containers
 		// IN: (scene_current) The current scene
 		// OUT: N/A
-		public HUDHandlerClass( Scene scene_current )
+		public HUDHandlerClass( Scene_GameClass scene_current )
 			: base()
 		{
 			// Reference to the current scene
 			CurrentScene = scene_current;
 
 			// Parent HUD objects
-			HUD = new HUDClass[HUDS];
+			HUD = new HUDClass[HUDs];
 			{
 				HUD[0] = new HUDClass( CurrentScene, -90 );
 				HUD[1] = new HUDClass( CurrentScene, 90 );
 			}
 
 			// Leap Motion Controller warning objects
-			HUDElement_Leap = new HUDElementClass[HUDS];
+			HUDElement_Leap = new HUDElementClass[HUDs];
 
 			// Team display objects
-			HUDElement_Team = new HUDElementClass[HUDS];
+			HUDElement_Team = new HUDElementClass[HUDs];
 
 			// Combo objects
-			HUDElement_Combo = new HUDElementClass[HUDS];
+			HUDElement_Combo = new HUDElementClass[HUDs];
+
+			// Timer objects
+			HUDElement_Timer = new HUDElementClass[HUDs];
+
+			// Score objects
+			HUDElement_Score = new HUDElementClass[HUDs];
+
+			// Outcome objects
+			HUDElement_Outcome = new HUDElementClass[HUDs];
 		}
 
 		public override void Added()
@@ -76,7 +94,8 @@ namespace TragicMagic
 		{
 			if ( HUDElement_Leap[0] != null ) { return; }; // Already added
 
-			for ( short hud = 0; hud < HUDS; hud++ )
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Leap[hud] = new HUDElement_LeapClass(
 					CurrentScene, // Reference to the current scene
@@ -98,7 +117,7 @@ namespace TragicMagic
 			Remove( HUDElement_Leap[0], HUDElement_Leap[1] );
 
 			// Flag both HUD elements for garbage collection
-			for ( short hud = 0; hud < HUDS; hud++ )
+			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Leap[hud] = null;
 			}
@@ -111,7 +130,8 @@ namespace TragicMagic
 		{
 			if ( HUDElement_Team[0] != null ) { return; }; // Already added
 
-			for ( short hud = 0; hud < HUDS; hud++ )
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Team[hud] = new HUDElement_TeamClass(
 					CurrentScene, // Reference to the current scene
@@ -133,7 +153,7 @@ namespace TragicMagic
 			Remove( HUDElement_Team[0], HUDElement_Team[1] );
 
 			// Flag both HUD elements for garbage collection
-			for ( short hud = 0; hud < HUDS; hud++ )
+			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Team[hud] = null;
 			}
@@ -146,7 +166,8 @@ namespace TragicMagic
 		{
 			if ( HUDElement_Combo[0] != null ) { return; }; // Already added
 
-			for ( short hud = 0; hud < HUDS; hud++ )
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Combo[hud] = new HUDElement_ComboBarClass(
 					CurrentScene, // Reference to the current scene
@@ -168,12 +189,132 @@ namespace TragicMagic
 			Remove( HUDElement_Combo[0], HUDElement_Combo[1] );
 
 			// Flag both HUD elements for garbage collection
-			for ( short hud = 0; hud < HUDS; hud++ )
+			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Combo[hud] = null;
 			}
 		}
 
+		// Add the game round timer to the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void AddTimer()
+		{
+			if ( HUDElement_Timer[0] != null ) { return; }; // Already added
+
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Timer[hud] = new HUDElement_TimerClass(
+					CurrentScene, // Reference to the current scene
+					Game.Instance.HalfHeight / 2, // Position X
+					80 // Position Y
+				);
+			}
+
+			Add( HUDElement_Timer[0], HUDElement_Timer[1] );
+		}
+
+		// Remove the game round timer from the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void RemoveTimer()
+		{
+			if ( HUDElement_Timer[0] == null ) { return; }; // Already removed
+
+			Remove( HUDElement_Timer[0], HUDElement_Timer[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Timer[hud] = null;
+			}
+		}
+
+		// Add the game round score to the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void AddScore()
+		{
+			if ( HUDElement_Score[0] != null ) { return; }; // Already added
+
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Score[hud] = new HUDElement_ScoreClass(
+					CurrentScene, // Reference to the current scene
+					Game.Instance.HalfHeight / 16, // Position X
+					80 // Position Y
+				);
+			}
+
+			Add( HUDElement_Score[0], HUDElement_Score[1] );
+		}
+
+		// Remove the game round score from the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void RemoveScore()
+		{
+			if ( HUDElement_Score[0] == null ) { return; }; // Already removed
+
+			Remove( HUDElement_Score[0], HUDElement_Score[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Score[hud] = null;
+			}
+		}
+
+		// Add the game round end outcome to the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void AddOutcome()
+		{
+			if ( HUDElement_Outcome[0] != null ) { return; }; // Already added
+
+			// Find the winner of the round
+			short winner = -1;
+			float maxscore = 0;
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				if ( CurrentScene.Wizards[hud].Score > maxscore ) // Player with the highest score wins
+				{
+					winner = hud;
+				}
+			}
+
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Outcome[hud] = new HUDElement_OutcomeClass(
+					CurrentScene, // Reference to the current scene
+					Game.Instance.HalfHeight / 2, // Position X
+					Game.Instance.HalfWidth / 3, // Position Y
+					CurrentScene.Wizards[hud].Score, // The final score of the player
+					( hud == winner ) // Whether or not this player was the winner
+				);
+			}
+
+			Add( HUDElement_Outcome[0], HUDElement_Outcome[1] );
+		}
+
+		// Remove the game round end outcome from the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void RemoveOutcome()
+		{
+			if ( HUDElement_Outcome[0] == null ) { return; }; // Already removed
+
+			Remove( HUDElement_Outcome[0], HUDElement_Outcome[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Outcome[hud] = null;
+			}
+		}
 		// Add an entity to both HUDs
 		// IN: (entity1) The entity representing the first HUD element, (entity2) The entity representing the second HUD element
 		// OUT: N/A

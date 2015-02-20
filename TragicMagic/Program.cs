@@ -35,6 +35,7 @@ namespace TragicMagic
 					60, // Target FPS
 					true // Fullscreen
 				);
+				game.SetWindowAutoFullscreen( true );
 
 				// Leap Motion Controller
 				LeapListener = new Leap.Listener();

@@ -7,26 +7,27 @@ using System.Threading.Tasks;
 using Leap;
 
 // Matthew Cormack @johnjoemcbob
-// 14/02/2015
-// A HUD element which appears when there is no Leap Motion Controller device found,
-// with instructions for the user to plug the device in
+// 20/02/2015
+// A HUD element which is shown after game rounds which shows the score of the
+// current player, and whether they won or lost
 // Depends on: HUDElement, ClampedSpeedValue
 
 namespace TragicMagic
 {
-	class HUDElement_LeapClass : HUDElementClass
+	class HUDElement_OutcomeClass : HUDElementClass
 	{
 		// Defines
 		private const float FADE_SPEED = 0.03f;
 
-		// The Leap Motion Controller image to display
-		private Otter.Image Image_LeapCable_Background;
-		private Otter.Image Image_LeapCable;
-		private Otter.Image Image_Leap;
-		private Otter.Text Text_Warning;
+		// The final value of this player's score
+		public float Score = 0;
 
-		// The clamped value of the cable offset from the Leap device
-		private ClampedSpeedValueClass Cable;
+		// Whether or not this player won the match
+		public bool Winner = false;
+
+		// The text image displaying the time left in the round
+		private Otter.Text Text_Outcome;
+		private Otter.Text Text_Score;
 
 		// The clamped value of the fade amount of the images
 		private ClampedSpeedValueClass Alpha;
@@ -36,64 +37,46 @@ namespace TragicMagic
 
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
 		// IN: (scene_current) Reference to the current scene, (x) The x position of the element,
-		//     (y) The y position of the element
+		//     (y) The y position of the element, (score) The final score of this player,
+		//     (winner) Whether or not this player won
 		// OUT: N/A
-		public HUDElement_LeapClass( Scene scene_current, float x = 0, float y = 0 )
+		public HUDElement_OutcomeClass( Scene scene_current, float x = 0, float y = 0, float score = 0, bool winner = false )
 			: base( scene_current )
 		{
 			X = x;
 			Y = y;
+			Score = score;
+			Winner = winner;
 		}
 
 		public override void Added()
 		{
 			base.Added();
 
-			// Initialize the background Leap cable image
-			Image_LeapCable_Background = new Otter.Image( "../../resources/leap/leapcableback.png" );
+			string text = "Loser!";
 			{
-				Image_LeapCable_Background.X = X;
-				Image_LeapCable_Background.Y = Y;
-				Image_LeapCable_Background.CenterOrigin();
-				Image_LeapCable_Background.OriginX = Image_LeapCable_Background.Width + 32;
+				if ( Winner )
+				{
+					text = "Winner!";
+				}
 			}
-			Parent.AddGraphic( Image_LeapCable_Background );
+			Text_Outcome = new Otter.Text( text, 96 );
+			{
+				Text_Outcome.X = X;
+				Text_Outcome.Y = Y;
+				Text_Outcome.CenterOrigin();
+				Text_Outcome.OriginY = Text_Outcome.Height;
+			}
+			Parent.AddGraphic( Text_Outcome );
 
-			// Initialize the Leap cable image
-			Image_LeapCable = new Otter.Image( "../../resources/leap/leapcable.png" );
+			Text_Score = new Otter.Text( Score.ToString(), 96 );
 			{
-				Image_LeapCable.X = X;
-				Image_LeapCable.Y = Y;
-				Image_LeapCable.CenterOrigin();
-				Image_LeapCable.OriginX = Image_LeapCable.Width + 32;
+				Text_Score.X = X;
+				Text_Score.Y = Y;
+				Text_Score.CenterOrigin();
+				Text_Score.OriginY = 0;
 			}
-			Parent.AddGraphic( Image_LeapCable );
-
-			// Initialize the Leap controller image
-			Image_Leap = new Otter.Image( "../../resources/leap/leapmotion.png" );
-			{
-				Image_Leap.X = X;
-				Image_Leap.Y = Y;
-				Image_Leap.CenterOrigin();
-				Image_Leap.OriginX = 0;
-			}
-			Parent.AddGraphic( Image_Leap );
-
-			Text_Warning = new Otter.Text( "Plug in Leap Motion Controller device", 16 );
-			{
-				Text_Warning.X = X + 55;
-				Text_Warning.Y = Y;
-				Text_Warning.CenterOrigin();
-			}
-			Parent.AddGraphic( Text_Warning );
-
-			// Initialize the cable offset
-			Cable = new ClampedSpeedValueClass();
-			{
-				Cable.Value = 32;
-				Cable.Minimum = -6;
-				Cable.Maximum = 32;
-			}
+			Parent.AddGraphic( Text_Score );
 
 			// Initialize the cable offset
 			Alpha = new ClampedSpeedValueClass();
@@ -144,10 +127,6 @@ namespace TragicMagic
 					}
 				}
 			}
-
-			// Move the cable using the clamped moving value
-			Cable.Update();
-			Image_LeapCable.OriginX = Image_LeapCable.Width + Cable.Value;
 		}
 
 		// Return whether or not the element should actually be removed at this point
@@ -156,6 +135,7 @@ namespace TragicMagic
 		// OUT: (bool) True to remove from scene
 		public override bool Remove()
 		{
+			Alpha.Value = 1; // This element was giving trouble by fading twice on exit, alpha wasn't set right for some reason
 			FadeOut = true;
 			return false;
 		}

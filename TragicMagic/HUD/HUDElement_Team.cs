@@ -79,7 +79,7 @@ namespace TragicMagic
 				// Max
 				TeamMember[member].Name = "Max Wrighton";
 				TeamMember[member].Username = "MaxWrighton";
-				TeamMember[member].Role = "Designer";
+				TeamMember[member].Role = "Engineer";
 				TeamMember[member].Website = "www.maxwrighton.com";
 				member++;
 
@@ -98,6 +98,7 @@ namespace TragicMagic
 		{
 			base.Added();
 
+			// Add each team member to the screen
 			for ( short member = 0; member < TEAM_MEMBERS; member++ )
 			{
 				HUDElement_TeamMember[member] = new HUDElement_TeamMemberClass(

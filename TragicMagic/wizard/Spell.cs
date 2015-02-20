@@ -5,6 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// Matthew Cormack @johnjoemcbob
+// 19/02/2015
+// A simple projectile with hitbox which will form the harmful part of spells
+// Depends on: N/A
+
 namespace TragicMagic
 {
     class SpellClass : Entity
@@ -12,14 +17,18 @@ namespace TragicMagic
 		// The ID of the wizard this spell was cast by
 		public int ID = 0;
 
+		// The direction of the spell's movement
+		public Vector2 Direction = new Vector2( 0, 0 );
+
 		// The clamped movement speed of the spell projectile
 		private Speed MovementSpeed = new Speed( 10 );
 
-        public SpellClass( int wizard = 0, float x = 0, float y = 0 )
+        public SpellClass( int wizard, float x, float y, Vector2 direction )
         {
 			ID = wizard;
 			X = x;
 			Y = y;
+			Direction = direction;
         }
         ~SpellClass()
         {
@@ -34,7 +43,8 @@ namespace TragicMagic
 			SetHitbox( 10, 10, ( (int) ColliderType.Wizard ) + ID );
 			Hitbox.CenterOrigin();
 
-			MovementSpeed.X = 5;
+			MovementSpeed.X = Direction.X * 5;
+			MovementSpeed.Y = Direction.Y * 5;
 		}
 
 		public override void Update()
@@ -52,7 +62,12 @@ namespace TragicMagic
 					Collider collision = Hitbox.Collide( X, Y, ( (int) ColliderType.Wizard ) + wizard );
 					if ( collision != null ) // Collision has happened
 					{
+						// Remove this collider to stop further collisions
 						Scene.Remove( this );
+
+						// Increment score of spell caster
+						Scene_GameClass scene = (Scene_GameClass) Scene;
+						scene.Wizards[ID].Score++;
 					}
 				}
 			}

@@ -27,11 +27,12 @@ namespace TragicMagic
 		// Defines
 		private static Vector2 WAND_OFFSET = new Vector2( -0.3f, -0.3f ); // Default is light (right hand) wizard
 		private const float SPRITE_SCALE = 0.2f; // Scale down the wizard body & wand sprites
+		private const float COLLISION_SCALE = 0.4f; // Scale down the wizard collision for (ONLY) clamping onscreen
 		private const float HITBOX_SCALE = 0.5f; // Scale down the wizard hitbox
 		private const short COMBO_MAX = 10; // The maximum string of button presses held in a combo
 
 		// Store a reference to the current scene
-		public Scene CurrentScene;
+		public Scene_GameClass CurrentScene;
 
 		// Store a reference to the GameWands to query tool positions
 		public GameWandsClass GameWands;
@@ -57,8 +58,20 @@ namespace TragicMagic
 		public float WandAngle = 0;
 		public float WandAngleDirection = 1; // Light & dark wands rotate differently
 
+		// The speed for the wizard to move at
+		public float Speed = 20;
+
+		// The current score of this wizard for this round
+		public float Score = 0;
+
 		// The wand direction as identified by GameWandsClass
 		public Vector2 WandDirection;
+
+		// The toggleable ability of the player to move the wizard
+		public bool CanMove = false;
+
+		// The toggleable functionality of the player to run most logic
+		public bool Pause = false;
 
 		// The wizard body sprite
 		private Otter.Image Body;
@@ -73,12 +86,13 @@ namespace TragicMagic
 		// The shader to render the wizard with (TEST)
 		private Shader TestShader;
 
-		// The list of currently active projectiles
-		private List<SpellClass> Projectile = new List<SpellClass>();
-
 		// The clamped position of this wizard
 		private ClampedValueClass ClampedX = new ClampedValueClass();
 		private ClampedValueClass ClampedY = new ClampedValueClass();
+
+        // The forward & right facing vectors of this wizard upon creation
+        private Vector2 Forward = new Vector2();
+        private Vector2 Right = new Vector2();
 
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
@@ -168,17 +182,45 @@ namespace TragicMagic
             SetHitbox( size, size, ( (int) ColliderType.Wizard ) + ID );
 			Hitbox.CenterOrigin();
 
-			// Initialize the clamped position of the wizard
-			ClampedX.Minimum = 0;
-			ClampedX.Maximum = Game.Instance.Width;
+            // Calculate the forward & right vectors of this wizard
+            double radangle = Math.PI * Angle / 180;
+            double sin = Math.Sin( radangle );
+            double cos = Math.Cos( radangle );
 
-			ClampedY.Minimum = 0;
-			ClampedY.Maximum = Game.Instance.Height;
+            Vector2 origin = new Vector2( 0, 1 ); // Default is facing upwards
+            Forward = new Vector2(
+				(float) ( ( (double) origin.X * cos ) - ( (double) origin.Y * sin ) ),
+				(float) ( ( (double) origin.X * sin ) + ( (double) origin.Y * cos ) )
+			);
+			Right = new Vector2(
+				Forward.Y,
+				Forward.X
+			);
+
+			// Initialize the clamped position of the wizard (for player movement)
+			{
+				// Calculate the side of the screen the player is on
+				float side = Math.Sign( Forward.X ); // -1, 0, 1
+				float onleft = Math.Max( 0, side ); // 0 or 1 boolean number
+				float onright = Math.Max( 0, -side ); // 0 or 1 boolean number
+
+				// X
+				float halfwidth = Body.Width * Body.ScaleX * COLLISION_SCALE; // Image is centered, ensure the whole thing stays onscreen
+				ClampedX.Minimum = ( Game.Instance.HalfWidth * onright ) + halfwidth;
+				ClampedX.Maximum = Game.Instance.Width - ( Game.Instance.HalfWidth * onleft ) - halfwidth;
+
+				// Y
+				float halfheight = Body.Height * Body.ScaleY * COLLISION_SCALE; // Image is centered, ensure the whole thing stays onscreen
+				ClampedY.Minimum = halfheight;
+				ClampedY.Maximum = Game.Instance.Height - halfheight;
+			}
 		}
 
 		public override void Update()
 		{
 			base.Update();
+
+			if ( Pause ) { return; }
 
 			// Update the time parameter of the wizard's shader
 			//TestShader.SetParameter( "Time", Game.Instance.Timer );
@@ -224,23 +266,50 @@ namespace TragicMagic
 				}
 
 				// Movement (While Held)
-				if ( LinkedSession.Controller.Left.Down )
+				if ( CanMove )
 				{
-					//TODO: Move Wizard Left. Movement funcs not implemented yet.
-				}
-				if ( LinkedSession.Controller.Right.Down )
-				{
-					//TODO: Move Wizard Right. Movement funcs not implemented yet.
-				}
-				if ( LinkedSession.Controller.Up.Down )
-				{
-					//TODO: Move Wizard Up. Movement funcs not implemented yet.
-				}
-				if ( LinkedSession.Controller.Down.Down )
-				{
-					//TODO: Move Wizard Down. Movement funcs not implemented yet.
-					//DEBUG: Using this to cast a spell
-					TryToCastSpell();
+					Vector2 move = new Vector2( 0, 0 );
+					{
+						if ( LinkedSession.Controller.Left.Down )
+						{
+							move.X += ( -Right.X * Game.Instance.DeltaTime * Speed );
+							move.Y += ( -Right.Y * Game.Instance.DeltaTime * Speed );
+						}
+						if ( LinkedSession.Controller.Right.Down )
+						{
+							move.X += ( Right.X * Game.Instance.DeltaTime * Speed );
+							move.Y += ( Right.Y * Game.Instance.DeltaTime * Speed );
+						}
+						if ( LinkedSession.Controller.Up.Down )
+						{
+							move.X += ( Forward.X * Game.Instance.DeltaTime * Speed );
+							move.Y += ( Forward.Y * Game.Instance.DeltaTime * Speed );
+						}
+						else if ( LinkedSession.Controller.Down.Down )
+						{
+							//DEBUG: Using this to cast a spell
+							TryToCastSpell();
+
+							move.X += ( -Forward.X * Game.Instance.DeltaTime * Speed );
+							move.Y += ( -Forward.Y * Game.Instance.DeltaTime * Speed );
+						}
+					}
+					// Only run logic if user has input
+					if ( ( move.X != 0 ) || ( move.Y != 0 ) )
+					{
+						// Only set destination if the user has actually input, otherwise continue on course
+						Destination.X = X + move.X;
+						Destination.Y = Y + move.Y;
+
+						// Only clamp to the map edges if the wizard has moved
+						ClampedX.Value = Destination.X; // Initial destination
+						ClampedX.Update(); // Update to clamp it
+						Destination.X = ClampedX.Value; // Final clamped destination
+
+						ClampedY.Value = Destination.Y; // Initial destination
+						ClampedY.Update(); // Update to clamp it
+						Destination.Y = ClampedY.Value; // Final clamped destination
+					}
 				}
 
 				// Update Input strings to only be 10 in length; trim off the leading characters
@@ -257,6 +326,9 @@ namespace TragicMagic
 		// OUT: N/A
 		public void UpdateDestination()
 		{
+			// Unlock from the intro walk-in animation, relock if still moving towards destination
+			CanMove = true;
+
 			// Position X
 			float min = Destination.X; // Default destination is smaller
 			float max = X;
@@ -273,10 +345,12 @@ namespace TragicMagic
 			ClampedPosition_X.Minimum = min;
 			ClampedPosition_X.Maximum = max;
 			ClampedPosition_X.Direction = dir;
-			if ( Math.Abs( min - max ) > 5 )
+			if ( Math.Abs( min - max ) > 2 ) // Small range in which the wizard gets rounded to the target point
 			{
 				ClampedPosition_X.Update();
 				X = ClampedPosition_X.Value;
+
+				CanMove = false; // Lock into the intro walk-in animation
 			}
 
 			// Position Y
@@ -295,10 +369,12 @@ namespace TragicMagic
 			ClampedPosition_Y.Minimum = min;
 			ClampedPosition_Y.Maximum = max;
 			ClampedPosition_Y.Direction = dir;
-			if ( Math.Abs( min - max ) > 5 )
+			if ( Math.Abs( min - max ) > 2 ) // Small range in which the wizard gets rounded to the target point
 			{
 				ClampedPosition_Y.Update();
 				Y = ClampedPosition_Y.Value;
+
+				CanMove = false; // Lock into the intro walk-in animation
 			}
 		}
 
@@ -317,11 +393,11 @@ namespace TragicMagic
 				this.Game.Debugger.Log( "", LinkedSession.Name + ": " + whatSpell.spellName + " just got cast!\n" );
 
 				// Spell test
-				SpellClass spell = new SpellClass( ID, X, Y );
+				SpellClass spell = new SpellClass( ID, X, Y, Forward );
 				{
 					CurrentScene.Add( spell );
 				}
-				Projectile.Add( spell );
+				CurrentScene.Projectile.Add( spell );
 
 				//TODO: Here we'd read the spell info and build a spell entity from it & add it to the scene.
 			}

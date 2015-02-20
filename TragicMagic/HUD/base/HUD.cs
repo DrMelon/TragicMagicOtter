@@ -75,7 +75,7 @@ namespace TragicMagic
 					}
 				}
 				graphic.SetPosition( entity.X + offx, entity.Y + offy );
-				graphic.Angle = -Rotation;
+				graphic.Angle += -Rotation;
 			}
 		}
 

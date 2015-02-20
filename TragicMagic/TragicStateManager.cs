@@ -23,11 +23,21 @@ namespace TragicMagic
 
 	class TragicStateManagerClass : Entity
 	{
+		// Defines
+		private const float ROUND_TIME = 10; // Time for a round to last, in seconds
+		private const float SCORE_TIME = 5; // Time for a round's outcome to display for, in seconds
+
 		// Reference to the current scene
 		public Scene_GameClass CurrentScene;
 
 		// Manage the state of the game
 		private StateMachine<TragicState> TragicStateMachine = new StateMachine<TragicState>();
+
+		// Hold a timer to time the length of each round (multiply to change the define to seconds)
+		private AutoTimer RoundTime = new AutoTimer( ROUND_TIME * 60 );
+
+		// Hold a timer to time the length of each round outcome display (multiply to change the define to seconds)
+		private AutoTimer ScoreTime = new AutoTimer( SCORE_TIME * 60 );
 
 		public TragicStateManagerClass()
 		{
@@ -46,14 +56,12 @@ namespace TragicMagic
 
 			// Initialize to the menu state
 			TragicStateMachine.ChangeState( TragicState.Menu );
-		}
 
-		// State: Menu
-		private void EnterMenu()
-		{
-			CurrentScene.HUDHandler.AddTeam();
+			// Add the game round timer to the manager
+			AddComponent( RoundTime );
+			AddComponent( ScoreTime );
 
-			// Reinitalize wizards to offscreen
+			// Initalize first wizards to offscreen
 			foreach ( WizardClass wizard in CurrentScene.Wizards )
 			{
 				float wizardoffset = -256; // Offscreen
@@ -65,7 +73,14 @@ namespace TragicMagic
 				}
 				wizard.SetPosition( wizardoffset, Game.Instance.HalfHeight );
 				wizard.Destination = new Vector2( wizard.X, wizard.Y );
+				wizard.Pause = true; // Pause to stop player movement (nothing to do with Otter Entity pausing, still need some input)
 			}
+		}
+
+		// State: Menu
+		private void EnterMenu()
+		{
+			CurrentScene.HUDHandler.AddTeam();
 		}
 		private void UpdateMenu()
 		{
@@ -79,6 +94,9 @@ namespace TragicMagic
 					{
 						play = false; // Player undetected, game cannot begin
 					}
+
+					// Also ensure wizards cannot move on the title screen
+					CurrentScene.Wizards[wizard].CanMove = false; // Lock into any animations
 				}
 			}
 			if ( play || Game.Instance.Session( "DarkWizard" ).Controller.A.Pressed ) // TODO: Remove temp button start
@@ -95,6 +113,8 @@ namespace TragicMagic
 		private void EnterGame()
 		{
 			CurrentScene.HUDHandler.AddCombo();
+			CurrentScene.HUDHandler.AddTimer();
+			CurrentScene.HUDHandler.AddScore();
 
 			// Move wizards towards starting point
 			foreach ( WizardClass wizard in CurrentScene.Wizards )
@@ -107,15 +127,91 @@ namespace TragicMagic
 					}
 				}
 				wizard.Destination = new Vector2( wizardoffset, Game.Instance.HalfHeight );
+				wizard.CanMove = false; // Lock into this animation
+				wizard.Pause = false; // Unpause to allow player movement (nothing to do with Otter Entity pausing, still need some input)
+
+				// Reset the wizard
+				wizard.ComboInputs = "";
+				wizard.Score = 0;
 			}
+
+			// Start game timer
+			RoundTime.Start();
 		}
 		private void UpdateGame()
 		{
-			
+			// Game timer logic
+			{
+				// Update the timer/score HUDs
+				for ( short hud = 0; hud < HUDHandlerClass.HUDs; hud++ )
+				{
+					// Timer
+					HUDElement_TimerClass timer = (HUDElement_TimerClass) CurrentScene.HUDHandler.HUDElement_Timer[hud];
+					float time = ROUND_TIME - ( RoundTime.Value / 60 ); // Convert back to seconds
+					timer.SetValue( time );
+
+					// Score
+					HUDElement_ScoreClass score = (HUDElement_ScoreClass) CurrentScene.HUDHandler.HUDElement_Score[hud];
+					score.SetValue( CurrentScene.Wizards[hud].Score );
+				}
+
+				// End the round when the timer runs out
+				if ( RoundTime.AtMax )
+				{
+					TragicStateMachine.ChangeState( TragicState.Score );
+				}
+			}
 		}
 		private void ExitGame()
 		{
 			CurrentScene.HUDHandler.RemoveCombo();
+			CurrentScene.HUDHandler.RemoveTimer();
+			CurrentScene.HUDHandler.RemoveScore();
+
+			// Move wizards offscreen
+			foreach ( WizardClass wizard in CurrentScene.Wizards )
+			{
+				float wizardoffset = -256; // Offscreen
+				{
+					if ( wizard.Graphic.Angle > 0 ) // Light player
+					{
+						wizardoffset = Game.Instance.Width - wizardoffset;
+					}
+				}
+				wizard.Destination = new Vector2( wizardoffset, Game.Instance.HalfHeight );
+				wizard.CanMove = false; // Lock into this animation
+			}
+
+			// Cleanup the game scene (spells, etc)
+			CurrentScene.Reset();
+		}
+
+		// State: Score
+		private void EnterScore()
+		{
+			CurrentScene.HUDHandler.AddOutcome();
+
+			// Start game timer
+			ScoreTime.Start();
+		}
+		private void UpdateScore()
+		{
+			// Game timer logic
+			{
+				if ( ScoreTime.AtMax )
+				{
+					TragicStateMachine.ChangeState( TragicState.Menu );
+				}
+			}
+
+			if ( Game.Instance.Session( "DarkWizard" ).Controller.A.Pressed ) // TODO: Remove temp tweeting
+			{
+				
+			}
+		}
+		private void ExitScore()
+		{
+			CurrentScene.HUDHandler.RemoveOutcome();
 		}
 	}
 }
