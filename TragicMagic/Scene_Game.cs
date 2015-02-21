@@ -46,9 +46,12 @@ namespace TragicMagic
 		// Test tilemap
 		public OgmoProject test = new OgmoProject( "../../resources/tilemap.oep", "../../resources/" );
 
+
 		public Scene_GameClass()
 		{
 		}
+
+
 
 		~Scene_GameClass()
 		{
@@ -72,6 +75,8 @@ namespace TragicMagic
 			GameWands.LeapController = LeapController;
 			GameWands.OnCast = OnCast;
 			Add( GameWands );
+
+            
 
 			// Initialize the two wizard players
 			float wizardoffset = 256;
