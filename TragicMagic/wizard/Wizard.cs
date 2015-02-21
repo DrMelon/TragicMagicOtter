@@ -11,6 +11,10 @@ using Leap;
 // Handle movement, combos & attacking of a player
 // Depends on: GameWands, ComboSystem
 
+// Sean Thurmond @_inu_
+// 21/02/15
+// GamePad Support
+
 // TODO:
 // Movement functions
 
@@ -248,19 +252,19 @@ namespace TragicMagic
 			if ( LinkedSession != null )
 			{
 				// Element Buttons (Just Pressed)
-				if ( LinkedSession.GetController<ControllerXbox360>().A.Pressed )
+				if ( LinkedSession.GetController<ControllerXbox360>().A.Pressed)
 				{
 					ComboInputs += "A";
 				}
-				if ( LinkedSession.GetController<ControllerXbox360>().B.Pressed )
+                if (LinkedSession.GetController<ControllerXbox360>().B.Pressed)
 				{
 					ComboInputs += "B";
 				}
-				if ( LinkedSession.GetController<ControllerXbox360>().X.Pressed )
+                if (LinkedSession.GetController<ControllerXbox360>().X.Pressed)
 				{
 					ComboInputs += "X";
 				}
-				if ( LinkedSession.GetController<ControllerXbox360>().Y.Pressed )
+                if (LinkedSession.GetController<ControllerXbox360>().Y.Pressed)
 				{
 					ComboInputs += "Y";
 				}
@@ -270,29 +274,32 @@ namespace TragicMagic
 				{
 					Vector2 move = new Vector2( 0, 0 );
 					{
-						if ( LinkedSession.GetController<ControllerXbox360>().Left.Down )
+                        if (LinkedSession.GetController<ControllerXbox360>().Left.Down || LinkedSession.GetController<ControllerXbox360>().LeftStick.X < -0.2)
 						{
 							move.X += ( -Right.X * Game.Instance.DeltaTime * Speed );
 							move.Y += ( -Right.Y * Game.Instance.DeltaTime * Speed );
 						}
-						if ( LinkedSession.GetController<ControllerXbox360>().Right.Down )
+                        if (LinkedSession.GetController<ControllerXbox360>().Right.Down || LinkedSession.GetController<ControllerXbox360>().LeftStick.X > 0.2)
 						{
 							move.X += ( Right.X * Game.Instance.DeltaTime * Speed );
 							move.Y += ( Right.Y * Game.Instance.DeltaTime * Speed );
 						}
-						if ( LinkedSession.GetController<ControllerXbox360>().Up.Down )
+                        if (LinkedSession.GetController<ControllerXbox360>().Up.Down || LinkedSession.GetController<ControllerXbox360>().LeftStick.Y < -0.2)
 						{
 							move.X += ( Forward.X * Game.Instance.DeltaTime * Speed );
 							move.Y += ( Forward.Y * Game.Instance.DeltaTime * Speed );
 						}
-						else if ( LinkedSession.GetController<ControllerXbox360>().Down.Down )
-						{
-							//DEBUG: Using this to cast a spell
-							TryToCastSpell();
+                        if (LinkedSession.GetController<ControllerXbox360>().RightStick.Y < 0 || LinkedSession.GetController<ControllerXbox360>().RB.Pressed ) // Flick right stick up
+                        {
+                            //DEBUG: Using this to cast a spell
+                            TryToCastSpell();
+                        }
 
-							move.X += ( -Forward.X * Game.Instance.DeltaTime * Speed );
-							move.Y += ( -Forward.Y * Game.Instance.DeltaTime * Speed );
-						}
+                        else if (LinkedSession.GetController<ControllerXbox360>().Down.Down || LinkedSession.GetController<ControllerXbox360>().LeftStick.Y > 0.2)
+                        {
+                            move.X += (-Forward.X * Game.Instance.DeltaTime * Speed);
+                            move.Y += (-Forward.Y * Game.Instance.DeltaTime * Speed);
+                        }
 					}
 					// Only run logic if user has input
 					if ( ( move.X != 0 ) || ( move.Y != 0 ) )
