@@ -26,8 +26,6 @@ SOFTWARE.
 #endregion License
 
 using System;
-using System.Globalization;
-using System.ComponentModel;
 
 namespace Otter {
     /// <summary>

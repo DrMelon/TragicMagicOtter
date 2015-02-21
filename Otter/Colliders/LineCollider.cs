@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -92,6 +89,11 @@ namespace Otter {
             X2 = x2;
             Y2 = y2;
 
+            AddTag(tags);
+        }
+
+        public LineCollider(float x1, float y1, float x2, float y2, Enum tag, params Enum[] tags) : this(x1, y1, x2, y2) {
+            AddTag(tag);
             AddTag(tags);
         }
 

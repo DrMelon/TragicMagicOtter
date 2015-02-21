@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
+using System;
+using System.Collections.Generic;
 
 namespace Otter {
     /// <summary>
@@ -44,6 +41,11 @@ namespace Otter {
         /// Determines if the Surface will automatically clear at the start of the next render cycle.
         /// </summary>
         public bool AutoClear = true;
+
+        /// <summary>
+        /// Determines if the Surface will automatically set its camera to the Scene's camera.
+        /// </summary>
+        public bool UseSceneCamera;
 
         #endregion
 
@@ -111,6 +113,18 @@ namespace Otter {
             }
         }
 
+        public float CameraWidth {
+            get {
+                return Width / CameraZoom;
+            }
+        }
+
+        public float CameraHeight {
+            get {
+                return Height / CameraZoom;
+            }
+        }
+
         /// <summary>
         /// The Texture the Surface has rendered to.
         /// </summary>
@@ -122,6 +136,7 @@ namespace Otter {
 
         /// <summary>
         /// Convert an X position into the same position but on the Surface.
+        /// TODO: Make this work with scale and rotation.
         /// </summary>
         /// <param name="x">The X position in the Scene.</param>
         /// <returns>The X position on the Surface.</returns>
@@ -131,6 +146,7 @@ namespace Otter {
 
         /// <summary>
         /// Convert a Y position into the same position but on the Surface.
+        /// TODO: Make this work with scale and rotation.
         /// </summary>
         /// <param name="y">The Y position in the Scene.</param>
         /// <returns>The Y position on the Surface.</returns>
@@ -160,6 +176,7 @@ namespace Otter {
             renderTexture = new RenderTexture((uint)Width, (uint)Height);
             TextureRegion = new Rectangle(0, 0, Width, Height);
             ClippingRegion = TextureRegion;
+            renderTexture.Smooth = Texture.DefaultSmooth;
 
             fill = new RectangleShape(new Vector2f(Width, Height)); // Using this for weird clearing bugs on some video cards
 
@@ -219,17 +236,10 @@ namespace Otter {
                 }
             }
         }
-
-        void Display() {
-            renderTexture.Display();
-            SetTexture(new Texture(renderTexture.Texture));
-            Update();
-            UpdateDrawable();
-        }
-
+       
         void RefreshView() {
             View v = new View(new FloatRect(cameraX, cameraY, Width, Height));
-
+            
             v.Rotation = -cameraAngle;
             v.Zoom(1 / cameraZoom);
             RenderTarget.SetView(v);
@@ -267,6 +277,17 @@ namespace Otter {
             var shader = shaders[shaders.Count - 1];
             RemoveShader(shader);
             return shader;
+        }
+
+        /// <summary>
+        /// Calls the SFML Display function on the internal render texture.  Should be used before
+        /// any sort of rendering, otherwise the texture will be upside down!
+        /// </summary>
+        public void Display() {
+            renderTexture.Display();
+            SetTexture(new Texture(renderTexture.Texture));
+            Update();
+            UpdateDrawable();
         }
 
         /// <summary>
@@ -418,9 +439,15 @@ namespace Otter {
         /// Saves the next completed render to a file. The supported image formats are bmp, png, tga and jpg.
         /// Note that this waits until the end of the game's Render() to actually export, otherwise it will be blank!
         /// </summary>
-        /// <param name="path">The file path to save to. The type of image is deduced from the extension.</param>
-        public void SaveToFile(string path) {
+        /// <param name="path">
+        /// The file path to save to. The type of image is deduced from the extension. If left unspecified the
+        /// path will be a png file of the current time in the same folder as the executable.
+        /// </param>
+        public void SaveToFile(string path = "") {
             saveNextFrame = true;
+            if (path == "") {
+                path = string.Format("{0:yyyyMMddHHmmssff}.png", DateTime.Now);
+            }
             saveNameFramePath = path;
         }
 
@@ -430,6 +457,16 @@ namespace Otter {
         /// <param name="scene">The Scene to match the camera with.</param>
         public void CameraScene(Scene scene) {
             SetView(scene.CameraX + X, scene.CameraY + Y, scene.CameraAngle, scene.CameraZoom);
+        }
+
+        /// <summary>
+        /// Centers the camera of the surface.
+        /// </summary>
+        /// <param name="x">The X position to be the center of the scene.</param>
+        /// <param name="y">The Y position to be the center of the scene.</param>
+        public void CenterCamera(float x, float y) {
+            CameraX = x - HalfWidth;
+            CameraY = y - HalfHeight;
         }
 
         #endregion

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Otter {
     /// <summary>
     /// Point Collider.
@@ -14,6 +10,12 @@ namespace Otter {
         public PointCollider(int x, int y, params int[] tags) {
             Width = 1;
             Height = 1;
+            AddTag(tags);
+        }
+
+        public PointCollider(int x, int y, Enum tag, params Enum[] tags) : this(x, y) {
+            AddTag(tag);
+            AddTag(tags);
         }
 
         #endregion

@@ -102,6 +102,7 @@ namespace TragicMagic
 					Game.Instance.HalfHeight / 2, // Position X
 					25 // Position Y
 				);
+               
 			}
 
 			Add( HUDElement_Leap[0], HUDElement_Leap[1] );

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
+using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Otter {
     /// <summary>
@@ -304,12 +302,48 @@ namespace Otter {
 
         #region Other
 
+        /// <summary>
+        /// Converts a RGB or RGBA uint value to a Color.
+        /// </summary>
+        /// <param name="i">The uint.</param>
+        /// <returns>A new Color from the uint.</returns>
         public static Color ToColor(this uint i) {
             return new Color(i);
         }
 
+        /// <summary>
+        /// Converts a RGB or RGBA int value to a Color.
+        /// </summary>
+        /// <param name="i">The int.</param>
+        /// <returns>A new Color from the int.</returns>
         public static Color ToColor(this int i) {
             return new Color((uint)i);
+        }
+
+        /// <summary>
+        /// Check to see if a flags enumeration has a specific flag set.
+        /// </summary>
+        /// <param name="variable">Flags enumeration to check</param>
+        /// <param name="value">Flag to check for</param>
+        /// <returns>True if the Enum contains the flag.</returns>
+        public static bool HasFlag(this Enum variable, Enum value) {
+            // http://stackoverflow.com/questions/4108828/generic-extension-method-to-see-if-an-enum-contains-a-flag
+            if (variable == null)
+                return false;
+
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            // Not as good as the .NET 4 version of this function, but should be good enough
+            if (!Enum.IsDefined(variable.GetType(), value)) {
+                throw new ArgumentException(string.Format(
+                    "Enumeration type mismatch.  The flag is of type '{0}', was expecting '{1}'.",
+                    value.GetType(), variable.GetType()));
+            }
+
+            ulong num = Convert.ToUInt64(value);
+            return ((Convert.ToUInt64(variable) & num) == num);
+
         }
 
         #endregion

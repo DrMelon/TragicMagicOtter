@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
-
 namespace Otter {
     /// <summary>
     /// Collider that can use an image as a mask.  This is not recommended to use for most cases as it can
@@ -67,6 +62,16 @@ namespace Otter {
             Width = this.texture.Size.X;
             Height = this.texture.Size.Y;
 
+            AddTag(tags);
+        }
+
+        public PixelCollider(string source, Enum tag, params Enum[] tags) : this(source) {
+            AddTag(tag);
+            AddTag(tags);
+        }
+
+        public PixelCollider(Texture texture, Enum tag, params Enum[] tags) : this(texture) {
+            AddTag(tag);
             AddTag(tags);
         }
 

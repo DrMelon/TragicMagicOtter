@@ -1,20 +1,19 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Otter {
     internal class GlideInfo {
         static GlideInfo() {
             numericTypes = new Type[] {
-				typeof(Int16),
-				typeof(Int32),
-				typeof(Int64),
-				typeof(UInt16),
-				typeof(UInt32),
-				typeof(UInt64),
-				typeof(Single),
-				typeof(Double)
-			};
+                typeof(Int16),
+                typeof(Int32),
+                typeof(Int64),
+                typeof(UInt16),
+                typeof(UInt32),
+                typeof(UInt64),
+                typeof(Single),
+                typeof(Double)
+            };
 
             flags =
                 BindingFlags.Public |

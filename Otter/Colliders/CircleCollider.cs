@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Otter {
     /// <summary>
     /// Circle Collider.
@@ -34,6 +30,11 @@ namespace Otter {
 
         public CircleCollider(int radius, params int[] tags) {
             Radius = radius;
+            AddTag(tags);
+        }
+
+        public CircleCollider(int radius, Enum tag, params Enum[] tags) : this(radius) {
+            AddTag(tag);
             AddTag(tags);
         }
 

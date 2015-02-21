@@ -1,8 +1,5 @@
-﻿using System;
+﻿using SFML.Window;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Window;
 
 namespace Otter {
     /// <summary>

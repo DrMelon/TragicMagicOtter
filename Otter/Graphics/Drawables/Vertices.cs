@@ -1,8 +1,6 @@
 ﻿using SFML.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -13,8 +11,6 @@ namespace Otter {
         #region Private Fields
 
         VertexPrimitiveType primitiveType = VertexPrimitiveType.Quads;
-
-        int prevCount = -1;
 
         #endregion
 
@@ -59,7 +55,7 @@ namespace Otter {
         /// <param name="vertices">The Verts to use.</param>
         public Vertices(string source, params Vert[] vertices)
             : this(vertices) {
-            SetTexture(new Texture("source"));
+            SetTexture(new Texture(source));
             Initialize(vertices);
         }
 
@@ -106,28 +102,43 @@ namespace Otter {
         protected override void UpdateDrawable() {
             base.UpdateDrawable();
 
-            // TODO: Make the vertices multiply in the color and alpha from the graphic
-            if (prevCount != Verts.Count) {
-                SFMLVertices = new VertexArray((SFML.Graphics.PrimitiveType)PrimitiveType, (uint)Verts.Count);
-                prevCount = Verts.Count;
+            SFMLVertices = new VertexArray((SFML.Graphics.PrimitiveType)PrimitiveType);
 
-                foreach (var v in Verts) {
-                    // Adjust texture for potential atlas offset.
-                    v.U += TextureLeft;
-                    v.V += TextureTop;
-                    v.U = Util.Clamp(v.U, TextureLeft, TextureRight);
-                    v.V = Util.Clamp(v.V, TextureTop, TextureBottom);
-                    SFMLVertices.Append(v);
-                }
-            }
-            else {
-                uint i = 0;
-                foreach (var v in Verts) {
-                    SFMLVertices[i] = v.SFMLVertex;
+            
+            foreach (var v in Verts) {
+                // Adjust texture for potential atlas offset.
+                v.U += TextureLeft;
+                v.V += TextureTop;
+                v.U = Util.Clamp(v.U, TextureLeft, TextureRight);
+                v.V = Util.Clamp(v.V, TextureTop, TextureBottom);
 
-                    i++;
-                }
+                //copy to new vert and apply color and alpha
+                var vCopy = new Vert(v);
+                vCopy.Color *= Color;
+                vCopy.Color.A *= Alpha;
+
+                SFMLVertices.Append(vCopy);
             }
+
+            
+        }
+
+        void UpdateDimensions() {
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minY = float.MaxValue;
+            float maxY = float.MinValue;
+
+            foreach (var v in Verts) {
+                minX = Util.Min(v.X, minX);
+                minY = Util.Min(v.Y, minY);
+
+                maxX = Util.Max(v.X, maxX);
+                maxY = Util.Max(v.Y, maxY);
+            }
+
+            Width = (int)Util.Round(Math.Abs(maxX - minX));
+            Height = (int)Util.Round(Math.Abs(maxY - minY));
         }
 
         #endregion
@@ -140,6 +151,7 @@ namespace Otter {
         public void Clear() {
             Verts.Clear();
             NeedsUpdate = true;
+            UpdateDimensions();
         }
 
         /// <summary>
@@ -197,6 +209,7 @@ namespace Otter {
                 Verts.Add(v);
             }
             NeedsUpdate = true;
+            UpdateDimensions();
         }
 
         /// <summary>
@@ -208,6 +221,22 @@ namespace Otter {
                 Verts.RemoveIfContains(v);
             }
             NeedsUpdate = true;
+            UpdateDimensions();
+        }
+
+        /// <summary>
+        /// Remove Verts at a specific coordinate.
+        /// </summary>
+        /// <param name="x">The X position of the Vert to remove.</param>
+        /// <param name="y">The Y position of the Vert to remove.</param>
+        public void RemoveAt(float x, float y) {
+            var vertsToRemove = new List<Vert>();
+            foreach (var v in Verts) {
+                if (v.X == x && v.Y == y) {
+                    vertsToRemove.Add(v);
+                }
+            }
+            Remove(vertsToRemove.ToArray());
         }
 
         #endregion

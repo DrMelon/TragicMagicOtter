@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using SFML.Window;
-using System.Globalization;
 
 namespace Otter {
     /// <summary>
@@ -45,10 +45,8 @@ namespace Otter {
 
         int liveConsoleLines = 0;
 
-        bool showLiveLog;
         bool enterPressed;
         bool dismissPressed;
-        internal bool Dismissed;
         bool executionError;
         bool locked;
 
@@ -71,7 +69,7 @@ namespace Otter {
 
         Dictionary<string, object> watching = new Dictionary<string, object>();
 
-        int debugLogBufferSize = 1000;
+        int debugLogBufferSize = 10000;
 
         int logIndex;
 

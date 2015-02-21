@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter {
+﻿namespace Otter {
     /// <summary>
     /// Entity that acts as a screen flash.  Best used when using the constructor that allows for
     /// initial parameters be set:

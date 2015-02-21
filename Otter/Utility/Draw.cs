@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using SFML;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
-using System.Diagnostics;
 
 namespace Otter {
     /// <summary>
@@ -60,6 +53,39 @@ namespace Otter {
         /// <param name="y">The y offset to position the Graphic at.</param>
         static public void Graphic(Graphic graphic, float x = 0, float y = 0) {
             graphic.Render(x, y);
+        }
+
+        /// <summary>
+        /// Renders an Entity.
+        /// </summary>
+        /// <param name="e">The Entity to render.</param>
+        public static void Entity(Entity e) {
+            e.RenderInternal();
+        }
+
+        /// <summary>
+        /// Renders an Entity at a specified X Y position.
+        /// </summary>
+        /// <param name="e">The Entity to render.</param>
+        /// <param name="x">The X position to place the Entity for rendering.</param>
+        /// <param name="y">The Y position to place the Entity for rendering.</param>
+        public static void Entity(Entity e, float x = 0, float y = 0) {
+            var tempX = e.X;
+            var tempY = e.Y;
+            e.SetPosition(x, y);
+            Entity(e);
+            e.SetPosition(tempX, tempY);
+        }
+
+        /// <summary>
+        /// Draws simple Text.  Should only be used for debugging as this creates Text Graphics each time it's called!
+        /// </summary>
+        /// <param name="str">The string to display.</param>
+        /// <param name="size">The size of the Text.</param>
+        /// <param name="x">The X position to render the Text from.</param>
+        /// <param name="y">The Y position to render the Text from.</param>
+        public static void Text(string str, int size, float x = 0, float y = 0) {
+            Draw.Graphic(new Text(str, size), x, y);
         }
 
         /// <summary>
@@ -368,5 +394,7 @@ namespace Otter {
 
         #endregion
 
+
+        
     }
 }

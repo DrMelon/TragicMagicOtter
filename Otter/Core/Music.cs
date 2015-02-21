@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace Otter {
@@ -72,7 +70,7 @@ namespace Otter {
         /// </summary>
         public int Offset {
             set { music.PlayingOffset = new TimeSpan(0, 0, 0, 0, value); }
-            get { return music.PlayingOffset.Milliseconds; }
+            get { return (int)music.PlayingOffset.TotalMilliseconds; }
         }
 
         /// <summary>
@@ -87,7 +85,7 @@ namespace Otter {
         /// The duration in milliseconds of the music.
         /// </summary>
         public int Duration {
-            get { return music.Duration.Milliseconds; }
+            get { return (int)music.Duration.TotalMilliseconds; }
         }
 
         #endregion

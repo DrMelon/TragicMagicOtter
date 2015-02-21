@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
-using System.Xml;
 
 namespace Otter {
     /// <summary>
@@ -277,6 +273,9 @@ namespace Otter {
         public void Play() {
             if (BufferedAnimation != null) {
                 Play(BufferedAnimation);
+            }
+            else {
+                Play(CurrentAnim);
             }
             UpdateSprite();
         }

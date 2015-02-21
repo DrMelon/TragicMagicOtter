@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter {
+﻿namespace Otter {
     /// <summary>
     /// Base Component class.  Components can be added to Entities.
     /// </summary>
@@ -30,6 +25,19 @@ namespace Otter {
         /// How long the Component has been alive (added to an Entity and updated.)
         /// </summary>
         public float Timer = 0;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// The Scene that the parent Entity is in.
+        /// </summary>
+        public Scene Scene {
+            get {
+                return Entity.Scene;
+            }
+        }
 
         #endregion
 

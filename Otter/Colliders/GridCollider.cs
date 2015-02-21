@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -111,6 +109,11 @@ namespace Otter {
             AddTag(tags);
         }
 
+        public GridCollider(int width, int height, int tileWidth, int tileHeight, Enum tag, params Enum[] tags) : this(width, height, tileWidth, tileHeight) {
+            AddTag(tag);
+            AddTag(tags);
+        }
+
         #endregion
 
         #region Public Methods
@@ -161,6 +164,7 @@ namespace Otter {
         /// <returns>True if the tile is collidable.</returns>
         public bool GetTile(int x, int y) {
             if (x < 0 || y < 0) return false;
+            if (x >= TileColumns || y >= TileRows) return false;
             var index = Util.OneDee((int)TileColumns, (int)x, (int)y);
             if (index >= collisions.Count) return false;
             return collisions[index];

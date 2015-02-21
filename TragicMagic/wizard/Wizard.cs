@@ -248,19 +248,19 @@ namespace TragicMagic
 			if ( LinkedSession != null )
 			{
 				// Element Buttons (Just Pressed)
-				if ( LinkedSession.Controller.A.Pressed )
+				if ( LinkedSession.GetController<ControllerXbox360>().A.Pressed )
 				{
 					ComboInputs += "A";
 				}
-				if ( LinkedSession.Controller.B.Pressed )
+				if ( LinkedSession.GetController<ControllerXbox360>().B.Pressed )
 				{
 					ComboInputs += "B";
 				}
-				if ( LinkedSession.Controller.X.Pressed )
+				if ( LinkedSession.GetController<ControllerXbox360>().X.Pressed )
 				{
 					ComboInputs += "X";
 				}
-				if ( LinkedSession.Controller.Y.Pressed )
+				if ( LinkedSession.GetController<ControllerXbox360>().Y.Pressed )
 				{
 					ComboInputs += "Y";
 				}
@@ -270,22 +270,22 @@ namespace TragicMagic
 				{
 					Vector2 move = new Vector2( 0, 0 );
 					{
-						if ( LinkedSession.Controller.Left.Down )
+						if ( LinkedSession.GetController<ControllerXbox360>().Left.Down )
 						{
 							move.X += ( -Right.X * Game.Instance.DeltaTime * Speed );
 							move.Y += ( -Right.Y * Game.Instance.DeltaTime * Speed );
 						}
-						if ( LinkedSession.Controller.Right.Down )
+						if ( LinkedSession.GetController<ControllerXbox360>().Right.Down )
 						{
 							move.X += ( Right.X * Game.Instance.DeltaTime * Speed );
 							move.Y += ( Right.Y * Game.Instance.DeltaTime * Speed );
 						}
-						if ( LinkedSession.Controller.Up.Down )
+						if ( LinkedSession.GetController<ControllerXbox360>().Up.Down )
 						{
 							move.X += ( Forward.X * Game.Instance.DeltaTime * Speed );
 							move.Y += ( Forward.Y * Game.Instance.DeltaTime * Speed );
 						}
-						else if ( LinkedSession.Controller.Down.Down )
+						else if ( LinkedSession.GetController<ControllerXbox360>().Down.Down )
 						{
 							//DEBUG: Using this to cast a spell
 							TryToCastSpell();

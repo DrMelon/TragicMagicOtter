@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -32,7 +30,6 @@ namespace Otter {
         bool hasSpeedDir;
 
         int frameCount;
-        int initFrameCount;
         bool hasFrameCount;
 
         float finalSpeedX;
@@ -248,6 +245,11 @@ namespace Otter {
         /// Determines if the Particle should animate the ImageSet.
         /// </summary>
         public bool Animate;
+
+        /// <summary>
+        /// The shader to use on the ImageSet.
+        /// </summary>
+        public Shader Shader;
 
         /// <summary>
         /// The specific frames to display for the ImageSet.  If set it will override the default FrameCount.
@@ -625,6 +627,10 @@ namespace Otter {
                 Ease = Otter.Ease.Linear;
             }
 
+            if (Shader != null) {
+                Image.Shader = Shader;
+            }
+
             Image.Visible = false;
         }
 
@@ -645,21 +651,21 @@ namespace Otter {
             }
 
             // Update values
-            float lerp = Timer / LifeSpan;
-            SpeedX = Ease(Util.Lerp(initSpeedX, finalSpeedX, lerp));
-            SpeedY = Ease(Util.Lerp(initSpeedY, finalSpeedY, lerp));
-            ScaleX = Ease(Util.Lerp(initScaleX, finalScaleX, lerp));
-            ScaleY = Ease(Util.Lerp(initScaleY, finalScaleY, lerp));
-            Angle = Ease(Util.Lerp(initAngle, finalAngle, lerp));
-            Alpha = Ease(Util.Lerp(initAlpha, finalAlpha, lerp));
-            ColorR = Ease(Util.Lerp(initColorR, finalColorR, lerp));
-            ColorG = Ease(Util.Lerp(initColorG, finalColorG, lerp));
-            ColorB = Ease(Util.Lerp(initColorB, finalColorB, lerp));
-            SpeedLen = Ease(Util.Lerp(initSpeedLen, finalSpeedLen, lerp));
-            SpeedDir = Ease(Util.Lerp(initSpeedDir, finalSpeedDir, lerp));
-            xpos = Ease(Util.Lerp(initX, finalX, lerp));
-            ypos = Ease(Util.Lerp(initY, finalY, lerp));
-            colorLerp = Ease(Util.Lerp(0, 1, lerp));
+            float lerp = Ease((float)Timer / LifeSpan);
+            SpeedX = Util.Lerp(initSpeedX, finalSpeedX, lerp);
+            SpeedY = Util.Lerp(initSpeedY, finalSpeedY, lerp);
+            ScaleX = Util.Lerp(initScaleX, finalScaleX, lerp);
+            ScaleY = Util.Lerp(initScaleY, finalScaleY, lerp);
+            Angle = Util.Lerp(initAngle, finalAngle, lerp);
+            Alpha = Util.Lerp(initAlpha, finalAlpha, lerp);
+            ColorR = Util.Lerp(initColorR, finalColorR, lerp);
+            ColorG = Util.Lerp(initColorG, finalColorG, lerp);
+            ColorB = Util.Lerp(initColorB, finalColorB, lerp);
+            SpeedLen = Util.Lerp(initSpeedLen, finalSpeedLen, lerp);
+            SpeedDir = Util.Lerp(initSpeedDir, finalSpeedDir, lerp);
+            xpos = Util.Lerp(initX, finalX, lerp);
+            ypos = Util.Lerp(initY, finalY, lerp);
+            colorLerp = Util.Lerp(0, 1, lerp);
 
             Image.Visible = true;
 

@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.IO;
 
 namespace Otter {
@@ -15,69 +10,46 @@ namespace Otter {
     
     public class Session {
 
-        #region Static Fields
-
         static private int nextSessionId = 0;
-
-        static string defaultPath;
-
-        #endregion
-
-        #region Static Methods
 
         /// <summary>
         /// Create a new Session using the current Game.Instance.
         /// </summary>
         /// <returns></returns>
-        static public Session Create() {
-            return new Session(Game.Instance);
+        static public Session Create(string name) {
+            return new Session(Game.Instance, name);
         }
 
-        #endregion
-
-        #region Public Fields
-
-        /// <summary>
-        /// The string to use when delimiting key data in data exports.
-        /// </summary>
-        public string KeyDelim = "::OTTERK::";
+        static public Session Create(Enum name) {
+            return Session.Create(Util.EnumValueToString(name));
+        }
 
         /// <summary>
-        /// The string to use when delimiting value data in data exports.
-        /// </summary>
-        public string ValueDelim = "::OTTERV::";
-
-        /// <summary>
-        /// The phrase to use as a salt when encrypting the data exports.
-        /// </summary>
-        public string EncryptionSalt = "otter";
-
-        /// <summary>
-        /// The name of this session. This is important as it will determine the name of save data
+        /// The name of this Session. This is important as it will determine the name of save data
         /// files and you can also find a session by name.
         /// </summary>
         public string Name = "";
 
         /// <summary>
-        /// The controller to use for this Session.
+        /// The Controller to use for this Session.
         /// </summary>
         public Controller Controller = new Controller();
 
         /// <summary>
-        /// The guide to salt the data string.  {S} is the salt, {D} is the data.
-        /// It is recommended to change this from the default for your game, but
-        /// only if you really care about hacking save data.
+        /// Gets the Controller as a specific type of Controller.
         /// </summary>
-        public static string SaltGuide = "{S}{D}{S}";
-
-        #endregion
-
-        #region Public Properties
+        /// <typeparam name="T">The type of Controller.</typeparam>
+        /// <returns>The Controller as type T.</returns>
+        public T GetController<T>() where T : Controller {
+            return Controller as T;
+        }
 
         /// <summary>
         /// The Id of this session in the Game.
         /// </summary>
         public int Id { get; internal set; }
+
+        public DataSaver Data { get; private set; }
 
         /// <summary>
         /// The game that manages this session.
@@ -85,154 +57,23 @@ namespace Otter {
         public Game Game { get; internal set; }
 
         /// <summary>
-        /// The data to store in this Session.  Must be converted to string to store for the file
-        /// exports and imports.
-        /// </summary>
-        public Dictionary<string, string> Data { get; private set; }
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
         /// Create a new Session.
         /// </summary>
         /// <param name="game">The Game that the session is tied to.</param>
-        public Session(Game game) {
-            Data = new Dictionary<string, string>();
+        public Session(Game game, string name) {
             Game = game;
+            Name = name;
+
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + Game.GameFolder;
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + Game.GameFolder + "/" + Name + ".";
+            if (!Directory.Exists(folder)) {
+                Directory.CreateDirectory(folder);
+            }
+            Data = new DataSaver(path);
 
             Id = nextSessionId;
             nextSessionId++;
-
-            defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/";
         }
-
-        #endregion
-
-        #region Indexers
-
-        /// <summary>
-        /// Access the string data for the Session.
-        /// </summary>
-        /// <param name="key">The key for the data.</param>
-        /// <returns>The string of data for that key.</returns>
-        public string this[string key] {
-            get {
-                return GetData(key);
-            }
-            set {
-                SetData(key, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Get the full path of a file associated with this session.
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        public string DataPath(string filename) {
-            if (!Directory.Exists(defaultPath + Game.GameFolder)) {
-                Directory.CreateDirectory(defaultPath + Game.GameFolder);
-            }
-            return defaultPath + "/" + Game.GameFolder + "/" + Name + "." + filename + ".dat";
-        }
-
-        /// <summary>
-        /// Verifies that the data has a valid hash.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public bool VerifyData(string data) {
-            string[] split = Regex.Split(data, ":");
-
-            if (split.Length != 2) return false;
-
-            string dataToHash = SaltGuide;
-            dataToHash = dataToHash.Replace("{S}", EncryptionSalt);
-            dataToHash = dataToHash.Replace("{D}", split[1]);
-
-            string hash = Util.MD5Hash(dataToHash);
-
-            if (hash == split[0]) return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Save this session's data to a file.
-        /// </summary>
-        /// <param name="filename">The file to save to.</param>
-        public void SaveData(string filename = "data") {
-            string filepath = DataPath(filename);
-
-            string str = Util.CompressString(Util.DictionaryToString(Data, KeyDelim, ValueDelim));
-
-            string dataToHash = SaltGuide;
-            dataToHash = dataToHash.Replace("{S}", EncryptionSalt);
-            dataToHash = dataToHash.Replace("{D}", str);
-
-            str = Util.MD5Hash(dataToHash) + ":" + str;
-
-            File.WriteAllText(filepath, str);
-        }
-
-        /// <summary>
-        /// Load this session's data from a file.
-        /// </summary>
-        /// <param name="filename">The file to load from.</param>
-        public void LoadData(string filename = "data") {
-            string filepath = DataPath(filename);
-
-            if (!File.Exists(filepath)) return;
-
-            string loaded = File.ReadAllText(filepath);
-
-            if (VerifyData(loaded)) {
-                string[] split = Regex.Split(loaded, ":");
-                loaded = Util.DecompressString(split[1]);
-                Data = Util.StringToDictionary(loaded, KeyDelim, ValueDelim);
-            }
-            else {
-                Util.Log("Data load failed: corrupt or modified data.");
-            }
-        }
-
-        /// <summary>
-        /// Returns data from the session.  If there is no key, return the onNull value.
-        /// </summary>
-        /// <param name="key">The key!</param>
-        /// <param name="onNull">What to return if there's no key found.  This is added to the data.</param>
-        /// <returns>The value of the key, or onNull if that key does not exist in the data.</returns>
-        public string GetData(string key, string onNull = "") {
-            if (Data.ContainsKey(key)) {
-                return Data[key];
-            }
-            else {
-                Data.Add(key, onNull);
-                return onNull;
-            }
-        }
-
-        /// <summary>
-        /// Set the data in the session.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The data.</param>
-        public void SetData(string key, string value) {
-            if (!Data.ContainsKey(key)) {
-                Data[key] = value;
-            }
-            Data[key] = value;
-        }
-
-        #endregion
-
-        #region Internal
 
         internal void Update() {
             if (Controller != null) {
@@ -240,7 +81,5 @@ namespace Otter {
             }
         }
 
-        #endregion
-        
     }
 }

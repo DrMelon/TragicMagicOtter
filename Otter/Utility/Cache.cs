@@ -1,9 +1,5 @@
-﻿using System;
+﻿using SFML.Audio;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
-using SFML.Audio;
 using System.IO;
 
 namespace Otter {
@@ -34,10 +30,10 @@ namespace Otter {
     /// Class that manages the cache of fonts.
     /// </summary>
     class Fonts {
-        static Dictionary<string, Font> fonts = new Dictionary<string, Font>();
-        static Dictionary<Stream, Font> fontsStreamed = new Dictionary<Stream, Font>();
+        static Dictionary<string, SFML.Graphics.Font> fonts = new Dictionary<string, SFML.Graphics.Font>();
+        static Dictionary<Stream, SFML.Graphics.Font> fontsStreamed = new Dictionary<Stream, SFML.Graphics.Font>();
 
-        public static Font DefaultFont {
+        public static SFML.Graphics.Font DefaultFont {
             get {
                 if (defaultFont == null) {
                     defaultFont = Load(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("Otter.CONSOLA.TTF"));
@@ -45,22 +41,22 @@ namespace Otter {
                 return defaultFont;
             }
         }
-        static Font defaultFont;
+        static SFML.Graphics.Font defaultFont;
 
-        public static Font Load(string source) {
+        internal static SFML.Graphics.Font Load(string source) {
             if (!File.Exists(source)) throw new FileNotFoundException(source + " not found.");
             if (fonts.ContainsKey(source)) {
                 return fonts[source];
             }
-            fonts.Add(source, new Font(source));
+            fonts.Add(source, new SFML.Graphics.Font(source));
             return fonts[source];
         }
 
-        public static Font Load(Stream stream) {
+        internal static SFML.Graphics.Font Load(Stream stream) {
             if (fontsStreamed.ContainsKey(stream)) {
                 return fontsStreamed[stream];
             }
-            fontsStreamed.Add(stream, new Font(stream));
+            fontsStreamed.Add(stream, new SFML.Graphics.Font(stream));
             return Load(stream);
         }
     }

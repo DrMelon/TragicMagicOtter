@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter {
+﻿namespace Otter {
     /// <summary>
     /// A timer that automatically counts on an increment.  Useful for handling things like cooldowns.
     /// </summary>

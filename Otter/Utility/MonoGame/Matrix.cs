@@ -26,7 +26,6 @@ SOFTWARE.
 #endregion License
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Otter {
     /// <summary>
@@ -208,11 +207,11 @@ namespace Otter {
         // a float[9] for a 3x3, and a float[16] for a 4x4
         public static float[] ToFloatArray(Matrix mat) {
             float[] matarray = {
-									mat.M11, mat.M12, mat.M13, mat.M14,
-									mat.M21, mat.M22, mat.M23, mat.M24,
-									mat.M31, mat.M32, mat.M33, mat.M34,
-									mat.M41, mat.M42, mat.M43, mat.M44
-								};
+                                    mat.M11, mat.M12, mat.M13, mat.M14,
+                                    mat.M21, mat.M22, mat.M23, mat.M24,
+                                    mat.M31, mat.M32, mat.M33, mat.M34,
+                                    mat.M41, mat.M42, mat.M43, mat.M44
+                                };
             return matarray;
         }
 
@@ -1188,8 +1187,8 @@ namespace Otter {
 
 
             /*
-			
-			
+            
+            
             ///
             // Use Laplace expansion theorem to calculate the inverse of a 4x4 matrix
             // 

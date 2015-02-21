@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter {
+﻿namespace Otter {
     /// <summary>
     /// Component that controls a sine wave.  Can be useful for special effects and such.
     /// </summary>

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-
-using SFML;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Otter {
     /// <summary>
@@ -51,6 +47,8 @@ namespace Otter {
 
         int removeSceneCount = 0;
 
+        string gameFolder;
+
         Process proc = Process.GetCurrentProcess();
 
         List<float> fpsTimes = new List<float>();
@@ -59,9 +57,6 @@ namespace Otter {
 
         bool windowSet = false;
         bool updatedOnce = false;
-
-        string keyDelim = "::OTTERK::";
-        string valueDelim = "::OTTERV::";
 
         bool mouseVisible;
 
@@ -102,19 +97,39 @@ namespace Otter {
         public bool Paused = false;
 
         /// <summary>
-        /// The default value of the Smooth property on graphic objects.
-        /// </summary>
-        public bool SmoothAll;
-
-        /// <summary>
         /// An action called when the game initializes.
         /// </summary>
-        public Action OnInit;
+        public Action OnInit = delegate { };
 
         /// <summary>
         /// An action called when the game updates (happens after all Scene and Entity updates.)
         /// </summary>
-        public Action OnUpdate;
+        public Action OnUpdate = delegate { };
+
+        /// <summary>
+        /// An action called when any Scene begins.
+        /// </summary>
+        public Action OnSceneBegin = delegate { };
+
+        /// <summary>
+        /// An action called when any Scene ends.
+        /// </summary>
+        public Action OnSceneEnd = delegate { };
+
+        /// <summary>
+        /// An Action called when the game ends.  The last code that executes when closing the game.
+        /// </summary>
+        public Action OnEnd = delegate { };
+
+        /// <summary>
+        /// An action that is called when the window loses focus.
+        /// </summary>
+        public Action OnFocusLost = delegate { };
+
+        /// <summary>
+        /// An action that is called when the window gains focus.
+        /// </summary>
+        public Action OnFocusGained = delegate { };
 
         /// <summary>
         /// If the game should draw all scenes on the stack including inactive scenes.
@@ -154,16 +169,6 @@ namespace Otter {
         public bool MeasureTimeInFrames = true;
 
         /// <summary>
-        /// An action that is called when the window loses focus.
-        /// </summary>
-        public Action OnFocusLost;
-
-        /// <summary>
-        /// An action that is called when the window gains focus.
-        /// </summary>
-        public Action OnFocusGained;
-
-        /// <summary>
         /// If the game should attempt to lock the mouse inside the window. This is not 100% accurate.
         /// </summary>
         public bool LockMouse;
@@ -191,12 +196,6 @@ namespace Otter {
         public Atlas Atlas = new Atlas();
 
         /// <summary>
-        /// The default folder that will be used to save options and session data.
-        /// Located in My Documents for the current user of the game.
-        /// </summary>
-        public string GameFolder = "ottergame";
-
-        /// <summary>
         /// Maintain the original aspect ratio of the game when scaling the window.
         /// </summary>
         public bool LockAspectRatio = true;
@@ -205,6 +204,11 @@ namespace Otter {
         /// Button that closes the game when pressed.  Defaults to the Escape key.
         /// </summary>
         public Button QuitButton = new Button();
+
+        /// <summary>
+        /// Button that will save the game's surface out to a timestamp named .png file after the next render.
+        /// </summary>
+        public Button ScreenshotButton = new Button();
 
         /// <summary>
         /// Determines if the QuitButton can close the game.
@@ -354,12 +358,46 @@ namespace Otter {
         /// <summary>
         /// The stored data for game options. The options file is not externally modifiable.
         /// </summary>
-        public Dictionary<string, string> GameOptions { get; private set; }
+        public DataSaver OptionsData { get; private set; }
+
+        /// <summary>
+        /// The stored data for the general game data.  The file is not externally modifiable.
+        /// </summary>
+        public DataSaver SaveData { get; private set; }
 
         /// <summary>
         /// The stored data for the game config file. The config file is externally modifiable.
         /// </summary>
-        public Dictionary<string, string> ConfigFile { get; private set; }
+        public DataSaver ConfigData { get; private set; }
+
+        /// <summary>
+        /// The default folder to use for storing data files for the game.  This will be a folder
+        /// created in the current user's My Documents folder.  The default is 'ottergame' so it
+        /// will create a folder 'ottergame' in My Documents.
+        /// </summary>
+        public string GameFolder {
+            get {
+                return gameFolder;
+            }
+            set {
+                gameFolder = value;
+
+                var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + GameFolder;
+                if (!Directory.Exists(folder)) {
+                    Directory.CreateDirectory(folder);
+                }
+                SaveData.DefaultPath = Filepath;
+                OptionsData.DefaultPath = Filepath;
+                ConfigData.DefaultPath = Filepath;
+            }
+        }
+
+        /// <summary>
+        /// The main filepath for saving and loading files for the game.
+        /// </summary>
+        public string Filepath {
+            get { return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + GameFolder + "/"; }
+        }
 
         /// <summary>
         /// The aspect ratio of the window that the game is rendering to.
@@ -463,8 +501,11 @@ namespace Otter {
             Scenes = new Stack<Scene>();
             Surfaces = new List<Surface>();
 
-            GameOptions = new Dictionary<string, string>();
-            ConfigFile = new Dictionary<string, string>();
+            SaveData = new DataSaver(Filepath);
+            OptionsData = new DataSaver(Filepath);
+            ConfigData = new DataSaver(Filepath);
+            ConfigData.ExportMode = DataSaver.DataExportMode.Config;
+            GameFolder = "ottergame";
 
             QuitButton.AddKey(Key.Escape);
 
@@ -502,6 +543,7 @@ namespace Otter {
             skipTime = frameTime * 2;
 
 #if DEBUG
+            Console.Title = string.Format("{0} Debug Console ᶜ(ᵔᴥᵔ)ᵓ", title);
             Console.WriteLine("[ Otter is running in debug mode! ]");
             Debugger = new Debugger(this);     
 #endif
@@ -564,7 +606,7 @@ namespace Otter {
             }
 
             Window = new RenderWindow(new VideoMode((uint)width, (uint)height), title, fullscreen ? Styles.Fullscreen : windowStyle);
-            Window.Closed += new EventHandler(OnClose);
+            Window.Closed += new EventHandler(OnWindowClose);
             Window.GainedFocus += new EventHandler(Focused);
             Window.LostFocus += new EventHandler(Unfocused);
             Window.Resized += new EventHandler<SizeEventArgs>(OnResize);
@@ -665,8 +707,8 @@ namespace Otter {
                 Scenes.Clear();
                 Scenes.Push(goToScene);
                 Scene.Game = this;
-                Scene.BeginInternal();
                 Scene.UpdateLists();
+                Scene.BeginInternal();
 
                 goToScene = null;
             }
@@ -682,9 +724,7 @@ namespace Otter {
             if (FirstScene != null) {
                 SwitchScene(FirstScene);
             }
-            if (OnInit != null) {
-                OnInit();
-            }
+            OnInit();
         }
 
         void Update() {
@@ -757,7 +797,7 @@ namespace Otter {
             Window.Display();
         }
 
-        void OnClose(object sender, EventArgs e) {
+        void OnWindowClose(object sender, EventArgs e) {
             Window.Close();
         }
 
@@ -826,7 +866,6 @@ namespace Otter {
         /// <param name="surface">The surface to add.</param>
         public void AddSurface(Surface surface) {
             surface.Scroll = 0;
-            surface.Repeat = Repeat.XY;
             Surfaces.Add(surface);
         }
 
@@ -836,155 +875,6 @@ namespace Otter {
         /// <param name="surface">The surface to remove.</param>
         public void RemoveSurface(Surface surface) {
             Surfaces.Remove(surface);
-        }
-
-        /// <summary>
-        /// The main filepath for saving and loading files for the game.
-        /// </summary>
-        public string Filepath {
-            get { return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + GameFolder + "/"; }
-        }
-
-        /// <summary>
-        /// Load the GameOptions dictionary from a file.
-        /// </summary>
-        /// <param name="path"></param>
-        public void LoadOptions(string path) {
-            string filepath = Filepath;
-            filepath += path + ".opt";
-
-            if (!File.Exists(filepath)) return;
-
-            string loaded = Util.DecompressString(File.ReadAllText(filepath));
-
-            GameOptions = Util.StringToDictionary(loaded, keyDelim, valueDelim);
-        }
-
-        /// <summary>
-        /// Save the GameOptions dictionary to a file.
-        /// </summary>
-        /// <param name="path"></param>
-        public void SaveOptions(string path) {
-            string filepath = Filepath;
-            if (!Directory.Exists(filepath)) {
-                Directory.CreateDirectory(filepath);
-            }
-
-            filepath += path + ".opt";
-
-            string data = Util.DictionaryToString(GameOptions, keyDelim, valueDelim);
-            data = Util.CompressString(data);
-
-            File.WriteAllText(filepath, data);
-        }
-
-        /// <summary>
-        /// Save data from the config file into the ConfigFile dictionary.
-        /// </summary>
-        public void SaveConfigFile() {
-            string filepath = Filepath;
-            if (!Directory.Exists(filepath)) {
-                Directory.CreateDirectory(filepath);
-            }
-
-            filepath += "config.cfg";
-
-            string data = "";
-            foreach (var e in ConfigFile) {
-                data += "" + e.Key.Replace('=', (char)16) + "=" + e.Value.Replace('=', (char)16) + "\n";
-            }
-
-            data = data.Trim();
-
-            File.WriteAllText(filepath, data);
-        }
-
-        /// <summary>
-        /// Load data from the config file into the ConfigFile dictionary.
-        /// </summary>
-        public void LoadConfigFile() {
-            string filepath = Filepath;
-            if (!Directory.Exists(filepath)) {
-                Directory.CreateDirectory(filepath);
-            }
-
-            filepath += "config.cfg";
-
-            if (!File.Exists(filepath)) return;
-
-            string data = File.ReadAllText(filepath);
-
-            string[] split = data.Split('\n');
-            foreach (var s in split) {
-                string[] entry = s.Split('=');
-                if (entry.Length == 2) {
-                    SetConfig(entry[0].Replace((char)16, '='), entry[1].Replace((char)16, '='));
-                }
-            }
-
-        }
-
-        /// <summary>
-        /// Retrieve an option from the game options but return a default value if that value isn't found.
-        /// </summary>
-        /// <param name="key">The key to search for.</param>
-        /// <param name="onNull">The default value to reutn if that key isn't found.</param>
-        /// <returns>The value on the key, or the default value if no key is found.</returns>
-        public string GetOption(string key, string onNull = "") {
-            if (GameOptions.ContainsKey(key)) {
-                return GameOptions[key];
-            }
-            else {
-                GameOptions.Add(key, onNull);
-                return onNull;
-            }
-        }
-
-        /// <summary>
-        /// Stores an option for the game.  Use this for something like screen resolution, music volume, sound volume, etc.
-        /// Automatically casts the value to a string!
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public object SetOption(string key, object value) {
-            if (GameOptions.ContainsKey(key)) {
-                GameOptions[key] = value.ToString();
-                return value;
-            }
-            GameOptions.Add(key, value.ToString());
-            return value;
-        }
-
-        /// <summary>
-        /// Stores a config setting.  This is meant to be open and editable by the user by the config file.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public object SetConfig(string key, object value) {
-            if (ConfigFile.ContainsKey(key)) {
-                ConfigFile[key] = value.ToString();
-                return value;
-            }
-            ConfigFile.Add(key, value.ToString());
-            return value;
-        }
-
-        /// <summary>
-        /// Gets a value from the config settings.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="onNull"></param>
-        /// <returns></returns>
-        public string GetConfig(string key, string onNull = "") {
-            if (ConfigFile.ContainsKey(key)) {
-                return ConfigFile[key];
-            }
-            else {
-                ConfigFile.Add(key, onNull);
-                return onNull;
-            }
         }
 
         /// <summary>
@@ -1084,6 +974,13 @@ namespace Otter {
                             Window.SetMouseCursorVisible(mouseVisible);
                         }
 
+                        if (HasFocus) {
+                            ScreenshotButton.UpdateFirst();
+                            if (ScreenshotButton.Pressed) {
+                                Surface.SaveToFile();
+                            }
+                        }
+
                         if (HasFocus && EnableQuitButton) {
                             QuitButton.UpdateFirst();
 
@@ -1093,7 +990,7 @@ namespace Otter {
                         }
 
                         if (HasFocus && EnableAltF4) {
-                            if (Keyboard.IsKeyPressed((Keyboard.Key)Key.LAlt) || Keyboard.IsKeyPressed((Keyboard.Key)Key.LAlt)) {
+                            if (Keyboard.IsKeyPressed((Keyboard.Key)Key.LAlt) || Keyboard.IsKeyPressed((Keyboard.Key)Key.RAlt)) {
                                 if (Keyboard.IsKeyPressed((Keyboard.Key)Key.F4)) {
                                     Close();
                                 }
@@ -1201,6 +1098,8 @@ namespace Otter {
                     }
                 }
             }
+
+            OnEnd();
         }
 
         /// <summary>
@@ -1288,15 +1187,23 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Adds a new session to the game.
+        /// Adds a new Session to the game.
         /// </summary>
-        /// <param name="name">The name of the session.</param>
-        /// <returns></returns>
+        /// <param name="name">The name of the Session.</param>
+        /// <returns>The Session.</returns>
         public Session AddSession(string name) {
-            Session s = new Session(this);
-            s.Name = name;
+            Session s = new Session(this, name);
             Sessions.Add(s);
             return s;
+        }
+
+        /// <summary>
+        /// Adds a new Session to the game.
+        /// </summary>
+        /// <param name="name">The name of the Session.</param>
+        /// <returns>The Session.</returns>
+        public Session AddSession(Enum name) {
+            return AddSession(Util.EnumValueToString(name));
         }
 
         /// <summary>
@@ -1312,10 +1219,19 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Get a Session by the name.
+        /// </summary>
+        /// <param name="name">The name of the Session.</param>
+        /// <returns>A Session if one is found, or null.</returns>
+        public Session Session(Enum name) {
+            return Session(Util.EnumValueToString(name));
+        }
+
+        /// <summary>
         /// Get a session by id.
         /// </summary>
         /// <param name="id">The id of the session.</param>
-        /// <returns>A session.</returns>
+        /// <returns>The Session with that id.</returns>
         public Session Session(int id) {
             return Sessions[id];
         }

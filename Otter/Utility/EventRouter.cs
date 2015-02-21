@@ -20,9 +20,7 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 /// <summary>
 /// 	Class for broadcasting messages to subscribers.  Clients of the EventRouter register 

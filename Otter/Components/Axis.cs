@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 using System.Collections.Generic;
-using SFML.Window;
 
 namespace Otter {
     /// <summary>
@@ -74,6 +74,15 @@ namespace Otter {
         #region Public Properties
 
         /// <summary>
+        /// The current Vector2 position of the axis.
+        /// </summary>
+        public Vector2 Position {
+            get {
+                return new Vector2(X, Y);
+            }
+        }
+
+        /// <summary>
         /// The X position of the axis from -1 to 1.
         /// </summary>
         public float X { get; private set; }
@@ -97,6 +106,26 @@ namespace Otter {
         /// Check if the axis is currently forced.
         /// </summary>
         public bool ForcedInput { get; private set; }
+
+        /// <summary>
+        /// The the up Button for the Axis.
+        /// </summary>
+        public Button Up { get; private set; }
+       
+        /// <summary>
+        /// The the left Button for the Axis.
+        /// </summary>
+        public Button Left { get; private set; }
+
+        /// <summary>
+        /// Gets the down Button for the Axis.
+        /// </summary>
+        public Button Down { get; private set; }
+
+        /// <summary>
+        /// Gets the right Button for the Axis.
+        /// </summary>
+        public Button Right { get; private set; }
 
         /// <summary>
         /// Check if the axis has any means of input currently registered to it.
@@ -143,6 +172,12 @@ namespace Otter {
                 xAxes.Add(new List<JoyAxis>());
                 yAxes.Add(new List<JoyAxis>());
             }
+
+            // Create buttons for Axis.
+            Up = new Button();
+            Down = new Button();
+            Left = new Button();
+            Right = new Button();
         }
 
         /// <summary>
@@ -248,17 +283,17 @@ namespace Otter {
         /// <summary>
         /// Add keys.
         /// </summary>
-        /// <param name="k">Four keys to create a pair of axes from (Up, Right, Down, Left).</param>
+        /// <param name="upRightDownLeft">Four keys to create a pair of axes from (Up, Right, Down, Left).</param>
         /// <returns>The Axis.</returns>
-        public Axis AddKeys(params Key[] k) {
-            if (k.Length != 4) {
+        public Axis AddKeys(params Key[] upRightDownLeft) {
+            if (upRightDownLeft.Length != 4) {
                 throw new ArgumentException("Must use four keys for an axis!");
             }
 
-            AddKey(k[0], Direction.Up);
-            AddKey(k[1], Direction.Right);
-            AddKey(k[2], Direction.Down);
-            AddKey(k[3], Direction.Left);
+            AddKey(upRightDownLeft[0], Direction.Up);
+            AddKey(upRightDownLeft[1], Direction.Right);
+            AddKey(upRightDownLeft[2], Direction.Down);
+            AddKey(upRightDownLeft[3], Direction.Left);
 
             return this;
         }
@@ -322,14 +357,11 @@ namespace Otter {
             Y = 0;
 
             for (int i = 0; i < Joystick.Count; i++) {
-                bool live = false;
                 foreach (JoyAxis axis in xAxes[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
-                    if (Math.Abs(a) >= DeadZone) live = true;
                 }
                 foreach (JoyAxis axis in yAxes[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
-                    if (Math.Abs(a) >= DeadZone) live = true;
                 }
 
                 foreach (JoyAxis axis in xAxes[i]) {
@@ -349,6 +381,7 @@ namespace Otter {
                     }
                     if (RoundInput) X = (float)Math.Round(X, 2);
                 }
+
                 foreach (JoyAxis axis in yAxes[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
                     if (Math.Abs(a) >= DeadZone) {
@@ -366,6 +399,7 @@ namespace Otter {
                     }
                     if (RoundInput) Y = (float)Math.Round(Y, 2);
                 }
+
             }
 
             foreach (Key k in keys[Direction.Up]) {
@@ -414,6 +448,30 @@ namespace Otter {
 
             X = Util.Clamp(X, -1, 1);
             Y = Util.Clamp(Y, -1, 1);
+
+            // Update the buttons.  This makes it easy to read the Axis as buttons for Up, Right, Left, Down.
+            Right.UpdateFirst();
+            Up.UpdateFirst();
+            Left.UpdateFirst();
+            Down.UpdateFirst();
+
+            Right.ForceState(false);
+            Up.ForceState(false);
+            Left.ForceState(false);
+            Down.ForceState(false);
+
+            if (X > 0.5f) {
+                Right.ForceState(true);
+            }
+            if (X < -0.5f) {
+                Left.ForceState(true);
+            }
+            if (Y > 0.5f) {
+                Down.ForceState(true);
+            }
+            if (Y < -0.5f) {
+                Up.ForceState(true);
+            }
         }
 
         public override string ToString() {

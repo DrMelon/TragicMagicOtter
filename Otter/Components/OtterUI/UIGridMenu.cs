@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter.UI {
+﻿namespace Otter.UI {
     /// <summary>
     /// OTTER UI IS NOT SUPPORTED YET.  ACTIVELY IN DEVELOPMENT, USE AT YOUR OWN RISK!
     /// Grid-based UIMenu designed to be navigated by a controller with button input.

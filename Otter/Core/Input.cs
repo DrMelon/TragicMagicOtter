@@ -1,11 +1,8 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using SFML;
-using SFML.Window;
 using System.Globalization;
+using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -502,10 +499,18 @@ namespace Otter {
         /// <summary>
         /// Set the threshold for an axis to act as an AxisButton.  Defaults to 50 or one half of the joystick's total range.
         /// </summary>
-        /// <param name="axis">The axis to set.</param>
+        /// <param name="axis">The JoyAxis to set.</param>
         /// <param name="threshold">The threshold that the axis must pass to act as a button press.</param>
         public void SetAxisThreshold(JoyAxis axis, float threshold) {
             axisThreshold[axis] = threshold;
+        }
+
+        /// <summary>
+        /// Gets the axis threshold for an axis to act as an AxisButton.
+        /// </summary>
+        /// <param name="axis">The JoyAxis.</param>
+        public float GetAxisThreshold(JoyAxis axis) {
+            return axisThreshold[axis];
         }
 
         /// <summary>

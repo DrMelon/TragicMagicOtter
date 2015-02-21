@@ -1,12 +1,9 @@
 ﻿using SFML.Graphics;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
+    /// NOT YET SUPPORTED
     /// Very WIP class, probably internal for Otter, don't use it yet.
     /// </summary>
     class SpriteBatch {

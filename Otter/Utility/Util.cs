@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Xml;
-using System.Reflection;
 using System.IO.Compression;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
+using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Xml.Serialization;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace Otter {
     /// <summary>
     /// Main utility function class. Various useful functions for 2d game development and Otter stuff.
     /// </summary>
-    public class Util {
+    public static class Util {
 
         #region Constants
 
@@ -90,9 +90,14 @@ namespace Otter {
         /// </summary>
         /// <param name="tag">The tag to log with.</param>
         /// <param name="str">The string to send.</param>
-        public static void Log(string tag, object str) {
+        public static void LogTag(string tag, object str) {
             if (Debugger.Instance == null) return;
             Debugger.Instance.Log(tag, str);
+        }
+
+        public static void Log(string str, params object[] obj) {
+            if (Debugger.Instance == null) return;
+            Debugger.Instance.Log("", string.Format(str, obj));
         }
 
         /// <summary>
@@ -143,8 +148,8 @@ namespace Otter {
         /// <param name="t">The progress of the interpolation.</param>
         /// <returns>The interpolated value.</returns>
         public static float Lerp(float a, float b, float t = 1) {
-			return a + (b - a) * t;
-		}
+            return a + (b - a) * t;
+        }
 
         /// <summary>
         /// Interpolate through a set of numbers.
@@ -207,7 +212,7 @@ namespace Otter {
         /// <returns>The interpolated Color.</returns>
         public static Color LerpColor(Color from, Color to, float amount) {
             if (amount <= 0) return new Color(from);
-			if (amount >= 1) return new Color(to);
+            if (amount >= 1) return new Color(to);
 
             var c = new Color(from);
             c.R = from.R + (to.R - from.R) * amount;
@@ -277,6 +282,20 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Steps an angle value toward a target based on a certain amount.
+        /// </summary>
+        /// <param name="from">The angle value to step.</param>
+        /// <param name="to">The target value to approach.</param>
+        /// <param name="amount">The amount to approach by.</param>
+        /// <returns>The new angle value approaching the target from 0 to 360.</returns>
+        public static float ApproachAngle(float from, float to, float amount) {
+            var sign = AngleDifferenceSign(from, to);
+            var diff = AngleDifference(from, to);
+            var maxMove = Math.Min(Math.Abs(diff), amount);
+            return (from + maxMove * sign);
+        }
+
+        /// <summary>
         /// Steps a value toward a target based on a certain amount.
         /// </summary>
         /// <param name="val">The value to step.</param>
@@ -285,6 +304,24 @@ namespace Otter {
         /// <returns>The new value approaching the target.</returns>
         static public float Approach(float val, float target, float maxMove) {
             return val > target ? Math.Max(val - maxMove, target) : Math.Min(val + maxMove, target);
+        }
+
+        /// <summary>
+        /// Steps a value toward a target based on a certain amount.
+        /// </summary>
+        /// <param name="val">The value to step.</param>
+        /// <param name="target">The target to approach.</param>
+        /// <param name="maxMove">The maximum increment toward the target.</param>
+        /// <returns>The new value approaching the target.</returns>
+        static public Vector2 Approach(Vector2 val, Vector2 target, Vector2 maxMove) {
+            return new Vector2(
+                Approach(val.X, target.X, maxMove.X),
+                Approach(val.Y, target.Y, maxMove.Y)
+                );
+        }
+
+        static public Vector2 Approach(Vector2 val, Vector2 target, float maxMove) {
+            return Approach(val, target, new Vector2(maxMove, maxMove));
         }
 
         /// <summary>
@@ -474,13 +511,25 @@ namespace Otter {
         /// <param name="b">The second angle.</param>
         /// <returns>The difference between the angles from -180 to 180.</returns>
         public static float AngleDifference(float a, float b) {
-			var diff = b - a;
+            var diff = b - a;
 
-			while (diff > 180) { diff -= 360; }
-			while (diff <= -180) { diff += 360; }
+            while (diff > 180) { diff -= 360; }
+            while (diff <= -180) { diff += 360; }
 
-			return diff;
-		}
+            return diff;
+        }
+
+        /// <summary>
+        /// Get the shortest direction from angle a to angle b.
+        /// </summary>
+        /// <param name="a">The first angle.</param>
+        /// <param name="b">The second angle..</param>
+        /// <returns>1 for clockwise, -1 for counter clockwise, 0 if angles are the same.</returns>
+        public static int AngleDifferenceSign(float a, float b) {
+            if (a == b) return 0;
+            var dif = AngleDifference(a, b);
+            return (int)Math.Sign(dif);
+        }
 
         /// <summary>
         /// Rotate a position by an angle.
@@ -500,12 +549,101 @@ namespace Otter {
         /// <param name="amount">The amount to rotate the position in degrees.</param>
         /// <returns>The new rotated position.</returns>
         public static Vector2 Rotate(float x, float y, float amount) {
+            amount *= -1;  // Flip Y because of video game coordinates.
+            return new Vector2(x * Cos(amount) - y * Sin(amount), x * Sin(amount) + y * Cos(amount)); // Wow this is fancy
+            /*
+            // old rotate code just in case I broke something
             var v = new Vector2(x, y);
             var length = v.Length;
             var angle = Angle(x, y) + amount;
             v.X = PolarX(angle, length);
             v.Y = PolarY(angle, length);
             return v;
+             */
+        }
+
+        /// <summary>
+        /// Rotate a position by an angle around an anchor point.
+        /// </summary>
+        /// <param name="x">The X position to rotate.</param>
+        /// <param name="y">The Y position to rotate.</param>
+        /// <param name="aroundX">The X position to rotate around.</param>
+        /// <param name="aroundY">The Y position to rotate around.</param>
+        /// <param name="amount">The amount to rotate the position in degrees.</param>
+        /// <returns>The new rotated position.</returns>
+        public static Vector2 RotateAround(float x, float y, float aroundX, float aroundY, float amount) {
+            var vec = Rotate(x - aroundX, y - aroundY, amount);
+            vec.X += aroundX;
+            vec.Y += aroundY;
+            return vec;
+        }
+
+        /// <summary>
+        /// Rotate a position by an angle around an anchor point.
+        /// </summary>
+        /// <param name="point">The position to rotate.</param>
+        /// <param name="around">The position to rotate around.</param>
+        /// <param name="amount">The amount to rotate the position in degrees.</param>
+        /// <returns>The new rotated position.</returns>
+        public static Vector2 RotateAround(Vector2 point, Vector2 around, float amount) {
+            return RotateAround(point.X, point.Y, around.X, around.Y, amount);
+        }
+
+        /// <summary>
+        /// Scale a position by an amount around an anchor point.
+        /// </summary>
+        /// <param name="x">The X position to scale.</param>
+        /// <param name="y">The Y position to scale.</param>
+        /// <param name="aroundX">The X position to scale around.</param>
+        /// <param name="aroundY">The Y position to scale around.</param>
+        /// <param name="amountX">The X amount to scale by.</param>
+        /// <param name="amountY">The Y amount to scale by.</param>
+        /// <returns>The new scaled position.</returns>
+        public static Vector2 ScaleAround(float x, float y, float aroundX, float aroundY, float amountX, float amountY) {
+            x -= aroundX;
+            y -= aroundY;
+
+            x *= amountX;
+            y *= amountY;
+
+            x += aroundX;
+            y += aroundY;
+
+            return new Vector2(x, y);
+        }
+
+        /// <summary>
+        /// Scale a position by an amount around an anchor point.
+        /// </summary>
+        /// <param name="point">The position to scale.</param>
+        /// <param name="around">The position to scale around.</param>
+        /// <param name="amountX">The X amount to scale by.</param>
+        /// <param name="amountY">The Y amount to scale by.</param>
+        /// <returns>The new scaled position.</returns>
+        public static Vector2 ScaleAround(Vector2 point, Vector2 around, float amountX, float amountY) {
+            return ScaleAround(point.X, point.Y, around.X, around.Y, amountX, amountY);
+        }
+
+        /// <summary>
+        /// Scale a position by an amount around an anchor point.
+        /// </summary>
+        /// <param name="point">The position to scale.</param>
+        /// <param name="around">The position to scale around.</param>
+        /// <param name="amount">The amount to scale by.</param>
+        /// <returns>The new scaled position.</returns>
+        public static Vector2 ScaleAround(Vector2 point, Vector2 around, float amount) {
+            return ScaleAround(point, around, amount, amount);
+        }
+
+        /// <summary>
+        /// Scale a position by an amount around an anchor point.
+        /// </summary>
+        /// <param name="point">The position to scale.</param>
+        /// <param name="around">The position to scale around.</param>
+        /// <param name="amount">The amount to scale by.</param>
+        /// <returns>The new scaled position.</returns>
+        public static Vector2 ScaleAround(Vector2 point, Vector2 around, Vector2 amount) {
+            return ScaleAround(point.X, point.Y, around.X, around.Y, amount.X, amount.Y);
         }
 
         /// <summary>
@@ -518,6 +656,16 @@ namespace Otter {
         /// <returns>The distance between the two points.</returns>
         public static float Distance(float x1, float y1, float x2, float y2) {
             return (float)Math.Sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        }
+
+        /// <summary>
+        /// Distance check.
+        /// </summary>
+        /// <param name="from">The first position.</param>
+        /// <param name="to">The second position.</param>
+        /// <returns>The distance between the two positions.</returns>
+        public static float Distance(Vector2 from, Vector2 to) {
+            return Distance(from.X, from.Y, to.X, to.Y);
         }
 
         /// <summary>
@@ -881,7 +1029,7 @@ namespace Otter {
         /// </summary>
         /// <param name="attributes">The attributes to convert.</param>
         /// <returns>A dictionary of string, string with the attribute names and values.</returns>
-        public static Dictionary<string, string> XMLAttributesToDictionary(XmlAttributeCollection attributes) {
+        public static Dictionary<string, string> XmlAttributesToDictionary(XmlAttributeCollection attributes) {
             var d = new Dictionary<string, string>();
             foreach (XmlAttribute attr in attributes) {
                 d.Add(attr.Name, attr.Value);
@@ -1102,7 +1250,21 @@ namespace Otter {
         /// <param name="value">The enum value.</param>
         /// <returns>The string of the enum value.</returns>
         public static string EnumValueToString(Enum value) {
-            return string.Format("{0}.{1}", value.GetType(), value);
+            if (enumStringCache.ContainsKey(value)) return enumStringCache[value];
+            var str = string.Format("{0}.{1}", value.GetType(), value);
+            enumStringCache.Add(value, str);
+            return enumStringCache[value];
+        }
+        static Dictionary<Enum, string> enumStringCache = new Dictionary<Enum, string>();
+
+        /// <summary>
+        /// Convert a generic enum's value into a string of just its value. (No type included!)
+        /// </summary>
+        /// <param name="e">The enum value.</param>
+        /// <returns>The value of the enum following the final period.</returns>
+        public static string EnumValueToBasicString(Enum e) {
+            var split = Util.EnumValueToString(e).Split('.');
+            return split[split.Length - 1];
         }
 
         /// <summary>
@@ -1204,6 +1366,203 @@ namespace Otter {
 
             return obj;
         }
+
+        /// <summary>
+        /// Calculates the point in a cubic Bezier curve at t (0 to 1) using 4 control points.
+        /// </summary>
+        /// <param name="t">Distance along the curve 0 to 1.</param>
+        /// <param name="p0">The first control point.</param>
+        /// <param name="p1">The second control point.</param>
+        /// <param name="p2">The third control point.</param>
+        /// <param name="p3">The fourth control point.</param>
+        /// <returns>A Vector2 point along the curve at distance t.</returns>
+        public static Vector2 BezierCurvePoint(float t, Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3) {
+            // http://devmag.org.za/2011/04/05/bzier-curves-a-tutorial/
+            float u = 1 - t;
+            float uu = u * u;
+            float uuu = uu * u;
+
+            float tt = t * t;
+            float ttt = tt * t;
+
+            Vector2 p = uuu * p0; // first term
+            p += 3 * uu * t * p1; // second term
+            p += 3 * u * tt * p2; // third term
+            p += ttt * p3; // fourth term
+
+            return p;
+        }
+
+        /// <summary>
+        /// Find the point on a Bezier path at t.
+        /// </summary>
+        /// <param name="t">The progress along the path 0 to 1.</param>
+        /// <param name="points">The points that make up the cubic Bezier path. (4 points per curve, 1 point of overlap.)</param>
+        /// <returns>The position on the curve at t.</returns>
+        static public Vector2 BezierPathPoint(float t, params Vector2[] points) {
+            var length = points.Length - (points.Length - 1) % 3;
+
+            var steps = length / 3;
+            var step = (int)Math.Floor(ScaleClamp(t, 0, 1, 0, steps));
+
+            int i = step * 3;
+
+            var p0 = points[i];
+            var p1 = points[i + 1];
+            var p2 = points[i + 2];
+            var p3 = points[i + 3];
+
+            var segment = 1 / (float)(steps);
+
+            var st = ScaleClamp(t - segment * step, 0, segment, 0, 1);
+
+            return BezierCurvePoint(st, p0, p1, p2, p3);
+        }
+
+        static float CatmullRom(float a, float b, float c, float d, float t) {
+            // Hermite Spline... I think?
+            return 0.5f * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * (t * t) + (3 * b - a - 3 * c + d) * (t * t * t));
+        }
+
+        /// <summary>
+        /// Gets the spline path point.
+        /// </summary>
+        /// <param name="t">The progress on the path from 0 to 1.</param>
+        /// <param name="path">The set of points making the path.</param>
+        /// <returns>The position on the spline path for the progress t.</returns>
+        public static Vector2 SplinePathPoint(float t, params Vector2[] path) {
+            // Shoutouts to Chevy Ray
+            int b = (int)((path.Length - 1) * t);
+            int a = b - 1;
+            int c = b + 1;
+            int d = c + 1;
+            a = (int)Util.Clamp(a, 0, path.Length - 1);
+            b = (int)Util.Clamp(b, 0, path.Length - 1);
+            c = (int)Util.Clamp(c, 0, path.Length - 1);
+            d = (int)Util.Clamp(d, 0, path.Length - 1);
+            float i = 1f / (path.Length - 1);
+            t = (t - b * i) / i;
+            return new Vector2(
+                    CatmullRom(path[a].X, path[b].X, path[c].X, path[d].X, t),
+                    CatmullRom(path[a].Y, path[b].Y, path[c].Y, path[d].Y, t)
+                    );
+        }
+
+        /// <summary>
+        /// The Width of the desktop.  Note that this is for the display that the game was initialized in.
+        /// </summary>
+        public static int DesktopWidth {
+            get {
+                return (int)SFML.Window.VideoMode.DesktopMode.Width;
+            }
+        }
+
+        /// <summary>
+        /// The height of the desktop.  Note that this is for the display that the game was initialized in.
+        /// </summary>
+        public static int DesktopHeight {
+            get {
+                return (int)SFML.Window.VideoMode.DesktopMode.Height;
+            }
+        }
+
+        /// <summary>
+        /// Get all types with a specific Attribute.
+        /// </summary>
+        /// <typeparam name="T">The type of Attribute.</typeparam>
+        /// <param name="inherit">Check inherited classes.</param>
+        /// <returns>All types with the Attribute T.</returns>
+        public static IEnumerable<Type> GetTypesWithAttribute<T>(bool inherit = true) where T : Attribute {
+            return from a in AppDomain.CurrentDomain.GetAssemblies()
+            from t in a.GetTypes()
+            where t.IsDefined(typeof(T), inherit)
+            select t;
+        }
+
+        /// <summary>
+        /// Download the json feed of a Google Spreadsheet from the key and sheet id.
+        /// Only works on publicly shared sheets.
+        /// </summary>
+        /// <param name="docKey">The long id of the sheet.  Usually a big set of numbers and letters in the url.</param>
+        /// <param name="sheetId">The sheet id.  Usually a shorter set of letters and numbers.  Default is "od6".</param>
+        /// <returns>A json feed of the spreadsheet.</returns>
+        public static string GetSpreadsheetJsonById(string docKey, string sheetId = "od6") {
+            var url = string.Format("https://spreadsheets.google.com/feeds/list/{0}/{1}/public/values?alt=json", docKey, sheetId);
+            return DownloadData(url);
+        }
+
+        /// <summary>
+        /// Download the json feed of a Google Spreadsheet from the key and the sheet name.
+        /// Only works on publicly shared sheets.
+        /// </summary>
+        /// <param name="docKey">The long id of the sheet.  Usually a big set of numbers and letters in the url.</param>
+        /// <param name="sheetName">The name of the sheet as it appears on the bottom left of the spreadsheet window.</param>
+        /// <returns>A json feed of the spreadsheet.</returns>
+        public static string GetSpreadsheetJsonByName(string docKey, string sheetName) {
+            return GetSpreadsheetJsonById(docKey, GetSpreadsheetId(docKey, sheetName));
+        }
+
+        /// <summary>
+        /// Get the internal id of a Google Spreadsheet sheet.
+        /// Only works on publicly shared sheets.
+        /// </summary>
+        /// <param name="docKey">The long id of the sheet.  Usually a big set of numbers and letters in the url.</param>
+        /// <param name="sheetName">The name of the sheet as it appears on the bottom left of the spreadsheet window.</param>
+        /// <returns>The internal id of the sheet.</returns>
+        public static string GetSpreadsheetId(string docKey, string sheetName) {
+            var url = string.Format("https://spreadsheets.google.com/feeds/worksheets/{0}/public/full", docKey);
+            var xml = DownloadData(url);
+            XElement xDoc = XElement.Parse(xml);
+            var ns = "{" + xDoc.GetDefaultNamespace() + "}";
+            var id = "od6";
+
+            xDoc.Elements(ns + "entry")
+                .Where(x => x.Element(ns + "title").Value == sheetName)
+                .Each(x => x.Elements(ns + "id")
+                    .Each(xx => {
+                        id = xx.Value.Split('/').Last();
+                    }));
+
+            return id;
+        }
+
+        /// <summary>
+        /// Get the internal ids of all sheets in a Google Spreadsheet.
+        /// Only works on publicly shared sheets.
+        /// </summary>
+        /// <param name="docKey">The long id of the sheet.  Usually a big set of numbers and letters in the url.</param>
+        /// <returns>A dictionary with sheet names as the keys, and ids as the values.</returns>
+        public static Dictionary<string, string> GetSpreadsheetIds(string docKey) {
+            var url = string.Format("https://spreadsheets.google.com/feeds/worksheets/{0}/public/full", docKey);
+            var xml = DownloadData(url);
+            XElement xDoc = XElement.Parse(xml);
+            var ns = "{" + xDoc.GetDefaultNamespace() + "}";
+            var dict = new Dictionary<string, string>();
+            var name = "";
+            var id = "";
+
+            xDoc.Elements(ns + "entry")
+                .Each(e => {
+                    name = e.Element(ns + "title").Value;
+                    id = e.Element(ns + "id").Value.Split('/').Last();
+                    dict.Add(name, id);
+                });
+
+            return dict;
+        }
+
+        // Download url cache stuff
+        static string downloadData;
+        static string downloadUrl = "";
+
+        static string DownloadData(string url) {
+            if (downloadUrl != url) {
+                downloadData = new WebClient().DownloadString(url);
+                downloadUrl = url;
+            }
+            return downloadData;
+        }
+
         #endregion
 
     }

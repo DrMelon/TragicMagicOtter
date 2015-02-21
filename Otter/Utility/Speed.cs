@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -10,13 +7,7 @@ namespace Otter {
     /// </summary>
     public class Speed {
 
-        #region Private Fields
-
         float x, y;
-
-        #endregion
-
-        #region Public Fields
 
         /// <summary>
         /// The maximum X speed.
@@ -33,10 +24,6 @@ namespace Otter {
         /// If true, values will never exceed the maximums.
         /// </summary>
         public bool HardClamp;
-
-        #endregion
-
-        #region Public Properties
 
         /// <summary>
         /// The current X value of the speed.
@@ -89,10 +76,6 @@ namespace Otter {
                 return (float)Math.Sqrt(X * X + Y * Y);
             }
         }
-
-        #endregion
-
-        #region Constructors
 
         /// <summary>
         /// Create a new Speed object.
@@ -147,15 +130,15 @@ namespace Otter {
         /// <param name="max">The maximum X and Y values.</param>
         public Speed(float max) : this(0, 0, max, max, true) { }
 
-        #endregion
-
-        #region Public Methods
-
+        /// <summary>
+        /// Returns a String that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A String that represents this instance.
+        /// </returns>
         public override string ToString() {
             return "X: " + X + " Y: " + Y;
         }
-
-        #endregion
 
     }
 }

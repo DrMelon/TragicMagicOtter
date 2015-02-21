@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -535,6 +533,8 @@ namespace Otter {
         /// <param name="tag">The tag to add.</param>
         /// <returns>The Collider.</returns>
         public Collider AddTag(int tag) {
+            if (Tags.Contains(tag)) return this;
+
             if (Entity != null) {
                 if (Entity.Scene != null) {
                     Entity.Scene.RemoveColliderInternal(this);
@@ -561,6 +561,17 @@ namespace Otter {
             AddTag(Util.EnumToIntArray(tags));
 
             return this;
+        }
+
+        public bool HasTag(params Enum[] tags) {
+            return HasTag(Util.EnumToIntArray(tags));
+        }
+
+        public bool HasTag(params int[] tags) {
+            foreach (var t in tags) {
+                if (Tags.Contains(t)) return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -629,6 +640,42 @@ namespace Otter {
         public virtual void CenterOrigin() {
             OriginX = HalfWidth;
             OriginY = HalfHeight;
+        }
+
+        /// <summary>
+        /// Set the positon of the Collider.
+        /// </summary>
+        /// <param name="x">The X position of the Collider.</param>
+        /// <param name="y">The Y position of the Collider.</param>
+        public void SetPosition(float x, float y) {
+            X = x;
+            Y = y;
+        }
+
+        /// <summary>
+        /// Set the position of the Collider.
+        /// </summary>
+        /// <param name="xy">The Vector2 position of the Collider.</param>
+        public void SetPosition(Vector2 xy) {
+            SetPosition(xy.X, xy.Y);
+        }
+
+        /// <summary>
+        /// Set the origin of the Collider 
+        /// </summary>
+        /// <param name="x">The X origin of the Collider.</param>
+        /// <param name="y">The Y origin of the Collider.</param>
+        public void SetOrigin(float x, float y) {
+            OriginX = x;
+            OriginY = y;
+        }
+
+        /// <summary>
+        /// Set the origin of the Collider.
+        /// </summary>
+        /// <param name="xy">The Vector2 origin of the Collider.</param>
+        public void SetOrigin(Vector2 xy) {
+            SetOrigin(xy.X, xy.Y);
         }
 
         #endregion
@@ -719,18 +766,6 @@ namespace Otter {
             }
             #endregion
 
-            #region Circle vs Circle
-            else if (first is CircleCollider && second is CircleCollider) {
-                CircleCollider
-                    circle1 = first as CircleCollider,
-                    circle2 = second as CircleCollider;
-                if (Util.Distance(circle1.CenterX, circle1.CenterY, circle2.CenterX, circle2.CenterY) < circle1.Radius + circle2.Radius) {
-                    return true;
-                }
-                return false;
-            }
-            #endregion
-
             #region Box vs Line
             else if ((first is BoxCollider && second is LineCollider) || (first is LineCollider && second is BoxCollider)) {
                 BoxCollider box;
@@ -749,6 +784,82 @@ namespace Otter {
                 return false;
             }
             #endregion
+                
+            #region Circle vs Circle
+            else if (first is CircleCollider && second is CircleCollider) {
+                CircleCollider
+                    circle1 = first as CircleCollider,
+                    circle2 = second as CircleCollider;
+                if (Util.Distance(circle1.CenterX, circle1.CenterY, circle2.CenterX, circle2.CenterY) < circle1.Radius + circle2.Radius) {
+                    return true;
+                }
+                return false;
+            }
+            #endregion
+
+            #region Circle vs Grid
+                        else if ((first is CircleCollider && second is GridCollider) || (first is GridCollider && second is CircleCollider)) {
+                            //make a rectangle out of the circle, check for any tiles in that rectangle
+                            //if there are tiles, check each tile as a rectangle against the circle
+                            CircleCollider circle;
+                            GridCollider grid;
+                            if (first is CircleCollider) {
+                                circle = first as CircleCollider;
+                                grid = second as GridCollider;
+                            }
+                            else {
+                                circle = second as CircleCollider;
+                                grid = first as GridCollider;
+                            }
+
+                            int gridx, gridy, gridx2, gridy2;
+                            gridx = (int)(Util.SnapToGrid(circle.Left - grid.Left, grid.TileWidth) / grid.TileWidth);
+                            gridy = (int)(Util.SnapToGrid(circle.Top - grid.Top, grid.TileHeight) / grid.TileHeight);
+                            gridx2 = (int)(Util.SnapToGrid(circle.Right - grid.Left, grid.TileWidth) / grid.TileWidth);
+                            gridy2 = (int)(Util.SnapToGrid(circle.Bottom - grid.Top, grid.TileHeight) / grid.TileHeight);
+
+                            //if (grid.GetRect(gridx, gridy, gridx2, gridy2, false)) {
+                            if (grid.GetRect(circle.Left, circle.Top, circle.Right, circle.Bottom, false)) {
+                                float rectX, rectY;
+                                for (int i = gridx; i <= gridx2; i++) {
+                                    for (int j = gridy; j <= gridy2; j++) {
+                                        if (grid.GetTile(i, j)) {
+                                            rectX = (i * grid.TileWidth) + grid.Left;
+                                            rectY = (j * grid.TileHeight) + grid.Top;
+
+                                            //check is c center point is in the rect
+                                            if (Util.InRect(circle.CenterX, circle.CenterY, rectX, rectY, grid.TileWidth, grid.TileHeight)) {
+                                                return true;
+                                            }
+
+                                            //check to see if any corners are in the circle
+                                            if (Util.DistanceRectPoint(circle.CenterX, circle.CenterY, rectX, rectY, grid.TileWidth, grid.TileHeight) < circle.Radius) {
+                                                //return true;
+                                            }
+
+                                            //check to see if any lines on the box intersect the circle
+                                            Line2 boxLine;
+
+                                            boxLine = new Line2(rectX, rectY, rectX + grid.TileWidth, rectY);
+                                            if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
+
+                                            boxLine = new Line2(rectX + grid.TileWidth, rectY, rectX + grid.TileWidth, rectY + grid.TileHeight);
+                                            if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
+
+                                            boxLine = new Line2(rectX + grid.TileWidth, rectY + grid.TileHeight, rectX, rectY + grid.TileHeight);
+                                            if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
+
+                                            boxLine = new Line2(rectX, rectY + grid.TileHeight, rectX, rectY);
+                                            if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
+
+                                        }
+                                    }
+                                }
+                            }
+                            return false;
+
+                        }
+                        #endregion
 
             #region Line vs Line
             else if (first is LineCollider && second is LineCollider) {
@@ -805,70 +916,26 @@ namespace Otter {
             }
             #endregion
 
-            #region Circle vs Grid
-            else if ((first is CircleCollider && second is GridCollider) || (first is GridCollider && second is CircleCollider)) {
-                //make a rectangle out of the circle, check for any tiles in that rectangle
-                //if there are tiles, check each tile as a rectangle against the circle
+            #region Line vs Circle
+            else if ((first is LineCollider && second is CircleCollider) || (first is CircleCollider && second is LineCollider)) {
                 CircleCollider circle;
-                GridCollider grid;
-                if (first is CircleCollider) {
-                    circle = first as CircleCollider;
-                    grid = second as GridCollider;
+                LineCollider line;
+                if (first is LineCollider) {
+                    line = first as LineCollider;
+                    circle = second as CircleCollider;
                 }
                 else {
-                    circle = second as CircleCollider;
-                    grid = first as GridCollider;
+                    line = second as LineCollider;
+                    circle = first as CircleCollider;
                 }
 
-                int gridx, gridy, gridx2, gridy2;
-                gridx = (int)(Util.SnapToGrid(circle.Left - grid.Left, grid.TileWidth) / grid.TileWidth);
-                gridy = (int)(Util.SnapToGrid(circle.Top - grid.Top, grid.TileHeight) / grid.TileHeight);
-                gridx2 = (int)(Util.SnapToGrid(circle.Right - grid.Left, grid.TileWidth) / grid.TileWidth);
-                gridy2 = (int)(Util.SnapToGrid(circle.Bottom - grid.Top, grid.TileHeight) / grid.TileHeight);
-
-                //if (grid.GetRect(gridx, gridy, gridx2, gridy2, false)) {
-                if (grid.GetRect(circle.Left, circle.Top, circle.Right, circle.Bottom, false)) {
-                    float rectX, rectY;
-                    for (int i = gridx; i <= gridx2; i++) {
-                        for (int j = gridy; j <= gridy2; j++) {
-                            if (grid.GetTile(i, j)) {
-                                rectX = (i * grid.TileWidth) + grid.Left;
-                                rectY = (j * grid.TileHeight) + grid.Top;
-
-                                //check is c center point is in the rect
-                                if (Util.InRect(circle.CenterX, circle.CenterY, rectX, rectY, grid.TileWidth, grid.TileHeight)) {
-                                    return true;
-                                }
-
-                                //check to see if any corners are in the circle
-                                if (Util.DistanceRectPoint(circle.CenterX, circle.CenterY, rectX, rectY, grid.TileWidth, grid.TileHeight) < circle.Radius) {
-                                    //return true;
-                                }
-
-                                //check to see if any lines on the box intersect the circle
-                                Line2 boxLine;
-
-                                boxLine = new Line2(rectX, rectY, rectX + grid.TileWidth, rectY);
-                                if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
-
-                                boxLine = new Line2(rectX + grid.TileWidth, rectY, rectX + grid.TileWidth, rectY + grid.TileHeight);
-                                if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
-
-                                boxLine = new Line2(rectX + grid.TileWidth, rectY + grid.TileHeight, rectX, rectY + grid.TileHeight);
-                                if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
-
-                                boxLine = new Line2(rectX, rectY + grid.TileHeight, rectX, rectY);
-                                if (boxLine.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) return true;
-
-                            }
-                        }
-                    }
+                if (line.Line2.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) {
+                    return true;
                 }
                 return false;
-
             }
             #endregion
-
+                
             #region Grid vs Grid
             else if (first is GridCollider && second is GridCollider) {
                 //loop through one grid, check tile as rectangle in second grid?
@@ -907,26 +974,6 @@ namespace Otter {
 
                 return false;
 
-            }
-            #endregion
-
-            #region Line vs Circle
-            else if ((first is LineCollider && second is CircleCollider) || (first is CircleCollider && second is LineCollider)) {
-                CircleCollider circle;
-                LineCollider line;
-                if (first is LineCollider) {
-                    line = first as LineCollider;
-                    circle = second as CircleCollider;
-                }
-                else {
-                    line = second as LineCollider;
-                    circle = first as CircleCollider;
-                }
-
-                if (line.Line2.IntersectCircle(new Vector2(circle.CenterX, circle.CenterY), circle.Radius)) {
-                    return true;
-                }
-                return false;
             }
             #endregion
 
@@ -1299,6 +1346,238 @@ namespace Otter {
                         }
                     }
                 }
+            }
+            #endregion
+
+            #region Polygon vs Polygon
+            else if (first is PolygonCollider && second is PolygonCollider) {
+                var p1 = first as PolygonCollider;
+                var p2 = second as PolygonCollider;
+
+                // make copies of the polygons with applied offsets for testing
+                var poly1 = new Polygon(p1.Polygon);
+                var poly2 = new Polygon(p2.Polygon);
+
+                poly1.OffsetPoints(p1.Left, p1.Top);
+                poly2.OffsetPoints(p2.Left, p2.Top);
+
+                return poly1.Overlap(poly2);
+            }
+            #endregion
+
+            #region Polygon vs Box
+
+            else if (first is PolygonCollider && second is BoxCollider || first is BoxCollider && second is PolygonCollider) {
+                PolygonCollider poly;
+                BoxCollider box;
+
+                if (first is PolygonCollider) {
+                    poly = first as PolygonCollider;
+                    box = second as BoxCollider;
+                }
+                else {
+                    poly = second as PolygonCollider;
+                    box = first as BoxCollider;
+                }
+
+                var poly1 = new Polygon(poly.Polygon);
+                poly1.OffsetPoints(poly.Left, poly.Top);
+
+                //create poly for box
+
+                var poly2 = new Polygon(box.Left, box.Top, box.Right, box.Top, box.Right, box.Bottom, box.Left, box.Bottom);
+
+                //test polys
+                return poly1.Overlap(poly2);
+            }
+
+            #endregion
+
+            #region Polygon vs Circle
+            else if (first is PolygonCollider && second is CircleCollider || first is CircleCollider && second is PolygonCollider) {
+                PolygonCollider poly;
+                CircleCollider circ;
+
+                if (first is PolygonCollider) {
+                    poly = first as PolygonCollider;
+                    circ = second as CircleCollider;
+                }
+                else {
+                    poly = second as PolygonCollider;
+                    circ = first as CircleCollider;
+                }
+
+                var poly1 = new Polygon(poly.Polygon);
+                poly1.OffsetPoints(poly.Left, poly.Top);
+
+                //check if center point is in poly
+                if (poly1.ContainsPoint(circ.CenterX, circ.CenterY)) {
+                    return true;
+                }
+
+                //check each edge for intersection with the circle
+                var lines = poly1.GetEdgesAsLines();
+
+                foreach (var l in lines) {
+                    if (l.IntersectCircle(new Vector2(circ.CenterX, circ.CenterY), circ.Radius)) {
+                        return true;
+                    }
+                }
+
+                return false;
+                
+            }
+            #endregion
+
+            #region Polygon vs Grid
+            else if (first is PolygonCollider && second is GridCollider || first is GridCollider && second is PolygonCollider) {
+                PolygonCollider poly;
+                GridCollider grid;
+
+                if (first is PolygonCollider) {
+                    poly = first as PolygonCollider;
+                    grid = second as GridCollider;
+                }
+                else {
+                    poly = second as PolygonCollider;
+                    grid = first as GridCollider;
+                }
+
+                var poly1 = new Polygon(poly.Polygon);
+                poly1.OffsetPoints(poly.Left, poly.Top);
+
+                //test against grid bounding box first
+                var bbox = new Polygon(grid.Left, grid.Top, grid.Right, grid.Top, grid.Right, grid.Bottom, grid.Left, grid.Bottom);
+                if (!poly1.Overlap(bbox)) {
+                    return false;
+                }
+
+                //check rect in bounding box where polygon is
+                if (!grid.GetRect(poly.Left, poly.Top, poly.Right, poly.Bottom, false)) {
+                    return false;
+                }
+
+                //check each occupied cell as a box in the bounding box
+                int startX = grid.GridX(poly.Left - grid.Left);
+                int startY = grid.GridY(poly.Top - grid.Top);
+
+                int endX = grid.GridX(poly.Left - grid.Left + poly.Width) + 1;
+                int endY = grid.GridY(poly.Top - grid.Top + poly.Height) + 1;
+
+                //Console.WriteLine("StartX {0} StartY {1} EndX {2} EndY {3}", startX, startY, endX, endY);
+
+                for (var xx = startX; xx < endX; xx++) {
+                    for (var yy = startY; yy < endY; yy++) {
+                        if (grid.GetTile(xx, yy)) {
+                            var realX = xx * grid.TileWidth + grid.Left;
+                            var realY = yy * grid.TileHeight + grid.Top;
+                            var gridPoly = new Polygon(
+                                realX, realY,
+                                realX + grid.TileWidth, realY,
+                                realX + grid.TileWidth, realY + grid.TileHeight,
+                                realX, realY + grid.TileHeight
+                                );
+                            if (gridPoly.Overlap(poly1)) {
+                                //Console.WriteLine("Collision with tile X:{0} Y:{1}", xx, yy);
+                                //Console.WriteLine("Poly overlapped with {0}", gridPoly);
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+
+            }
+            #endregion
+
+            #region Polygon vs Line
+            else if (first is PolygonCollider && second is LineCollider || first is LineCollider && second is PolygonCollider) {
+                PolygonCollider poly;
+                LineCollider line;
+
+                if (first is PolygonCollider) {
+                    poly = first as PolygonCollider;
+                    line = second as LineCollider;
+                }
+                else {
+                    poly = second as PolygonCollider;
+                    line = first as LineCollider;
+                }
+
+                var poly1 = new Polygon(poly.Polygon);
+                poly1.OffsetPoints(poly.Left, poly.Top);
+
+                var poly2 = new Polygon(line.Left, line.Top, line.Right, line.Bottom);
+                return poly1.Overlap(poly2);
+            }
+            #endregion
+
+            #region Polygon vs Pixel
+            else if (first is PolygonCollider && second is PixelCollider || first is PixelCollider && second is PolygonCollider) {
+                PolygonCollider poly;
+                PixelCollider pixel;
+
+                if (first is PolygonCollider) {
+                    poly = first as PolygonCollider;
+                    pixel = second as PixelCollider;
+                }
+                else {
+                    poly = second as PolygonCollider;
+                    pixel = first as PixelCollider;
+                }
+
+                var poly1 = new Polygon(poly.Polygon);
+                poly1.OffsetPoints(poly.Left, poly.Top);
+
+                // check bounding box of pixel first
+                var bbox = new Polygon(pixel.Left, pixel.Top, pixel.Right, pixel.Top, pixel.Right, pixel.Bottom, pixel.Left, pixel.Bottom);
+                if (!poly1.Overlap(bbox)) {
+                    return false;
+                }
+
+                // get intersecting area of the bounding boxes
+                float x1 = Math.Max(poly.Left, pixel.Left);
+                float x2 = Math.Min(poly.Right, pixel.Right);
+
+                float y1 = Math.Max(poly.Top, pixel.Top);
+                float y2 = Math.Min(poly.Bottom, pixel.Bottom);
+
+                // check each pixel in area as point in poly
+                for (var i = x1; i < x2; i++) {
+                    for (var j = y1; j < y2; j++) {
+                        var xx = (int)Math.Floor(i - pixel.Left);
+                        var yy = (int)Math.Floor(j - pixel.Top);
+
+                        if (pixel.PixelAt(xx, yy)) {
+                            if (poly1.ContainsPoint(xx + pixel.Left, yy + pixel.Top)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            #endregion
+
+            #region Polygon vs Point
+            else if (first is PolygonCollider && second is PointCollider || first is PointCollider && second is PolygonCollider) {
+                PolygonCollider poly;
+                PointCollider point;
+
+                if (first is PolygonCollider) {
+                    poly = first as PolygonCollider;
+                    point = second as PointCollider;
+                }
+                else {
+                    poly = second as PolygonCollider;
+                    point = first as PointCollider;
+                }
+
+                var poly1 = new Polygon(poly.Polygon);
+                poly1.OffsetPoints(poly.Left, poly.Top);
+
+                return poly1.ContainsPoint(point.Left, point.Top);
             }
             #endregion
 

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
 using System.IO;
 using System.Reflection;
+using System.Xml;
 
 namespace Otter {
     /// <summary>
@@ -66,6 +64,11 @@ namespace Otter {
         /// The entities stored to create tilemaps and grids.  Cleared every time LoadLevel is called.
         /// </summary>
         public Dictionary<string, Entity> Entities = new Dictionary<string, Entity>();
+
+        /// <summary>
+        /// The name of the method to use for creating Entities when loading an .oel file into a Scene.
+        /// </summary>
+        public string CreationMethodName = "CreateFromXml";
 
         /// <summary>
         /// The drawing layer to place the first loaded tile map on.
@@ -131,9 +134,16 @@ namespace Otter {
             arguments[1] = e.Attributes;
 
             if (entityType != null) {
-                MethodInfo method = entityType.GetMethod("CreateFromXML", BindingFlags.Static | BindingFlags.Public);
+                MethodInfo method = entityType.GetMethod(CreationMethodName, BindingFlags.Static | BindingFlags.Public);
                 if (method != null) {
                     method.Invoke(null, arguments);
+                }
+                else {
+                    // Attempt to create with just constructor
+                    var x = e.AttributeInt("x");
+                    var y = e.AttributeInt("y");
+                    var entity = (Entity)Activator.CreateInstance(entityType, x, y);
+                    scene.Add(entity);
                 }
             }
         }
@@ -231,6 +241,15 @@ namespace Otter {
         /// <param name="layerName">The layer name that should use the tag.</param>
         public void RegisterTag(int tag, string layerName) {
             ColliderTags.Add(layerName, tag);
+        }
+
+        /// <summary>
+        /// Register a collision tag on a grid layer loaded from the oel file.
+        /// </summary>
+        /// <param name="tag">The enum tag to use. (Casts to int!)</param>
+        /// <param name="layerName">The layer name that should use the tag.</param>
+        public void RegisterTag(Enum tag, string layerName) {
+            RegisterTag(Convert.ToInt32(tag), layerName);
         }
 
         /// <summary>

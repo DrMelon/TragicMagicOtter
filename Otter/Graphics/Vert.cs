@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
+using System;
 
 namespace Otter {
     /// <summary>
@@ -77,6 +74,14 @@ namespace Otter {
 
         #endregion
 
+        #region Public Methods
+
+        public override string ToString() {
+            return String.Format("X: {0} Y: {1} Color: {2} U: {3} V: {4}", X, Y, Color, U, V);
+        }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -90,6 +95,12 @@ namespace Otter {
         public Vert(float x, float y, Color color, float u, float v) {
             vertex = new SFML.Graphics.Vertex(new Vector2f(x, y), color.SFMLColor, new Vector2f(u, v));
         }
+
+        /// <summary>
+        /// Create a new Vert.
+        /// </summary>
+        /// <param name="copy">A source Vert to copy.</param>
+        public Vert(Vert copy) : this(copy.X, copy.Y, copy.Color, copy.U, copy.V) { }
 
         /// <summary>
         /// Create a new white Vert at 0, 0.

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using SFML;
-using SFML.Window;
-using SFML.Graphics;
 
 namespace Otter {
     /// <summary>
@@ -53,52 +49,57 @@ namespace Otter {
         /// <summary>
         /// An action that triggers during Update().
         /// </summary>
-        public Action OnUpdate;
+        public Action OnUpdate = delegate { };
 
         /// <summary>
         /// An action that triggers during UpdateFirst().
         /// </summary>
-        public Action OnUpdateFirst;
+        public Action OnUpdateFirst = delegate { };
 
         /// <summary>
         /// An action that triggers during UpdateLast().
         /// </summary>
-        public Action OnUpdateLast;
+        public Action OnUpdateLast = delegate { };
 
         /// <summary>
         /// An action that triggers during Render(), after all entities have been rendered.
         /// </summary>
-        public Action OnRender;
+        public Action OnRender = delegate { };
 
         /// <summary>
         /// An action that triggers during Begin().
         /// </summary>
-        public Action OnBegin;
+        public Action OnBegin = delegate { };
 
         /// <summary>
         /// An action that triggers during End().
         /// </summary>
-        public Action OnEnd;
+        public Action OnEnd = delegate { };
 
         /// <summary>
         /// An action that triggers when an entity is Added.
         /// </summary>
-        public Action OnAdd;
+        public Action OnAdd = delegate { };
 
         /// <summary>
         /// An action that triggers when an entity is removed.
         /// </summary>
-        public Action OnRemove;
+        public Action OnRemove = delegate { };
 
         /// <summary>
         /// An action that triggers when the Scene is paused because a Scene is stacked on top of it.
         /// </summary>
-        public Action OnPause;
+        public Action OnPause = delegate { };
 
         /// <summary>
         /// An action that triggers when the Scene is resumed because the active Scene on top of it was popped.
         /// </summary>
-        public Action OnResume;
+        public Action OnResume = delegate { };
+
+        /// <summary>
+        /// An action that triggers after the Scene has updated the camera positions for the Game's Surfaces.
+        /// </summary>
+        public Action OnCameraUpdate = delegate { };
 
         /// <summary>
         /// The angle of the camera.
@@ -248,7 +249,7 @@ namespace Otter {
             set {
                 cameraX = value;
                 if (UseCameraBounds) {
-                    cameraX = Util.Clamp(cameraX, CameraBounds.Left, CameraBounds.Right - Game.Width);
+                    cameraX = Util.Clamp(cameraX, CameraBounds.Left, CameraBounds.Right - CameraWidth);
                 }
             }
         }
@@ -277,8 +278,20 @@ namespace Otter {
             set {
                 cameraY = value;
                 if (UseCameraBounds) {
-                    cameraY = Util.Clamp(cameraY, CameraBounds.Top, CameraBounds.Bottom - Game.Height);
+                    cameraY = Util.Clamp(cameraY, CameraBounds.Top, CameraBounds.Bottom - CameraHeight);
                 }
+            }
+        }
+
+        public float CameraWidth {
+            get {
+                return Game.Width / CameraZoom;
+            }
+        }
+
+        public float CameraHeight {
+            get {
+                return Game.Height / CameraZoom;
             }
         }
 
@@ -312,19 +325,27 @@ namespace Otter {
 
         void RenderScene() {
             if (Visible) {
-                foreach (Graphic g in graphics) {
+                foreach (var g in graphics) {
                     g.Render();
                 }
 
-                if (OnRender != null) {
-                    OnRender();
-                }
+                OnRender();
             }
         }
 
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// A handy shortcut for casting the Scene as a specific scene type.
+        /// For some reason I just like this better than doing (Scene as Type).Whatever();
+        /// </summary>
+        /// <typeparam name="T">The type of scene.</typeparam>
+        /// <returns>The scene as that type.</returns>
+        public T As<T>() where T : Scene {
+            return (T)this;
+        }
 
         /// <summary>
         /// Centers the camera of the scene.
@@ -340,23 +361,85 @@ namespace Otter {
         /// Add an entity to the scene.
         /// </summary>
         /// <param name="e">Adds a new entity</param>
-        /// <returns></returns>
+        /// <returns>The added Entity.</returns>
         public T Add<T>(T e) where T : Entity {
             if (e == null) throw new ArgumentNullException("Entity cannot be null.");
             if (e.Scene != null) return e;
 
             entitiesToAdd.Add(e);
-
             e.Scene = this;
+            
             e.MarkedForRemoval = false;
-            e.Added();
-            if (e.OnAdded != null) e.OnAdded();
-
-            foreach (Collider c in e.Colliders) {
-                AddColliderInternal(c);
-            }
+            e.MarkedForAdd = true;
 
             return e;
+        }
+
+        /// <summary>
+        /// Create and add a new Entity to the Scene.
+        /// </summary>
+        /// <typeparam name="T">The Type of entity to add.</typeparam>
+        /// <param name="constructorArgs">The constructor arguments for creating the Entity.</param>
+        /// <returns>The created Entity.</returns>
+        public T Add<T>(params object[] constructorArgs) where T : Entity {
+            return Add((T)Activator.CreateInstance(typeof(T), constructorArgs));
+        }
+
+        /// <summary>
+        /// Add a list of Entities to the scene.
+        /// </summary>
+        /// <typeparam name="T">The type of Entity.</typeparam>
+        /// <param name="entities">The list of Entities.</param>
+        /// <returns>The list of Entities.</returns>
+        public List<T> Add<T>(List<T> entities) where T : Entity {
+            foreach (var e in entities) {
+                Add(e);
+            }
+            return entities;
+        }
+
+        /// <summary>
+        /// Adds an Entity only if no other Entities of that type exist in the Scene already.
+        /// </summary>
+        /// <typeparam name="T">The type of Entity.</typeparam>
+        /// <param name="e">The Entity to add.</param>
+        /// <returns>The added Entity, or the Entity of type T that exists in the Scene already.</returns>
+        public T AddUnique<T>(T e) where T : Entity {
+            if (GetEntity<T>() == null) {
+                if (entitiesToAdd.Count(en => en is T) == 0) {
+                    return Add(e);
+                }
+                else {
+                    return (T)entitiesToAdd.Find(en => en is T);
+                }
+            }
+            return GetEntity<T>();
+        }
+
+        /// <summary>
+        /// Creates an adds an Entity to the Scene if there is no Entity of that type in the Scene already.
+        /// </summary>
+        /// <typeparam name="T">The type of Entity to create and Add.</typeparam>
+        /// <param name="constructorArgs">The constructor arguments for creating the Entity.</param>
+        /// <returns>The added Entity, or the Entity of type T that exists in the Scene already.</returns>
+        public T AddUnique<T>(params object[] constructorArgs) where T : Entity {
+            return AddUnique((T)Activator.CreateInstance(typeof(T), constructorArgs));
+        }
+
+        /// <summary>
+        /// Adds a list of Entities to the Scene if there is no Entity of that type added already.
+        /// </summary>
+        /// <typeparam name="T">The type of Entity</typeparam>
+        /// <param name="entities">The list of Entities to AddUnique.</param>
+        /// <returns>A list of the Entities that were successfully added.</returns>
+        public List<T> AddUnique<T>(List<T> entities) where T : Entity {
+            var added = new List<T>();
+            entities.ForEach(e => {
+                if (AddUnique(e) != null) {
+                    added.Add(e);
+                }
+            });
+            return added;
         }
 
         /// <summary>
@@ -366,7 +449,7 @@ namespace Otter {
         /// <returns>A list of the entities.</returns>
         public List<Entity> AddMultiple(params Entity[] entities) {
             var r = new List<Entity>();
-            foreach (Entity e in entities) {
+            foreach (var e in entities) {
                 r.Add(Add(e));
             }
             return r;
@@ -393,6 +476,12 @@ namespace Otter {
             return g;
         }
 
+        public T AddGraphic<T>(T g, float x, float y) where T : Graphic {
+            graphics.Add(g);
+            g.SetPosition(x, y);
+            return g;
+        }
+
         /// <summary>
         /// Add multiple graphics to the scene.
         /// </summary>
@@ -400,7 +489,7 @@ namespace Otter {
         /// <returns>A list of the graphics added.</returns>
         public List<Graphic> AddGraphics(params Graphic[] graphics) {
             var r = new List<Graphic>();
-            foreach (Graphic g in graphics) {
+            foreach (var g in graphics) {
                 r.Add(AddGraphic(g));
             }
             return r;
@@ -435,6 +524,12 @@ namespace Otter {
             return AddGraphic(g);
         }
 
+        public T AddGraphicGUI<T>(T g, float x, float y) where T : Graphic {
+            g.Scroll = 0;
+            g.SetPosition(x, y);
+            return AddGraphic(g);
+        }
+
         /// <summary>
         /// Adds graphics to the Scene and sets their Scroll values to 0.
         /// </summary>
@@ -465,11 +560,8 @@ namespace Otter {
             }
 
             e.MarkedForRemoval = true;
-            e.Removed();
-            if (e.OnRemoved != null) e.OnRemoved();
-            foreach (Collider c in e.Colliders) {
-                RemoveColliderInternal(c);
-            }
+            e.MarkedForAdd = false;
+
             return e;
         }
 
@@ -570,8 +662,13 @@ namespace Otter {
         /// Update the internal lists stored by the scene.  The engine will usually take care of this!
         /// </summary>
         public void UpdateLists() {
-            foreach (Entity e in entitiesToAdd) {
-                if (!e.MarkedForRemoval) {
+            while (entitiesToAdd.Count > 0) {
+                var adding = new List<Entity>(entitiesToAdd);
+                entitiesToAdd.Clear();
+
+                foreach (var e in adding) {
+                    if (e.MarkedForRemoval) continue;
+
                     if (!orders.ContainsKey(e.Order)) {
                         orders.Add(e.Order, new List<Entity>());
                     }
@@ -583,13 +680,24 @@ namespace Otter {
                     layers[e.Layer].Add(e);
 
                     entities.Add(e);
+                    e.MarkedForAdd = false;
+
+                    foreach (var c in e.Colliders) {
+                        AddColliderInternal(c);
+                    }
 
                     entityCount++;
                 }
-            }
-            entitiesToAdd.Clear();
 
-            foreach (Entity e in entitiesToChangeOrder) {
+                foreach (var e in adding) {
+                    // Invoke these methods after *all* entities in the queue are actually in the scene.
+                    e.Added();
+                    e.OnAdded();
+                    e.UpdateComponentLists(); // Add components after e.Added, so that Entity.Scene is not null for components.
+                }
+            }
+
+            foreach (var e in entitiesToChangeOrder) {
                 orders[e.oldOrder].Remove(e);
                 if (orders[e.oldOrder].Count == 0) {
                     orders.Remove(e.oldOrder);
@@ -601,7 +709,7 @@ namespace Otter {
             }
             entitiesToChangeOrder.Clear();
 
-            foreach (Entity e in entitiesToChangeLayer) {
+            foreach (var e in entitiesToChangeLayer) {
                 layers[e.oldLayer].Remove(e);
                 if (layers[e.oldLayer].Count == 0) {
                     layers.Remove(e.oldLayer);
@@ -613,29 +721,42 @@ namespace Otter {
             }
             entitiesToChangeLayer.Clear();
 
-            foreach (Entity e in entitiesToRemove) {
-                orders[e.Order].Remove(e);
-                if (orders[e.Order].Count == 0) {
-                    orders.Remove(e.Order);
+            while (entitiesToRemove.Count > 0) {
+                var removing = new List<Entity>(entitiesToRemove);
+                entitiesToRemove.Clear();
+
+                foreach (var e in removing) {
+                    orders[e.Order].Remove(e);
+                    if (orders[e.Order].Count == 0) {
+                        orders.Remove(e.Order);
+                    }
+
+                    layers[e.Layer].Remove(e);
+                    if (layers[e.Layer].Count == 0) {
+                        layers.Remove(e.Layer);
+                    }
+
+                    entities.Remove(e);
+
+                    foreach (var c in e.Colliders) {
+                        RemoveColliderInternal(c);
+                    }
+
+                    entityCount--;
                 }
 
-                layers[e.Layer].Remove(e);
-                if (layers[e.Layer].Count == 0) {
-                    layers.Remove(e.Layer);
+                foreach (var e in removing) {
+                    e.Removed();
+                    e.OnRemoved();
+                    e.Scene = null;
                 }
-
-                entities.Remove(e);
-
-                entityCount--;
-
-                e.Scene = null;
             }
-            entitiesToRemove.Clear();
+            
 
-            foreach (int group in groupsToPause) {
+            foreach (var group in groupsToPause) {
                 if (!pausedGroups.Contains(group)) {
                     foreach (var order in orders) {
-                        foreach (Entity e in order.Value) {
+                        foreach (var e in order.Value) {
                             if (e.Group == group) {
                                 e.Paused();
                             }
@@ -646,10 +767,10 @@ namespace Otter {
             }
             groupsToPause.Clear();
 
-            foreach (int group in groupsToUnpause) {
+            foreach (var group in groupsToUnpause) {
                 if (IsGroupPaused(group)) {
                     foreach (var order in orders) {
-                        foreach (Entity e in order.Value) {
+                        foreach (var e in order.Value) {
                             if (e.Group == group) {
                                 e.Resumed();
                             }
@@ -734,7 +855,7 @@ namespace Otter {
         /// <returns>A list of entities of type T.</returns>
         public List<T> GetEntities<T>() where T : Entity {
             var list = new List<T>();
-            foreach (Entity e in entities) {
+            foreach (var e in entities) {
                 if (e is T) {
                     list.Add(e as T);
                 }
@@ -743,17 +864,64 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Get the first instance of an entity of type T.
+        /// Get a list of Entities of a type from the Scene.
+        /// </summary>
+        /// <param name="t">The type of Entity to list.</param>
+        /// <returns>A list of Entities of type t.</returns>
+        public List<Entity> GetEntities(Type t) {
+            return entities.Where(e => e.GetType() == t).ToList<Entity>();
+        }
+
+        /// <summary>
+        /// Get the first instance of an Entity of type T.
         /// </summary>
         /// <typeparam name="T">The entity type to search for.</typeparam>
         /// <returns>The first entity of that type in the scene.</returns>
         public T GetEntity<T>() where T : Entity {
-            foreach (Entity e in entities) {
+            foreach (var e in entities) {
                 if (e is T) {
                     return (e as T);
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Get a list of Entities that have a Collider that matches a specified tag.
+        /// </summary>
+        /// <param name="colliderTag">The tag to search for.</param>
+        /// <returns>Entities that have a Collider with that tag.</returns>
+        public List<Entity> GetEntities(int colliderTag) {
+            var list = new List<Entity>();
+            GetColliders(colliderTag).ForEach(c => list.Add(c.Entity));
+            return list;
+        }
+
+        /// <summary>
+        /// Get a list of Entities that have a Collider that matches a specified tag.
+        /// </summary>
+        /// <param name="colliderTag">The tag to search for.</param>
+        /// <returns>Entities that have a Collider with that tag.</returns>
+        public List<Entity> GetEntities(Enum colliderTag) {
+            return GetEntities(Convert.ToInt32(colliderTag));
+        }
+
+        /// <summary>
+        /// Get a list of Colliders that match a specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to search for.</param>
+        /// <returns>Colliders that have the specified tag.</returns>
+        public List<Collider> GetColliders(int tag) {
+            return Colliders[tag].ToList<Collider>();
+        }
+
+        /// <summary>
+        /// Get a list of Colliders that match a specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to search for.</param>
+        /// <returns>Colliders that have the specified tag.</returns>
+        public List<Collider> GetColliders(Enum tag) {
+            return GetColliders(Convert.ToInt32(tag));
         }
 
         /// <summary>
@@ -763,7 +931,7 @@ namespace Otter {
         /// <returns>The number of entities of type T.</returns>
         public int GetCount<T>() where T : Entity {
             var count = 0;
-            foreach (Entity e in entities) {
+            foreach (var e in entities) {
                 if (e is T) {
                     count++;
                 }
@@ -780,7 +948,7 @@ namespace Otter {
             cameraY;
 
         internal void AddColliderInternal(Collider c) {
-            foreach (int tag in c.Tags) {
+            foreach (var tag in c.Tags) {
                 if (Colliders.ContainsKey(tag)) {
                     if (!Colliders[tag].Contains(c)) { // Quick fix to prevent double adding.
                         Colliders[tag].Add(c);
@@ -794,22 +962,25 @@ namespace Otter {
         }
 
         internal void RemoveColliderInternal(Collider c) {
-            foreach (int tag in c.Tags) {
-                Colliders[tag].Remove(c);
-                if (Colliders[tag].Count == 0) {
-                    Colliders.Remove(tag);
+            foreach (var tag in c.Tags) {
+                if (Colliders.ContainsKey(tag)) {
+                    Colliders[tag].Remove(c);
+
+                    if (Colliders[tag].Count == 0) {
+                        Colliders.Remove(tag);
+                    }
                 }
             }
         }
 
         internal void BeginInternal() {
-            foreach (Entity e in entitiesToAdd) {
+            Instance = this;
+
+            foreach (var e in entitiesToAdd) {
                 e.SceneBegin();
             }
-            if (OnBegin != null) {
-                OnBegin();
-            }
-            Instance = this;
+            Game.OnSceneBegin();
+            OnBegin();
 
             if (Width == 0 || Height == 0) {
                 Width = Game.Width;
@@ -822,62 +993,49 @@ namespace Otter {
 
 
         internal void EndInternal() {
-            foreach (KeyValuePair<int, List<Entity>> order in orders) {
-                foreach (Entity e in order.Value) {
+            foreach (var order in orders) {
+                foreach (var e in order.Value) {
                     e.SceneEnd();
                 }
             }
-            if (OnEnd != null) {
-                OnEnd();
-            }
-
+            Game.OnSceneEnd();
+            OnEnd();
             End();
 
             UpdateLists(); // Testing this
         }
 
-
-
         internal void PauseInternal() {
-            foreach (KeyValuePair<int, List<Entity>> order in orders) {
-                foreach (Entity e in order.Value) {
+            foreach (var order in orders) {
+                foreach (var e in order.Value) {
                     e.ScenePause();
                 }
             }
-            if (OnPause != null) {
-                OnPause();
-            }
+            OnPause();
 
             Pause();
         }
 
-
-
         internal void ResumeInternal() {
             Instance = this;
-            foreach (KeyValuePair<int, List<Entity>> order in orders) {
-                foreach (Entity e in order.Value) {
+
+            foreach (var order in orders) {
+                foreach (var e in order.Value) {
                     e.SceneResume();
                 }
             }
-            if (OnResume != null) {
-                OnResume();
-            }
+            OnResume();
 
             Resume();
         }
 
-
-
         internal void UpdateFirstInternal() {
-            if (OnUpdateFirst != null) {
-                OnUpdateFirst();
-            }
+            OnUpdateFirst();
 
             UpdateFirst();
 
-            foreach (KeyValuePair<int, List<Entity>> order in orders) {
-                foreach (Entity e in order.Value) {
+            foreach (var order in orders) {
+                foreach (var e in order.Value) {
                     if (e.AutoUpdate) {
                         if (!IsGroupPaused(e.Group)) {
                             e.UpdateFirstInternal();
@@ -888,17 +1046,13 @@ namespace Otter {
 
         }
 
-
-
         internal void UpdateLastInternal() {
-            if (OnUpdateLast != null) {
-                OnUpdateLast();
-            }
+            OnUpdateLast();
 
             UpdateLast();
 
-            foreach (KeyValuePair<int, List<Entity>> order in orders) {
-                foreach (Entity e in order.Value) {
+            foreach (var order in orders) {
+                foreach (var e in order.Value) {
                     if (e.AutoUpdate) {
                         if (!IsGroupPaused(e.Group)) {
                             e.UpdateLastInternal();
@@ -911,8 +1065,8 @@ namespace Otter {
                 }
             }
 
-            foreach (KeyValuePair<int, List<Entity>> layer in layers.Reverse()) {
-                foreach (Entity e in layer.Value) {
+            foreach (var layer in layers.Reverse()) {
+                foreach (var e in layer.Value) {
                     if (e.Layer != layer.Key) {
                         entitiesToChangeLayer.Add(e);
                         e.oldLayer = layer.Key;
@@ -929,7 +1083,7 @@ namespace Otter {
                 CameraY = Util.Clamp(CameraY, CameraBounds.Top, CameraBounds.Bottom - Game.Height);
             }
 
-            foreach (Graphic g in graphics) {
+            foreach (var g in graphics) {
                 g.Update();
             }
 
@@ -950,20 +1104,22 @@ namespace Otter {
             }
 
             if (ApplyCamera) {
+                Game.Surfaces.FindAll(s => s.UseSceneCamera).ForEach(s => s.SetView(Util.Round(cx), Util.Round(cy), CameraAngle, CameraZoom));
                 Game.Surface.SetView(Util.Round(cx), Util.Round(cy), CameraAngle, CameraZoom);
             }
+
+            OnCameraUpdate();
         }
 
         internal void UpdateInternal() {
-            if (OnUpdate != null) {
-                OnUpdate();
-            }
+            OnUpdate();
+
             Tweener.Update(Game.DeltaTime);
 
             Update();
 
-            foreach (KeyValuePair<int, List<Entity>> order in orders) {
-                foreach (Entity e in order.Value) {
+            foreach (var order in orders) {
+                foreach (var e in order.Value) {
                     if (e.AutoUpdate) {
                         if (!IsGroupPaused(e.Group)) {
                             e.UpdateInternal();
@@ -991,9 +1147,9 @@ namespace Otter {
                 Draw.SetTarget(temp);
             }
 
-            foreach (KeyValuePair<int, List<Entity>> layer in layers.Reverse()) {
-                foreach (Entity e in layer.Value) {
-                    if (e.AutoRender) {
+            foreach (var layer in layers.Reverse()) {
+                foreach (var e in layer.Value) {
+                    if (e.AutoRender && e.Visible) {
                         e.RenderInternal();
                     }
                 }

@@ -1,18 +1,49 @@
-﻿using System;
+﻿using System.IO;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using SFML.Graphics;
-using SFML;
-using SFML.Window;
-using System.IO;
 
 namespace Otter {
     /// <summary>
     /// Class representing a shader written in GLSL.
+    /// Warning: Visual Studio encoding must be set to Western European (Windows) Codepage 1252 when editing shaders!
+    /// More details here: http://blog.pixelingene.com/2008/07/file-encodings-matter-when-writing-pixel-shaders/
     /// </summary>
     public class Shader {
+
+        #region Static Methods
+
+        /// <summary>
+        /// Store a shader parameter name by an Enum value.  After storing a parameter this way
+        /// you can use SetParameter on shader instances with the Enum value and it will retrieve
+        /// the parameter name string.
+        /// </summary>
+        /// <example>
+        /// If your shader has a parameter named "overlayColor" you can do this:
+        /// Shader.SetParameter(ShaderParams.OverlayColor, "overlayColor");
+        /// And then on a shader instance you can do this:
+        /// someImageWithAShader.Shader.SetParameter(ShaderParams.OverlayColor, Color.Red);
+        /// </example>
+        /// <param name="name">The Enum value to use as the key for the shader parameter name.</param>
+        /// <param name="nameInShader">The name of the parameter in the shader code.</param>
+        public static void AddParameter(Enum name, string nameInShader) {
+            parameters.Add(Util.EnumValueToString(name), nameInShader);
+        }
+
+        /// <summary>
+        /// Get the parameter string stored with the Enum key.
+        /// </summary>
+        /// <param name="name">The Enum name that is the key for the string parameter.</param>
+        /// <returns>The string parameter.</returns>
+        public static string Parameter(Enum name) {
+            return parameters[Util.EnumValueToString(name)];
+        }
+        #endregion
+
+        #region Static Fields
+
+        static Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+        #endregion
 
         #region Constructors
 
@@ -99,9 +130,27 @@ namespace Otter {
         /// Set a parameter on the shader.
         /// </summary>
         /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="color">The color to set it to.</param>
+        public void SetParameter(Enum name, Color color) {
+            SetParameter(Parameter(name), color);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
         /// <param name="x">The value to set it to.</param>
         public void SetParameter(string name, float x) {
             shader.SetParameter(name, x);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="x">The value to set it to.</param>
+        public void SetParameter(Enum name, float x) {
+            SetParameter(Parameter(name), x);
         }
 
         /// <summary>
@@ -118,11 +167,86 @@ namespace Otter {
         /// Set a parameter on the shader.
         /// </summary>
         /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="x">The first value of a vec2.</param>
+        /// <param name="y">The first value of a vec2.</param>
+        public void SetParameter(Enum name, float x, float y) {
+            SetParameter(Parameter(name), x, y);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="xy">A Vector2 to set.</param>
+        public void SetParameter(string name, Vector2 xy) {
+            shader.SetParameter(name, xy.X, xy.Y);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="xy">A Vector2 to set.</param>
+        public void SetParameter(Enum name, Vector2 xy) {
+            SetParameter(Parameter(name), xy.X, xy.Y);
+        }
+        
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="xyz">A Vector3 to set.</param>
+        public void SetParameter(string name, Vector3 xyz) {
+            shader.SetParameter(name, xyz.X, xyz.Y, xyz.Z);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="xyz">A Vector3 to set.</param>
+        public void SetParameter(Enum name, Vector3 xyz) {
+            SetParameter(Parameter(name), xyz.X, xyz.Y, xyz.Z);
+        }
+        
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="xyzw">A Vector4 to set.</param>
+        public void SetParameter(string name, Vector4 xyzw) {
+            shader.SetParameter(name, xyzw.X, xyzw.Y, xyzw.Z, xyzw.W);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="xyzw">A Vector4 to set.</param>
+        public void SetParameter(Enum name, Vector4 xyzw) {
+            SetParameter(Parameter(name), xyzw.X, xyzw.Y, xyzw.Z, xyzw.W);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
         /// <param name="x">The first value of a vec3.</param>
         /// <param name="y">The second value of a vec3.</param>
         /// <param name="z">The third value of a vec3.</param>
         public void SetParameter(string name, float x, float y, float z) {
-            shader.SetParameter(name, x, y);
+            shader.SetParameter(name, x, y, z);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="x">The first value of a vec3.</param>
+        /// <param name="y">The second value of a vec3.</param>
+        /// <param name="z">The third value of a vec3.</param>
+        public void SetParameter(Enum name, float x, float y, float z) {
+            SetParameter(Parameter(name), x, y, z);
         }
 
         /// <summary>
@@ -141,9 +265,48 @@ namespace Otter {
         /// Set a parameter on the shader.
         /// </summary>
         /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="x">The first value of a vec4.</param>
+        /// <param name="y">The second value of a vec4.</param>
+        /// <param name="z">The third value of a vec4.</param>
+        /// <param name="w">The fourth value of a vec4.</param>
+        public void SetParameter(Enum name, float x, float y, float z, float w) {
+            SetParameter(Parameter(name), x, y, z, w);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
         /// <param name="texture">The texture to set it to.</param>
         public void SetParameter(string name, Texture texture) {
             shader.SetParameter(name, texture.SFMLTexture);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="texture">The texture to set it to.</param>
+        public void SetParameter(Enum name, Texture texture) {
+            SetParameter(Parameter(name), texture);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="textureSource">The path to an image to load as a texture.</param>
+        public void SetParameter(string name, string textureSource) {
+            shader.SetParameter(name, new Texture(textureSource).SFMLTexture);
+        }
+
+        /// <summary>
+        /// Set a parameter on the shader.
+        /// </summary>
+        /// <param name="name">The parameter in the shader to set.</param>
+        /// <param name="textureSource">The path to an image to load as a texture.</param>
+        public void SetParameter(Enum name, string textureSource) {
+            SetParameter(Parameter(name), textureSource);
         }
 
         #endregion

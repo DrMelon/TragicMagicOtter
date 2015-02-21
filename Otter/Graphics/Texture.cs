@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace Otter {
@@ -11,64 +8,32 @@ namespace Otter {
     /// </summary>
     public class Texture {
 
-        #region Public Properties
+        #region Public Fields
 
         /// <summary>
-        /// The file path source if the texture was loaded from a file.
+        /// The default setting to use for smoothing textures.
+        /// Much easier to set this at the start of a program rather than
+        /// adjust the settings for every single texture you use.
         /// </summary>
-        public string Source { get; private set; }
+        public static bool DefaultSmooth = false;
 
-        /// <summary>
-        /// Determines if the source texture is smoothed when transformed.
-        /// </summary>
-        public bool Smooth { get { return texture.Smooth; } set { texture.Smooth = value; } }
+        #endregion Public Fields
 
-        /// <summary>
-        /// The array of pixels in the texture in bytes.
-        /// </summary>
-        public byte[] Pixels {
-            get {
-                CreateImage();
-                return image.Pixels;
-            }
-            set {
-                image = new SFML.Graphics.Image((uint)Width, (uint)Height, value);
-                Update();
-            }
-        }
+        #region Internal Fields
 
-        /// <summary>
-        /// The width of the Texture.
-        /// </summary>
-        public int Width {
-            get { return (int)texture.Size.X; }
-        }
+        internal bool needsUpdate = false;
 
-        /// <summary>
-        /// The height of the texture.
-        /// </summary>
-        public int Height {
-            get { return (int)texture.Size.Y; }
-        }
+        internal SFML.Graphics.Texture texture;
 
-        /// <summary>
-        /// The rectangle created by the Texture's width and height.
-        /// </summary>
-        public Rectangle Region {
-            get { return new Rectangle(0, 0, Width, Height); }
-        }
-
-        #endregion
+        #endregion Internal Fields
 
         #region Private Fields
 
-        internal bool needsUpdate = false;
-        internal SFML.Graphics.Texture texture;
         SFML.Graphics.Image image;
 
-        #endregion
+        #endregion Private Fields
 
-        #region Constructors
+        #region Public Constructors
 
         /// <summary>
         /// Load a texture from a file path.
@@ -84,9 +49,7 @@ namespace Otter {
             }
             Source = source;
 
-            if (Game.Instance != null) {
-                texture.Smooth = Game.Instance.SmoothAll;
-            }
+            texture.Smooth = DefaultSmooth;
         }
 
         /// <summary>
@@ -103,9 +66,7 @@ namespace Otter {
             }
             Source = "stream";
 
-            if (Game.Instance != null) {
-                texture.Smooth = Game.Instance.SmoothAll;
-            }
+            texture.Smooth = DefaultSmooth;
         }
 
         /// <summary>
@@ -117,9 +78,7 @@ namespace Otter {
 
             Source = copy.Source;
 
-            if (Game.Instance != null) {
-                texture.Smooth = Game.Instance.SmoothAll;
-            }
+            texture.Smooth = DefaultSmooth;
         }
 
         /// <summary>
@@ -140,9 +99,7 @@ namespace Otter {
             }
             Source = "byte array";
 
-            if (Game.Instance != null) {
-                texture.Smooth = Game.Instance.SmoothAll;
-            }
+            texture.Smooth = DefaultSmooth;
         }
 
         /// <summary>
@@ -158,14 +115,104 @@ namespace Otter {
 
             Source = width + " x " + height + " texture";
 
-            if (Game.Instance != null) {
-                texture.Smooth = Game.Instance.SmoothAll;
+            texture.Smooth = DefaultSmooth;
+        }
+
+        #endregion Public Constructors
+
+        #region Internal Constructors
+
+        /// <summary>
+        /// Load a texture from an SFML texture.
+        /// </summary>
+        /// <param name="texture"></param>
+        internal Texture(SFML.Graphics.Texture texture) {
+            this.texture = texture;
+        }
+
+        #endregion Internal Constructors
+
+        #region Public Properties
+
+        /// <summary>
+        /// The height of the texture.
+        /// </summary>
+        public int Height {
+            get { return (int)texture.Size.Y; }
+        }
+
+        /// <summary>
+        /// The array of pixels in the texture in bytes.
+        /// </summary>
+        public byte[] Pixels {
+            get {
+                CreateImage();
+                return image.Pixels;
+            }
+            set {
+                image = new SFML.Graphics.Image((uint)Width, (uint)Height, value);
+                Update();
             }
         }
 
-        #endregion
+        /// <summary>
+        /// The rectangle created by the Texture's width and height.
+        /// </summary>
+        public Rectangle Region {
+            get { return new Rectangle(0, 0, Width, Height); }
+        }
+
+        /// <summary>
+        /// Determines if the source texture is smoothed when transformed.
+        /// </summary>
+        public bool Smooth { get { return texture.Smooth; } set { texture.Smooth = value; } }
+
+        /// <summary>
+        /// The file path source if the texture was loaded from a file.
+        /// </summary>
+        public string Source { get; private set; }
+        /// <summary>
+        /// The width of the Texture.
+        /// </summary>
+        public int Width {
+            get { return (int)texture.Size.X; }
+        }
+
+        #endregion Public Properties
+
+        #region Internal Properties
+
+        internal SFML.Graphics.Texture SFMLTexture {
+            get { return texture; }
+        }
+
+        #endregion Internal Properties
 
         #region Public Methods
+
+        /// <summary>
+        /// Copy pixels from one texture to another using blitting.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="fromX"></param>
+        /// <param name="fromY"></param>
+        /// <param name="toX"></param>
+        /// <param name="toY"></param>
+        public void CopyPixels(Texture from, int fromX, int fromY, int toX, int toY) {
+            CreateImage();
+
+            image.Copy(from.image, (uint)toX, (uint)toY, new SFML.Graphics.IntRect(fromX, fromY, from.Width, from.Height));
+        }
+
+        /// <summary>
+        /// Loads the image internally in the texture for image manipulation.  This is
+        /// handled automatically, but it's exposed so that it can be manually controlled.
+        /// </summary>
+        public void CreateImage() {
+            if (image == null) {
+                image = texture.CopyToImage();
+            }
+        }
 
         /// <summary>
         /// Get the Color from a specific pixel on the texture.
@@ -181,6 +228,16 @@ namespace Otter {
             CreateImage();
 
             return new Color(texture.CopyToImage().GetPixel((uint)x, (uint)y));
+        }
+
+        /// <summary>
+        /// Save the texture to a file. The supported image formats are bmp, png, tga and jpg.
+        /// </summary>
+        /// <param name="path">The file path to save to. The type of image is deduced from the extension.</param>
+        public void SaveToFile(string path) {
+            CreateImage();
+
+            image.SaveToFile(path);
         }
 
         /// <summary>
@@ -223,41 +280,6 @@ namespace Otter {
                 }
             }
         }
-
-        /// <summary>
-        /// Copy pixels from one texture to another using blitting.
-        /// </summary>
-        /// <param name="from"></param>
-        /// <param name="fromX"></param>
-        /// <param name="fromY"></param>
-        /// <param name="toX"></param>
-        /// <param name="toY"></param>
-        public void CopyPixels(Texture from, int fromX, int fromY, int toX, int toY) {
-            CreateImage();
-
-            image.Copy(from.image, (uint)toX, (uint)toY, new SFML.Graphics.IntRect(fromX, fromY, from.Width, from.Height));
-        }
-
-        /// <summary>
-        /// Save the texture to a file. The supported image formats are bmp, png, tga and jpg.
-        /// </summary>
-        /// <param name="path">The file path to save to. The type of image is deduced from the extension.</param>
-        public void SaveToFile(string path) {
-            CreateImage();
-
-            image.SaveToFile(path);
-        }
-
-        /// <summary>
-        /// Loads the image internally in the texture for image manipulation.  This is
-        /// handled automatically, but it's exposed so that it can be manually controlled.
-        /// </summary>
-        public void CreateImage() {
-            if (image == null) {
-                image = texture.CopyToImage();
-            }
-        }
-
         /// <summary>
         /// Updates the texture to reflect changes made from SetPixel.
         /// </summary>
@@ -268,23 +290,6 @@ namespace Otter {
             }
         }
 
-        #endregion
-
-        #region Internal
-
-        /// <summary>
-        /// Load a texture from an SFML texture.
-        /// </summary>
-        /// <param name="texture"></param>
-        internal Texture(SFML.Graphics.Texture texture) {
-            this.texture = texture;
-        }
-
-        internal SFML.Graphics.Texture SFMLTexture {
-            get { return texture; }
-        }
-
-        #endregion
-
+        #endregion Public Methods
     }
 }

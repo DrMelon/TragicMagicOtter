@@ -1,11 +1,8 @@
-﻿using System;
+﻿using SFML.Graphics;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
-using SFML.Window;
-using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -43,6 +40,8 @@ namespace Otter {
     ///     {waveOffsetY:0} - Set the wave offset for the Y axis.
     ///     {waveOffset:0} - Set the wave offset for the X and Y axes.
     ///     {offset:0} - Set the offset rate for characters.
+    ///     {charOffsetX:0} - Set the character offset X for the BitmapFont.
+    ///     {charOffsetY:0} - Set the character offset Y for the BitmapFont.
     /// </code>
     /// </example>
     public class RichText : Graphic {
@@ -113,6 +112,11 @@ namespace Otter {
         float currentShadowX = 0;
         float currentShadowY = 0;
         float currentOutlineThickness = 0;
+        int currentCharOffsetX = 0;
+        int currentCharOffsetY = 0;
+        float currentScaleX = 1;
+        float currentScaleY = 1;
+        float currentAngle = 0;
         bool currentBold = false;
 
         float currentShakeX = 0;
@@ -135,7 +139,7 @@ namespace Otter {
 
         List<float> cachedLineWidths = new List<float>();
 
-        SFML.Graphics.Font font;
+        BaseFont font;
 
         int charSize = 16;
 
@@ -286,6 +290,24 @@ namespace Otter {
         public Color DefaultOutlineColor = Color.White;
 
         /// <summary>
+        /// The default x scale of the characters.
+        /// Will not take effect until the string changes, or Refresh() is called.
+        /// </summary>
+        public float DefaultScaleX = 1;
+
+        /// <summary>
+        /// The default y scale of the characters.
+        /// Will not take effect until the string changes, or Refresh() is called.
+        /// </summary>
+        public float DefaultScaleY = 1;
+
+        /// <summary>
+        /// The default angle of the characters.
+        /// Will not take effect until the string changes, or Refresh() is called.
+        /// </summary>
+        public float DefaultAngle = 0;
+
+        /// <summary>
         /// The line height. 1 is 100% of the normal line height for the font.
         /// </summary>
         public float LineHeight = 1;
@@ -294,6 +316,16 @@ namespace Otter {
         /// The letter spacing. 1 is 100% of the normal letter spacing.
         /// </summary>
         public float LetterSpacing = 1;
+
+        /// <summary>
+        /// How far to offset the text rendering horizontally from the origin.
+        /// </summary>
+        public float OffsetX;
+
+        /// <summary>
+        /// How far to offset the text rendering vertically from the origin.
+        /// </summary>
+        public float OffsetY;
 
         /// <summary>
         /// The default config.
@@ -337,7 +369,7 @@ namespace Otter {
         /// The line spacing between each vertical line.
         /// </summary>
         public int LineSpacing {
-            get { return font.GetLineSpacing((uint)charSize); }
+            get { return font.GetLineSpacing(charSize); }
         }
 
         /// <summary>
@@ -471,7 +503,7 @@ namespace Otter {
         /// <param name="textHeight">The height of the text box.</param>
         public RichText(string str, string font = "", int size = 16, int textWidth = -1, int textHeight = -1)
             : base() {
-            Initialize(str, font, size, textWidth, textHeight);
+            Initialize(str, (font == "" ? new Font() : new Font(font)), size, textWidth, textHeight);
         }
 
         /// <summary>
@@ -484,8 +516,11 @@ namespace Otter {
         /// <param name="textHeight">The height of the text box.</param>
         public RichText(string str, Stream font, int size = 16, int textWidth = -1, int textHeight = -1)
             : base() {
-            Initialize(str, font, size, textWidth, textHeight);
+            Initialize(str, new Font(font), size, textWidth, textHeight);
+        }
 
+        public RichText(string str, BaseFont font, int size = 16, int textWidth = -1, int textHeight = -1) : base() {
+            Initialize(str, font, size, textWidth, textHeight);
         }
 
         /// <summary>
@@ -518,10 +553,16 @@ namespace Otter {
             DefaultCharColor3 = config.CharColor3;
             DefaultShadowColor = config.ShadowColor;
             DefaultOutlineColor = config.OutlineColor;
+            DefaultScaleX = config.ScaleX;
+            DefaultScaleY = config.ScaleY;
+            DefaultAngle = config.Angle;
 
+            LineHeight = config.LineHeight;
             LetterSpacing = config.LetterSpacing;
             MonospaceWidth = config.MonospaceWidth;
             TextAlign = config.TextAlign;
+            OffsetX = config.OffsetX;
+            OffsetY = config.OffsetY;
 
             if (config.String != "") {
                 str = config.String;
@@ -559,26 +600,20 @@ namespace Otter {
 
         #region Private Methods
 
-        void Initialize(string str, object font, int size, int textWidth, int textHeight) {
+        void Initialize(string str, BaseFont font, int size, int textWidth, int textHeight) {
             Dynamic = true;
 
-            if (font is string) {
-                if ((string)font == "") {
-                    this.font = Fonts.DefaultFont;
-                }
-                else {
-                    this.font = Fonts.Load((string)font);
-                }
-            }
-            else {
-                this.font = Fonts.Load((Stream)font);
-            }
+            this.font = font;
 
             charSize = size;
             TextWidth = textWidth;
             TextHeight = textHeight;
             String = str;
             roundRendering = false;
+
+            if (font is BitmapFont) {
+                charSize = 0; // Char size shouldn't matter for bitmap fonts?
+            }
         }
 
         int Advance(Glyph glyph) {
@@ -586,12 +621,12 @@ namespace Otter {
             return glyph.Advance;
         }
 
-        Glyph Glyph(uint charCode) {
-            var g = font.GetGlyph(charCode, (uint)charSize, currentBold);
+        Glyph Glyph(char charCode) {
+            var g = font.GetGlyph(charCode, charSize, currentBold);
 
             //update otter texture because SFML font texture updates
             if (!glyphs.Contains(charCode)) {
-                SetTexture(new Texture(font.GetTexture((uint)charSize)));
+                SetTexture(font.GetTexture(charSize));
                 glyphs.Add(charCode);
             }
 
@@ -600,11 +635,13 @@ namespace Otter {
 
         void PrecalculateLineWidths() {
             if (cachedLineWidths.Count > 0) return; // Already calculated, will reset when string changes.
+            //Console.WriteLine("Precalculate line width go");
             int lineNumber = 0;
             foreach (var line in Lines) {
                 cachedLineWidths.Add(GetLineWidth(lineNumber));
                 lineNumber++;
             }
+            //Console.WriteLine("cached line width count {0}", cachedLineWidths.Count);
         }
 
         void ApplyCommand(string command, string args) {
@@ -689,6 +726,21 @@ namespace Otter {
                 case "bold":
                     currentBold = int.Parse(args) > 0;
                     break;
+                case "charOffsetX":
+                    currentCharOffsetX = int.Parse(args);
+                    break;
+                case "charOffsetY":
+                    currentCharOffsetY = int.Parse(args);
+                    break;
+                case "scaleX":
+                    currentScaleX = float.Parse(args);
+                    break;
+                case "scaleY":
+                    currentScaleY = float.Parse(args);
+                    break;
+                case "angle":
+                    currentAngle = float.Parse(args);
+                    break;
             }
         }
 
@@ -769,7 +821,12 @@ namespace Otter {
                         Color3 = currentCharColor3,
                         ShakeX = currentShakeX,
                         ShakeY = currentShakeY,
-                        Timer = timer
+                        Timer = timer,
+                        CharOffsetX = currentCharOffsetX,
+                        CharOffsetY = currentCharOffsetY,
+                        ScaleX = currentScaleX,
+                        ScaleY = currentScaleY,
+                        Angle = currentAngle
                     };
 
                     chars.Add(rtchar);
@@ -778,7 +835,7 @@ namespace Otter {
 
             Lines = CleanString.Split('\n');
 
-            totalHeight = (int)Math.Ceiling(NumLines * font.GetLineSpacing((uint)charSize) * LineHeight);
+            totalHeight = (int)Math.Ceiling(NumLines * font.GetLineSpacing(charSize) * LineHeight);
         }
 
         void Clear() {
@@ -801,6 +858,11 @@ namespace Otter {
             currentSineRateX = DefaultSineRateX;
             currentSineRateY = DefaultSineRateY;
             currentOffsetAmount = DefaultOffsetAmount;
+            currentCharOffsetX = 0;
+            currentCharOffsetY = 0;
+            currentScaleX = 1;
+            currentScaleY = 1;
+            currentAngle = 0;
         }
 
         protected override void UpdateDrawable() {
@@ -808,7 +870,8 @@ namespace Otter {
 
             SFMLVertices.Clear();
 
-            PrecalculateLineWidths();
+            // No precalculate for now, it just doubles the loops I think.
+            //PrecalculateLineWidths();
 
             advanceSpace = Advance(Glyph(' ')); //Figure out space ahead of time.
 
@@ -817,8 +880,8 @@ namespace Otter {
 
             int currentLine = 0;
 
-            x = LineStartPosition(currentLine);
-            y = charSize;
+            x = LineStartPosition(currentLine) + OffsetX;
+            y = charSize + OffsetY;
 
             float lineLength = 0;
 
@@ -828,6 +891,16 @@ namespace Otter {
             float minX = charSize;
 
             var quadCount = 0;
+
+            var buildLineCache = false;
+
+            if (cachedLineWidths.Count == 0) {
+                //build cached line widths this draw.
+                //cache will be cleared on string change
+                buildLineCache = true;
+            }
+
+            char prevChar = (char)0;
 
             for (var i = 0; i < chars.Count; i++) {
 
@@ -848,7 +921,7 @@ namespace Otter {
                             lineLength += advanceSpace * 4 * LetterSpacing;
                             break;
                         case '\n':
-                            cachedLineWidths.Add(lineLength);
+                            if (buildLineCache) cachedLineWidths.Add(lineLength);
                             lineLength = 0;
 
                             y += LineSpacing * LineHeight;
@@ -867,6 +940,13 @@ namespace Otter {
                     var rect = glyph.TextureRect;
                     var bounds = glyph.Bounds;
 
+                    // Char offset only works with default formatted bitmap fonts!!
+                    rect.Top += chars[i].CharOffsetY;
+                    rect.Left += chars[i].CharOffsetX;
+
+                    // This is how you do kerning I guess
+                    x += font.GetKerning(prevChar, chars[i].Character, FontSize);
+
                     var cx = chars[i].OffsetX;
                     var cy = chars[i].OffsetY;
 
@@ -875,44 +955,68 @@ namespace Otter {
                     var top = bounds.Top;
                     var bottom = bounds.Top + bounds.Height;
 
+                    var x1y1 = new Vector2(cx + x + left, cy + y + top);
+                    var x2y1 = new Vector2(cx + x + right, cy + y + top);
+                    var x2y2 = new Vector2(cx + x + right, cy + y + bottom);
+                    var x1y2 = new Vector2(cx + x + left, cy + y + bottom);
+
                     var u1 = rect.Left;
                     var v1 = rect.Top;
                     var u2 = rect.Left + rect.Width;
                     var v2 = rect.Top + rect.Height;
 
-                    // Draw shadow
+                    var charCenterX = cx + x + bounds.Left + bounds.Width / 2;
+                    var charCenterY = cy + y + bounds.Top + bounds.Height / 2;
 
+                    var charCenter = new Vector2(charCenterX, charCenterY);
+
+                    var scaleX = chars[i].ScaleX;
+                    var scaleY = chars[i].ScaleY;
+                    var angle = chars[i].Angle;
+
+                    // Scale the character verticies
+                    x1y1 = Util.ScaleAround(x1y1, charCenter, scaleX, scaleY);
+                    x1y2 = Util.ScaleAround(x1y2, charCenter, scaleX, scaleY);
+                    x2y2 = Util.ScaleAround(x2y2, charCenter, scaleX, scaleY);
+                    x2y1 = Util.ScaleAround(x2y1, charCenter, scaleX, scaleY);
+
+                    // Rotate the character verticies
+                    x1y1 = Util.RotateAround(x1y1, charCenter, angle);
+                    x1y2 = Util.RotateAround(x1y2, charCenter, angle);
+                    x2y2 = Util.RotateAround(x2y2, charCenter, angle);
+                    x2y1 = Util.RotateAround(x2y1, charCenter, angle);
+
+                    // Draw shadow
                     Color nextColor;
 
                     if (chars[i].ShadowX != 0 || chars[i].ShadowY != 0) {
-                        var shadowx = cx + chars[i].ShadowX;
-                        var shadowy = cy + chars[i].ShadowY;
+                        var shadowx = chars[i].ShadowX;
+                        var shadowy = chars[i].ShadowY;
 
                         nextColor = chars[i].ShadowColor * Color;
 
-                        SFMLVertices.Append(shadowx + x + bounds.Left, shadowy + y + bounds.Top, nextColor, rect.Left, rect.Top);
-                        SFMLVertices.Append(shadowx + x + bounds.Left + bounds.Width, shadowy + y + bounds.Top, nextColor, rect.Left + rect.Width, rect.Top);
-                        SFMLVertices.Append(shadowx + x + bounds.Left + bounds.Width, shadowy + y + bounds.Top + bounds.Height, nextColor, rect.Left + rect.Width, rect.Top + rect.Height);
-                        SFMLVertices.Append(shadowx + x + bounds.Left, shadowy + y + bounds.Top + bounds.Height, nextColor, rect.Left, rect.Top + rect.Height);
+                        Append(shadowx + x1y1.X, shadowy + x1y1.Y, nextColor, u1, v1);
+                        Append(shadowx + x2y1.X, shadowy + x2y1.Y, nextColor, u2, v1);
+                        Append(shadowx + x2y2.X, shadowy + x2y2.Y, nextColor, u2, v2);
+                        Append(shadowx + x1y2.X, shadowy + x1y2.Y, nextColor, u1, v2);
 
                         quadCount++;
                     }
 
                     // Draw outline
-
                     if (chars[i].OutlineThickness > 0) {
                         var outline = chars[i].OutlineThickness;
                         nextColor = chars[i].OutlineColor * Color;
 
                         for (float o = outline * 0.5f; o < outline; o += outline * 0.5f) {
                             for (float r = 0; r < 360; r += 45) {
-                                var outlinex = Util.PolarX(r, o) + cx;
-                                var outliney = Util.PolarY(r, o) + cy;
+                                var outlinex = Util.PolarX(r, o);
+                                var outliney = Util.PolarY(r, o);
 
-                                SFMLVertices.Append(outlinex + x + bounds.Left, outliney + y + bounds.Top, nextColor, rect.Left, rect.Top);
-                                SFMLVertices.Append(outlinex + x + bounds.Left + bounds.Width, outliney + y + bounds.Top, nextColor, rect.Left + rect.Width, rect.Top);
-                                SFMLVertices.Append(outlinex + x + bounds.Left + bounds.Width, outliney + y + bounds.Top + bounds.Height, nextColor, rect.Left + rect.Width, rect.Top + rect.Height);
-                                SFMLVertices.Append(outlinex + x + bounds.Left, outliney + y + bounds.Top + bounds.Height, nextColor, rect.Left, rect.Top + rect.Height);
+                                Append(outlinex + x1y1.X, outliney + x1y1.Y, nextColor, u1, v1);
+                                Append(outlinex + x2y1.X, outliney + x2y1.Y, nextColor, u2, v1);
+                                Append(outlinex + x2y2.X, outliney + x2y2.Y, nextColor, u2, v2);
+                                Append(outlinex + x1y2.X, outliney + x1y2.Y, nextColor, u1, v2);
 
                                 quadCount++;
                             }
@@ -920,26 +1024,25 @@ namespace Otter {
                     }
 
                     // Draw character
-
                     nextColor = chars[i].Color.Copy() * Color;
                     nextColor *= chars[i].Color0;
-
-                    Append(cx + x + left, cy + y + top, nextColor, u1, v1);
+                    
+                    Append(x1y1.X, x1y1.Y, nextColor, u1, v1);
 
                     nextColor = chars[i].Color.Copy() * Color;
                     nextColor *= chars[i].Color1;
 
-                    Append(cx + x + right, cy + y + top, nextColor, u2, v1);
+                    Append(x2y1.X, x2y1.Y, nextColor, u2, v1);
 
                     nextColor = chars[i].Color.Copy() * Color;
                     nextColor *= chars[i].Color2;
 
-                    Append(cx + x + right, cy + y + bottom, nextColor, u2, v2);
+                    Append(x2y2.X, x2y2.Y, nextColor, u2, v2);
 
                     nextColor = chars[i].Color.Copy() * Color;
                     nextColor *= chars[i].Color3;
 
-                    Append(cx + x + left, cy + y + bottom, nextColor, u1, v2);
+                    Append(x1y2.X, x1y2.Y, nextColor, u1, v2);
 
                     // Keep track of how many quads for debugging purposes
                     quadCount++;
@@ -957,11 +1060,13 @@ namespace Otter {
                     // Keep track of line length separately
                     lineLength += Advance(glyph) * LetterSpacing;
 
+                    // Keep track of prev char for kernin'
+                    prevChar = chars[i].Character;
                 }
             }
 
             // Handle Length of final line
-            cachedLineWidths.Add(lineLength);
+            if (buildLineCache) cachedLineWidths.Add(lineLength);
 
             // Figure out dimensions
             if (AutoWidth) {
@@ -1015,14 +1120,20 @@ namespace Otter {
         /// Center the RichText's Y origin.  This factors in the RichText's top bounds.
         /// </summary>
         public void CenterTextOriginY() {
-            OriginY = HalfHeight + BoundsTop;
+            OriginY = Util.Round(HalfHeight + BoundsTop);
         }
 
         /// <summary>
         /// Center the RichText's X origin.  This factors in the RichText's left bounds.
         /// </summary>
         public void CenterTextOriginX() {
-            OriginX = HalfWidth + BoundsLeft;
+            OriginX = Util.Round(HalfWidth + BoundsLeft);
+        }
+
+        public override void CenterOrigin() {
+            // Rounding to an int for this because origins of 0.5f cause bad text blurring.
+            OriginX = Util.Round(HalfWidth);
+            OriginY = Util.Round(HalfHeight);
         }
 
         /// <summary>
@@ -1100,7 +1211,8 @@ namespace Otter {
         /// <returns>The length of the line in pixels.</returns>
         public int GetLineWidth(int lineNumber) {
             if (lineNumber < 0 || lineNumber >= NumLines) throw new ArgumentOutOfRangeException("Line doesn't exist in string!");
-
+            if (lineNumber < cachedLineWidths.Count) return (int)Math.Ceiling(cachedLineWidths[lineNumber]);
+            
             //This is very slow on large text objects, but I'm not sure how to get around that!
 
             var line = Lines[lineNumber];
@@ -1135,7 +1247,30 @@ namespace Otter {
             base.Update();
         }
 
+        /// <summary>
+        /// Gets the font.
+        /// </summary>
+        /// <typeparam name="T">The specific type of Font.</typeparam>
+        /// <returns>The font as type font type T.</returns>
+        public T GetFont<T>() where T : BaseFont {
+            return (T)font;
+        }
+
         #endregion
+
+        /// <summary>
+        /// Retrieve the RichTextCharacter from the string.
+        /// </summary>
+        /// <param name="index">The index of the character.</param>
+        /// <returns>The RichTextCharacter at that index in the RichText string.</returns>
+        public RichTextCharacter this[int index] {
+            get {
+                return chars[index];
+            }
+            set {
+                chars[index] = value;
+            }
+        }
 
     }
 
@@ -1152,7 +1287,7 @@ namespace Otter {
     /// <summary>
     /// Internal class for managing characters in RichText.
     /// </summary>
-    class RichTextCharacter {
+    public class RichTextCharacter {
 
         #region Private Fields
 
@@ -1246,6 +1381,16 @@ namespace Otter {
         public float CharOffset;
 
         /// <summary>
+        /// The X offset of the character.  BitmapFont only.
+        /// </summary>
+        public int CharOffsetX = 0;
+
+        /// <summary>
+        /// The Y offset of the character.  BitmapFont only.
+        /// </summary>
+        public int CharOffsetY = 0;
+
+        /// <summary>
         /// The offset amount for each character.
         /// </summary>
         public float OffsetAmount = 10;
@@ -1280,6 +1425,31 @@ namespace Otter {
         /// </summary>
         public bool Bold = false;
 
+        /// <summary>
+        /// The X scale of the character.
+        /// </summary>
+        public float ScaleX = 1;
+
+        /// <summary>
+        /// The Y scale of the character.
+        /// </summary>
+        public float ScaleY = 1;
+
+        /// <summary>
+        /// The angle of the character.
+        /// </summary>
+        public float Angle;
+
+        /// <summary>
+        /// The X position offset of the character.
+        /// </summary>
+        public float X;
+
+        /// <summary>
+        /// The Y position offset of the character.
+        /// </summary>
+        public float Y;
+
         #endregion
 
         #region Public Properties
@@ -1289,7 +1459,7 @@ namespace Otter {
         /// </summary>
         public float OffsetX {
             get {
-                return finalShakeX + finalSinX;
+                return finalShakeX + finalSinX + X;
             }
         }
 
@@ -1298,7 +1468,7 @@ namespace Otter {
         /// </summary>
         public float OffsetY {
             get {
-                return finalShakeY + finalSinY;
+                return finalShakeY + finalSinY + Y;
             }
         }
 
@@ -1387,7 +1557,7 @@ namespace Otter {
         public float SineOffsetY = 0;
 
         /// <summary>
-        /// The offset amount for each character.
+        /// The offset amount for each character for sine wave related transformations.
         /// </summary>
         public float OffsetAmount = 10;
 
@@ -1451,7 +1621,40 @@ namespace Otter {
         /// </summary>
         public Color OutlineColor = Color.White;
 
+        /// <summary>
+        /// The X offset of the character.  BitmapFont only.
+        /// </summary>
+        public int CharOffsetX = 0;
+
+        /// <summary>
+        /// The Y offset of the character.  BitmapFont only.
+        /// </summary>
+        public int CharOffsetY = 0;
+
+        /// <summary>
+        /// The X scale of the character.
+        /// </summary>
+        public float ScaleX = 1;
+
+        /// <summary>
+        /// The Y scale of the character.
+        /// </summary>
+        public float ScaleY = 1;
+
+        /// <summary>
+        /// The angle of the character.
+        /// </summary>
+        public float Angle = 0;
+
+        /// <summary>
+        /// The spacing between each character.
+        /// </summary>
         public float LetterSpacing = 1.0f;
+
+        /// <summary>
+        /// The line height between each line. Default is 1.
+        /// </summary>
+        public float LineHeight = 1.0f;
 
         /// <summary>
         /// Controls the spacing between each character. If set above 0 the text will use a monospacing.
@@ -1464,9 +1667,9 @@ namespace Otter {
         public TextAlign TextAlign = TextAlign.Left;
 
         /// <summary>
-        /// The filepath to the font to use.
+        /// The font to use.
         /// </summary>
-        public string Font = "";
+        public BaseFont Font;
 
         /// <summary>
         /// The font size.
@@ -1487,6 +1690,16 @@ namespace Otter {
         /// The height of the text block.
         /// </summary>
         public int TextHeight = -1;
+
+        /// <summary>
+        /// How far to offset the text rendering horizontally from the origin.
+        /// </summary>
+        public float OffsetX;
+
+        /// <summary>
+        /// How far to offset the text rendering vertically from the origin.
+        /// </summary>
+        public float OffsetY;
 
         #endregion
         

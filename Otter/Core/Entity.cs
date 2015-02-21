@@ -1,97 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using SFML;
-using SFML.Graphics;
-using SFML.Window;
 
 namespace Otter {
+
     /// <summary>
     /// Class used for a game object. The bread and butter of your game. Entities are added to Scenes which are controlled by the Game.
     /// </summary>
     public class Entity {
 
-        #region Private Fields
-
-        List<Component> componentsToRemove = new List<Component>();
-        List<Component> componentsToAdd = new List<Component>();
-
-        bool updatedOnce = false;
-
-        #endregion
-
-        #region Private Methods
-
-        void RenderEntity() {
-            Prerender();
-
-            foreach (var c in Components) {
-                if (!c.RenderAfterEntity) {
-                    c.Render();
-                }
-            }
-
-            foreach (var g in Graphics) {
-                if (g.Relative) {
-                    g.Render(X, Y);
-                }
-                else {
-                    g.Render(0, 0);
-                }
-            }
-
-            Render();
-
-            if (OnRender != null) {
-                OnRender();
-            }
-
-            foreach (var c in Components) {
-                if (c.RenderAfterEntity) {
-                    c.Render();
-                }
-            }
-        }
-
-        #endregion
-
         #region Public Fields
 
         /// <summary>
-        /// The X position of the entity.
+        /// The X position of the Entity.
         /// </summary>
         public float X;
 
         /// <summary>
-        /// The Y position of the entity.
+        /// The Y position of the Entity.
         /// </summary>
         public float Y;
 
         /// <summary>
-        /// How long the entity has been active.
+        /// How long the Entity has been active.
         /// </summary>
         public float Timer;
 
         /// <summary>
-        /// Determines if the entity will render.
+        /// Determines if the Entity will render.
         /// </summary>
         public bool Visible = true;
 
         /// <summary>
-        /// Determines if the entity will collide with other entities. The entity can still check for
+        /// Determines if the Entity will collide with other entities. The entity can still check for
         /// collisions, but will not register as a collision with other entities.
         /// </summary>
         public bool Collidable = true;
 
         /// <summary>
-        /// Deteremines if the entity's update functions will run automatically from the Scene.
+        /// Deteremines if the Entity's update functions will run automatically from the Scene.
         /// </summary>
         public bool AutoUpdate = true;
 
         /// <summary>
-        /// Determines if the entiti's render functions will run automatically from the Scene.
+        /// Determines if the Entity's render functions will run automatically from the Scene.
         /// </summary>
         public bool AutoRender = true;
 
@@ -103,32 +54,32 @@ namespace Otter {
         /// <summary>
         /// An action that fires when the entity is added to a Scene.
         /// </summary>
-        public Action OnAdded;
+        public Action OnAdded = delegate { };
 
         /// <summary>
         /// An action that fires when the entity is updated.
         /// </summary>
-        public Action OnUpdate;
+        public Action OnUpdate = delegate { };
 
         /// <summary>
         /// An action that fires in the entity's UpdateFirst().
         /// </summary>
-        public Action OnUpdateFirst;
+        public Action OnUpdateFirst = delegate { };
 
         /// <summary>
         /// An action that is fired in the entity's UpdateLast().
         /// </summary>
-        public Action OnUpdateLast;
+        public Action OnUpdateLast = delegate { };
 
         /// <summary>
         /// An action that fires when the entity is removed from a Scene.
         /// </summary>
-        public Action OnRemoved;
+        public Action OnRemoved = delegate { };
 
         /// <summary>
         /// An action that fires when the entity is rendered.
         /// </summary>
-        public Action OnRender;
+        public Action OnRender = delegate { };
 
         /// <summary>
         /// The name of this entity. Default's to the Type name.
@@ -156,7 +107,64 @@ namespace Otter {
         /// </summary>
         public float LifeSpan;
 
-        #endregion
+        #endregion Public Fields
+
+        #region Internal Fields
+
+        internal bool MarkedForRemoval = false;
+        internal bool MarkedForAdd = false;
+
+        internal int
+            oldLayer,
+            oldOrder;
+
+        #endregion Internal Fields
+
+        #region Private Fields
+
+        private List<Component> componentsToRemove = new List<Component>();
+        private List<Component> componentsToAdd = new List<Component>();
+
+        private bool updatedOnce = false;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Create an entity.
+        /// </summary>
+        /// <param name="x">The x position to place the entity.</param>
+        /// <param name="y">The y position to place the entity.</param>
+        /// <param name="graphic">The graphic to assign to the entity.  Defaults to null.</param>
+        /// <param name="collider">The collider to assign to the entity.  Defaults to null.</param>
+        /// <param name="name">The name of the entity. Defaults to the type name.</param>
+        public Entity(float x = 0, float y = 0, Graphic graphic = null, Collider collider = null, string name = "") {
+            X = x;
+            Y = y;
+
+            Graphics = new List<Graphic>();
+            Components = new List<Component>();
+            Colliders = new List<Collider>();
+            Surfaces = new List<Surface>();
+
+            if (graphic != null) {
+                Graphic = graphic;
+            }
+
+            if (collider != null) {
+                Collider = collider;
+            }
+
+            if (name == "") {
+                Name = this.GetType().Name;
+            }
+            else {
+                Name = name;
+            }
+        }
+
+        #endregion Public Constructors
 
         #region Public Properties
 
@@ -186,7 +194,7 @@ namespace Otter {
         public Scene Scene { get; internal set; }
 
         /// <summary>
-        /// Returns true if the entity is currently in a Scene.
+        /// Returns true if the entity is currently in a Scene, or is queued to be added to a Scene next update.
         /// </summary>
         public bool IsInScene {
             get {
@@ -280,44 +288,18 @@ namespace Otter {
             }
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
-        /// Create an entity.
+        /// Returns the first available graphic, or set the graphic.
         /// </summary>
-        /// <param name="x">The x position to place the entity.</param>
-        /// <param name="y">The y position to place the entity.</param>
-        /// <param name="graphic">The graphic to assign to the entity.  Defaults to null.</param>
-        /// <param name="collider">The collider to assign to the entity.  Defaults to null.</param>
-        /// <param name="name">The name of the entity. Defaults to the type name.</param>
-        public Entity(float x = 0, float y = 0, Graphic graphic = null, Collider collider = null, string name = "") {
-            X = x;
-            Y = y;
-
-            Graphics = new List<Graphic>();
-            Components = new List<Component>();
-            Colliders = new List<Collider>();
-            Surfaces = new List<Surface>();
-
-            if (graphic != null) {
-                Graphic = graphic;
+        public Graphic Graphic {
+            get {
+                if (Graphics.Count == 0) return null;
+                return Graphics[0];
             }
-
-            if (collider != null) {
-                Collider = collider;
-            }
-
-            if (name == "") {
-                Name = this.GetType().Name;
-            }
-            else {
-                Name = name;
-            }
+            set { SetGraphic(value); }
         }
 
-        #endregion
+        #endregion Public Properties
 
         #region Public Methods
 
@@ -354,8 +336,7 @@ namespace Otter {
         /// <param name="axis">The axis to add from.</param>
         /// <param name="multiplier">The amount to muliply the axis values by before adding.</param>
         public void AddPosition(Axis axis, float multiplier = 1) {
-            X += axis.X * multiplier;
-            Y += axis.Y * multiplier;
+            AddPosition(axis.X * multiplier, axis.Y * multiplier);
         }
 
         /// <summary>
@@ -363,12 +344,11 @@ namespace Otter {
         /// </summary>
         /// <param name="vector">The Vector2 to add to the position.</param>
         public void AddPosition(Vector2 vector) {
-            X += vector.X;
-            Y += vector.Y;
+            AddPosition(vector.X, vector.Y);
         }
 
         /// <summary>
-        /// Set the position of the entity.
+        /// Set the position of the Entity.
         /// </summary>
         /// <param name="x">The new x position.</param>
         /// <param name="y">The new y position.</param>
@@ -378,28 +358,50 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Set the position of the entity.
+        /// Set the position of the Entity to another Entity's position.
         /// </summary>
-        /// <param name="v">The vector of the new position.</param>
-        public void SetPosition(Vector2 v) {
-            X = (float)v.X;
-            Y = (float)v.Y;
+        /// <param name="e">The Entity to match positions with.</param>
+        public void SetPosition(Entity e, float offsetX = 0, float offsetY = 0) {
+            SetPosition(e.X + offsetX, e.Y + offsetY);
         }
 
         /// <summary>
-        /// Adds a graphic to the entity.
+        /// Set the position of the Entity.
         /// </summary>
-        /// <param name="g"></param>
-        /// <returns></returns>
+        /// <param name="v">The vector of the new position.</param>
+        public void SetPosition(Vector2 v) {
+            SetPosition(v.X, v.Y);
+        }
+
+        /// <summary>
+        /// Adds a Graphic to the Entity.
+        /// </summary>
+        /// <param name="g">The Graphic to add.</param>
+        /// <returns>The added Graphic.</returns>
         public T AddGraphic<T>(T g) where T : Graphic {
             Graphics.Add(g);
             return g;
         }
 
         /// <summary>
-        /// Adds the graphics to the entity.
+        /// Adds a Graphic to the Entity.
         /// </summary>
-        /// <param name="graphics"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="g">The Graphic to add.</param>
+        /// <param name="x">The X position to place the Graphic relative to the Entity.</param>
+        /// <param name="y">The Y position to place the Graphic relative to the Entity.</param>
+        /// <returns>The added Graphic.</returns>
+        public T AddGraphic<T>(T g, float x, float y) where T : Graphic {
+            Graphics.Add(g);
+            g.X = x;
+            g.Y = y;
+            return g;
+        }
+
+        /// <summary>
+        /// Adds the graphics to the Entity.
+        /// </summary>
+        /// <param name="graphics">The Graphics to add.</param>
         public List<Graphic> AddGraphics(params Graphic[] graphics) {
             var r = new List<Graphic>();
             foreach (var g in graphics) {
@@ -412,19 +414,32 @@ namespace Otter {
         /// Adds a graphic to the Entity and sets its Scroll value to 0.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="g">The graphic to add.</param>
-        /// <returns>The added graphic.</returns>
+        /// <param name="g">The Graphic to add.</param>
+        /// <returns>The added Graphic.</returns>
         public T AddGraphicGUI<T>(T g) where T : Graphic {
             g.Scroll = 0;
             return AddGraphic(g);
         }
 
         /// <summary>
-        /// Adds graphics to the Entity and sets their Scroll values to 0.
+        /// Adds a graphic to the Entity and sets its Scroll value to 0.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="graphics">The graphics to add.</param>
-        /// <returns>The added graphics.</returns>
+        /// <param name="g">The Graphic to add.</param>
+        /// <param name="x">The X position to place the Graphic relative to the Entity.</param>
+        /// <param name="y">The Y position to place the Graphic relative to the Entity.</param>
+        /// <returns>The added Graphic.</returns>
+        public T AddGraphicGUI<T>(T g, float x, float y) where T : Graphic {
+            g.Scroll = 0;
+            return AddGraphic(g, x, y);
+        }
+
+        /// <summary>
+        /// Adds Graphics to the Entity and sets their Scroll values to 0.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="graphics">The Graphics to add.</param>
+        /// <returns>The added Graphics.</returns>
         public List<Graphic> AddGraphicsGUI(params Graphic[] graphics) {
             var r = new List<Graphic>();
             foreach (var g in graphics) {
@@ -434,12 +449,20 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Removes a graphic from the entity.
+        /// Removes a Graphic from the Entity.
         /// </summary>
-        /// <param name="g"></param>
+        /// <param name="g">The Graphic to remove.</param>
         public T RemoveGraphic<T>(T g) where T : Graphic {
             Graphics.Remove(g);
             return g;
+        }
+
+        /// <summary>
+        /// Removes Graphics from the Entity.
+        /// </summary>
+        /// <param name="g">The Graphics to remove.</param>
+        public void RemoveGraphics(params Graphic[] g) {
+            g.Each(gr => RemoveGraphic(gr));
         }
 
         /// <summary>
@@ -455,10 +478,20 @@ namespace Otter {
         /// <param name="c"></param>
         public T AddComponent<T>(T c) where T : Component {
             if (c.Entity != null) return c;
-            componentsToAdd.Add(c);
             c.Entity = this;
-            c.Added();
+            componentsToAdd.Add(c);
             return c;
+        }
+
+        /// <summary>
+        /// Creates and adds a Component to the entity.
+        /// </summary>
+        /// <typeparam name="T">The type of Component to create.</typeparam>
+        /// <param name="constructorArgs">The arguments for the Component's constructor.</param>
+        /// <returns>The newly created Component.</returns>
+        public T AddComponent<T>(params object[] constructorArgs) where T : Component {
+            var c = (T)Activator.CreateInstance(typeof(T), constructorArgs);
+            return AddComponent(c);
         }
 
         /// <summary>
@@ -480,8 +513,6 @@ namespace Otter {
         /// <param name="c"></param>
         public T RemoveComponent<T>(T c) where T : Component {
             componentsToRemove.Add(c);
-            c.Removed();
-            c.Entity = null;
             return c;
         }
 
@@ -492,17 +523,6 @@ namespace Otter {
             foreach (var c in Components) {
                 RemoveComponent(c);
             }
-        }
-
-        /// <summary>
-        /// Returns the first available graphic, or set the graphic.
-        /// </summary>
-        public Graphic Graphic {
-            get {
-                if (Graphics.Count == 0) return null;
-                return Graphics[0];
-            }
-            set { SetGraphic(value); }
         }
 
         /// <summary>
@@ -529,7 +549,7 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Shortcut to set the Collider of the entity to a BoxCollider.
+        /// Shortcut to set the Collider of the entity to a BoxCollider.  Using this will set the "Hitbox" field to this Collider.
         /// </summary>
         /// <param name="width">The width of the box collider.</param>
         /// <param name="height">The height of the box collider.</param>
@@ -543,15 +563,34 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Get the first component of type T.
+        /// Get the first Component of type T.
         /// </summary>
-        /// <typeparam name="T">The type of component to look for.</typeparam>
-        /// <returns>The component.</returns>
+        /// <typeparam name="T">The type of Component to look for.</typeparam>
+        /// <returns>The Component.</returns>
         public T GetComponent<T>() where T : Component {
             foreach (var c in Components) {
                 if (c is T) return (T)c;
             }
+            foreach (var c in componentsToAdd) {
+                if (c is T) return (T)c;
+            }
             return null;
+        }
+
+        /// <summary>
+        /// Get all Components of type T.
+        /// </summary>
+        /// <typeparam name="T">The type of Component to look for.</typeparam>
+        /// <returns>A list of Components of type T.</returns>
+        public List<T> GetComponents<T>() where T : Component {
+            var list = new List<T>();
+            foreach (var c in Components) {
+                if (c is T) list.Add((T)c);
+            }
+            foreach (var c in componentsToAdd) {
+                if (c is T) list.Add((T)c);
+            }
+            return list;
         }
 
         /// <summary>
@@ -726,6 +765,7 @@ namespace Otter {
         /// <returns>True if there is a collision.</returns>
         public bool Overlap(float x, float y, params int[] tags) {
             Overlapped = null;
+            if (Collider == null) return false; // If no collider, cant possibly overlap.
 
             var result = Collider.Overlap(x, y, tags);
             if (result) {
@@ -768,56 +808,48 @@ namespace Otter {
         /// Called when the entity is added to a scene.  The reference to the Scene is available here.
         /// </summary>
         public virtual void Added() {
-
         }
 
         /// <summary>
         /// Called when the entity is removed from a scene.  The reference to Scene is now null.
         /// </summary>
         public virtual void Removed() {
-
         }
 
         /// <summary>
         /// Called when the Scene begins.
         /// </summary>
         public virtual void SceneBegin() {
-
         }
 
         /// <summary>
         /// Called when the Scene ends.
         /// </summary>
         public virtual void SceneEnd() {
-
         }
 
         /// <summary>
         /// Called when the Scene is paused.
         /// </summary>
         public virtual void ScenePause() {
-
         }
 
         /// <summary>
         /// Called when the Scene is resumed.
         /// </summary>
         public virtual void SceneResume() {
-
         }
 
         /// <summary>
         /// Called when the entity is paused by the Scene.
         /// </summary>
         public virtual void Paused() {
-
         }
 
         /// <summary>
         /// Called when the entity is resumed by the Scene.
         /// </summary>
         public virtual void Resumed() {
-
         }
 
         /// <summary>
@@ -836,35 +868,30 @@ namespace Otter {
         /// Called first during the update.  Happens before Update.
         /// </summary>
         public virtual void UpdateFirst() {
-
         }
 
         /// <summary>
         /// Called last during the update.  Happens after Update.
         /// </summary>
         public virtual void UpdateLast() {
-
         }
 
         /// <summary>
         /// Called during the update of the game.
         /// </summary>
         public virtual void Update() {
-
         }
 
         /// <summary>
         /// Called when the entity is rendering to the screen.
         /// </summary>
         public virtual void Render() {
-
         }
 
         /// <summary>
         /// Called before an entity is rendered. Things rendered here will appear below the Entity's Graphics.
         /// </summary>
         public virtual void Prerender() {
-
         }
 
         /// <summary>
@@ -876,30 +903,43 @@ namespace Otter {
             }
         }
 
-        #endregion
+        #endregion Public Methods
 
-        #region Internal
+        #region Internal Methods
 
-        internal bool MarkedForRemoval = false;
+        internal void UpdateComponentLists() {
+            while (componentsToRemove.Count > 0) {
+                var removing = new List<Component>(componentsToRemove);
+                componentsToRemove.Clear();
+                
+                foreach (var c in removing) {
+                    Components.Remove(c);
+                }
+                foreach (var c in removing) {
+                    c.Removed();
+                    c.Entity = null;
+                }
+            }
 
-        internal int
-            oldLayer,
-            oldOrder;
+            while (componentsToAdd.Count > 0) {
+                var adding = new List<Component>(componentsToAdd);
+                componentsToAdd.Clear();
+                
+                foreach (var c in adding) {
+                    Components.Add(c);
+                }
+                foreach (var c in adding) {
+                    c.Added();
+                }
+            }
+        }
 
         internal void UpdateFirstInternal() {
             Game.UpdateCount++;
 
             updatedOnce = true;
 
-            foreach (var c in componentsToRemove) {
-                Components.Remove(c);
-            }
-            componentsToRemove.Clear();
-
-            foreach (var c in componentsToAdd) {
-                Components.Add(c);
-            }
-            componentsToAdd.Clear();
+            UpdateComponentLists();
 
             foreach (var c in Components) {
                 c.UpdateFirst();
@@ -911,15 +951,7 @@ namespace Otter {
         }
 
         internal void UpdateLastInternal() {
-            foreach (var c in componentsToRemove) {
-                Components.Remove(c);
-            }
-            componentsToRemove.Clear();
-
-            foreach (var c in componentsToAdd) {
-                Components.Add(c);
-            }
-            componentsToAdd.Clear();
+            UpdateComponentLists();
 
             foreach (var c in Components) {
                 c.UpdateLast();
@@ -944,15 +976,7 @@ namespace Otter {
         }
 
         internal void UpdateInternal() {
-            foreach (var c in componentsToRemove) {
-                Components.Remove(c);
-            }
-            componentsToRemove.Clear();
-
-            foreach (var c in componentsToAdd) {
-                Components.Add(c);
-            }
-            componentsToAdd.Clear();
+            UpdateComponentLists();
 
             foreach (var c in Components) {
                 c.Update();
@@ -986,7 +1010,41 @@ namespace Otter {
             }
         }
 
-        #endregion
-        
+        #endregion Internal Methods
+
+        #region Private Methods
+
+        private void RenderEntity() {
+            Prerender();
+
+            foreach (var c in Components) {
+                if (!c.RenderAfterEntity) {
+                    if (c.Visible) c.Render();
+                }
+            }
+
+            foreach (var g in Graphics) {
+                if (g.Relative) {
+                    g.Render(X, Y);
+                }
+                else {
+                    g.Render(0, 0);
+                }
+            }
+
+            Render();
+
+            if (OnRender != null) {
+                OnRender();
+            }
+
+            foreach (var c in Components) {
+                if (c.RenderAfterEntity) {
+                    if (c.Visible) c.Render();
+                }
+            }
+        }
+
+        #endregion Private Methods
     }
 }

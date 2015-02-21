@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -177,6 +174,16 @@ namespace Otter {
         public Text(string str, Stream font, int size = 16)
             : base() {
             Initialize(str, font, size);
+        }
+
+        /// <summary>
+        /// Create a new Text object.
+        /// </summary>
+        /// <param name="str">The string to display.</param>
+        /// <param name="font">The Font to use.</param>
+        /// <param name="size">The size of the font.</param>
+        public Text(string str, Font font, int size = 16) : base() {
+            Initialize(str, font.font, size);
         }
 
         /// <summary>

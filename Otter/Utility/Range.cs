@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter {
+﻿namespace Otter {
     /// <summary>
     /// Class used to represent a range using a min and max.
     /// </summary>
@@ -20,6 +15,30 @@ namespace Otter {
         /// The maximum of the range.
         /// </summary>
         public float Max;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Get a random int from the range.  Floors the Min and Ceils the Max.
+        /// </summary>
+        /// <returns>A random int.</returns>
+        public int RandInt {
+            get {
+                return Rand.Int((int)Min, (int)Util.Ceil(Max));
+            }
+        }
+
+        /// <summary>
+        /// Get a random float from the range.
+        /// </summary>
+        /// <returns>A random float.</returns>
+        public float RandFloat {
+            get {
+                return Rand.Float(Min, Max);
+            }
+        }
 
         #endregion
 
@@ -51,9 +70,9 @@ namespace Otter {
         /// <param name="r">The Range to test against.</param>
         /// <returns>True if the ranges overlap.</returns>
         public bool Overlap(Range r) {
-            if (Min >= r.Min && Min <= r.Max) return true;
-            if (Max <= r.Max && Max >= r.Min) return true;
-            return false;
+            if (r.Max < Min) return false;
+            if (r.Min > Max) return false;
+            return true;
         }
 
         public override string ToString() {

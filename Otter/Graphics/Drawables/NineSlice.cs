@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
+using System;
+using System.Collections.Generic;
 
 namespace Otter {
     /// <summary>
@@ -49,6 +47,43 @@ namespace Otter {
             foreach (var k in keys) {
                 SetFillRect(k, x1, y1, x2, y2);
             }
+        }
+
+        /// <summary>
+        /// Set the FillRect of the NineSlice using padding values.
+        /// </summary>
+        /// <param name="top">How far from the top of the texture to begin the rectangle.</param>
+        /// <param name="right">How far from the right of the texture to end the rectangle.</param>
+        /// <param name="bottom">How far from the bottom of the texture to end the rectangle.</param>
+        /// <param name="left">How far from the left of the texture to begin the rectangle.</param>
+        /// <returns>The NineSlice object.</returns>
+        public static void SetBorderPadding(string key, int top, int right, int bottom, int left) {
+            var texture = new Texture(key); // Have to load a texture here but I think that's okay?
+
+            var x1 = left;
+            var y1 = top;
+            var x2 = texture.Width - right;
+            var y2 = texture.Height - bottom;
+            SetFillRect(key, x1, y1, x2, y2);
+        }
+
+        /// <summary>
+        /// Set the FillRect of the NineSlice using padding values.
+        /// </summary>
+        /// <param name="padding">How far from the border of the texture to make the rectangle.</param>
+        /// <returns>The NineSlice object.</returns>
+        public static void SetBorderPadding(string key, int padding) {
+            SetBorderPadding(key, padding, padding, padding, padding);
+        }
+
+        /// <summary>
+        /// Set the FillRect of the NineSlice using padding values.
+        /// </summary>
+        /// <param name="horizontal">How far horizontally from the border of the texture to make the rectangle.</param>
+        /// <param name="vertical">How far horizontally from the border of the texture to make the rectangle.</param>
+        /// <returns>The NineSlice object.</returns>
+        public static void SetBorderPadding(string key, int horizontal, int vertical) {
+            SetBorderPadding(key, horizontal, vertical, horizontal, vertical);
         }
 
         #endregion
@@ -354,14 +389,18 @@ namespace Otter {
                     for (int yy = y1; yy < y2; yy += tileY) {
                         //middle
                         DrawQuad(v, xx, yy, xx + tileX, yy + tileY, u1, v1, u2, v2);
-
-                        //left
-                        DrawQuad(v, x0, yy, x1, yy + tileY, u0, v1, u1, v2);
-
-                        //right
-                        DrawQuad(v, x2, yy, x3, yy + tileY, u2, v1, u3, v2);
                     }
+                }
 
+                for (int yy = y1; yy < y2; yy += tileY) {
+                    //left
+                    DrawQuad(v, x0, yy, x1, yy + tileY, u0, v1, u1, v2);
+
+                    //right
+                    DrawQuad(v, x2, yy, x3, yy + tileY, u2, v1, u3, v2);
+                }
+
+                for (int xx = x1; xx < x2; xx += tileX) {
                     //top
                     DrawQuad(v, xx, y0, xx + tileX, y1, u1, v0, u2, v1);
 
@@ -422,13 +461,48 @@ namespace Otter {
         /// <param name="y1">The top corner of the rectangle.</param>
         /// <param name="x2">The right corner of the rectangle.</param>
         /// <param name="y2">The bottom corner of the rectangle.</param>
-        /// <returns></returns>
+        /// <returns>The NineSlice object.</returns>
         public NineSlice SetFillRect(int x1, int y1, int x2, int y2) {
             sliceX1 = x1;
             sliceX2 = x2;
             sliceY1 = y1;
             sliceY2 = y2;
             return this;
+        }
+
+        /// <summary>
+        /// Set the FillRect of the NineSlice using padding values.
+        /// </summary>
+        /// <param name="top">How far from the top of the texture to begin the rectangle.</param>
+        /// <param name="right">How far from the right of the texture to end the rectangle.</param>
+        /// <param name="bottom">How far from the bottom of the texture to end the rectangle.</param>
+        /// <param name="left">How far from the left of the texture to begin the rectangle.</param>
+        /// <returns>The NineSlice object.</returns>
+        public NineSlice SetBorderPadding(int top, int right, int bottom, int left) {
+            var x1 = left;
+            var y1 = top;
+            var x2 = Texture.Width - right;
+            var y2 = Texture.Height - bottom;
+            return SetFillRect(x1, y1, x2, y2);
+        }
+
+        /// <summary>
+        /// Set the FillRect of the NineSlice using padding values.
+        /// </summary>
+        /// <param name="padding">How far from the border of the texture to make the rectangle.</param>
+        /// <returns>The NineSlice object.</returns>
+        public NineSlice SetBorderPadding(int padding) {
+            return SetBorderPadding(padding, padding, padding, padding);
+        }
+
+        /// <summary>
+        /// Set the FillRect of the NineSlice using padding values.
+        /// </summary>
+        /// <param name="horizontal">How far horizontally from the border of the texture to make the rectangle.</param>
+        /// <param name="vertical">How far horizontally from the border of the texture to make the rectangle.</param>
+        /// <returns>The NineSlice object.</returns>
+        public NineSlice SetBorderPadding(int horizontal, int vertical) {
+            return SetBorderPadding(horizontal, vertical, horizontal, vertical);
         }
 
         /// <summary>

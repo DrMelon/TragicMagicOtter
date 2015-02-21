@@ -26,10 +26,8 @@ SOFTWARE.
 #endregion License
 
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
-using System.Runtime.Serialization;
 
 namespace Otter {
     /// <summary>
@@ -698,7 +696,15 @@ namespace Otter {
             value.Z *= factor;
             return value;
         }
+        
+        public static explicit operator SFML.Audio.Vector3f(Vector3 vector) {
+            return new SFML.Audio.Vector3f(vector.X, vector.Y, vector.Z);
+        }
 
+        public static explicit operator Vector3(SFML.Audio.Vector3f vector) {
+            return new Vector3(vector.X, vector.Y, vector.Z);
+        }
+        
         #endregion
 
     }

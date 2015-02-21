@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Graphics;
-using SFML.Window;
+﻿using SFML.Graphics;
 
 namespace Otter {
     /// <summary>
@@ -131,9 +126,14 @@ namespace Otter {
         public BlendMode Blend = BlendMode.Alpha;
 
         /// <summary>
-        /// Determines if the image should be rendered multiple times.
+        /// Determines if the image should be rendered multiple times horizontally.
         /// </summary>
-        public Repeat Repeat = Repeat.None;
+        public bool RepeatX;
+
+        /// <summary>
+        /// Determines if the image should be rendered multiple times vertically.
+        /// </summary>
+        public bool RepeatY;
 
         #endregion
 
@@ -152,7 +152,7 @@ namespace Otter {
                 if (color != null) {
                     color.Graphic = null;
                 }
-                color = value;
+                color = new Color(value); // 2015/2/12: testing copying the color because of a bug
                 // Set reference so that NeedsUpdate will be activated on changes
                 color.Graphic = this;
                 NeedsUpdate = true;
@@ -243,10 +243,17 @@ namespace Otter {
         public float HalfHeight { get { return Height / 2f; } }
 
         /// <summary>
-        /// Sets both the ScaleX and ScaleY at the same time.  A shortcut property.
+        /// Sets both the ScaleX and ScaleY at the same time.
         /// </summary>
         public float Scale {
             set { ScaleX = value; ScaleY = value; }
+        }
+
+        /// <summary>
+        /// Sets both RepeatX and RepeatY at the same time.
+        /// </summary>
+        public bool Repeat {
+            set { RepeatX = value; RepeatY = value; }
         }
 
         /// <summary>
@@ -388,6 +395,40 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Set the position of the Graphic.
+        /// </summary>
+        /// <param name="g">The Graphic to get the position from.</param>
+        public void SetPosition(Graphic g, float offsetX = 0, float offsetY = 0) {
+            SetPosition(g.X + offsetX, g.Y + offsetY);
+        }
+
+        /// <summary>
+        /// Set the position of the Graphic.
+        /// </summary>
+        /// <param name="xy">The Vector2 to get the position from.</param>
+        public void SetPosition(Vector2 xy) {
+            SetPosition(xy.X, xy.Y);
+        }
+
+        /// <summary>
+        /// Set the origin of the Graphic.
+        /// </summary>
+        /// <param name="x">The X origin.</param>
+        /// <param name="y">The Y origin.</param>
+        public void SetOrigin(float x, float y) {
+            OriginX = x;
+            OriginY = y;
+        }
+
+        /// <summary>
+        /// Set the origin of the Graphic.
+        /// </summary>
+        /// <param name="xy">The X,Y position of the origin.</param>
+        public void SetOrigin(Vector2 xy) {
+            SetOrigin(xy.X, xy.Y);
+        }
+
+        /// <summary>
         /// Set the Texture that the Graphic is using (if it is using one.)
         /// </summary>
         /// <param name="path">The path to the Texture to use.</param>
@@ -500,11 +541,39 @@ namespace Otter {
             }
 
 
-            switch (Repeat) {
-                case Repeat.None:
+            if (!RepeatX && !RepeatY) {
+                SFMLRender(drawable, renderX, renderY);
+            }
+
+            else if (RepeatX && !RepeatY) {
+                while (renderX > repeatLeft) {
+                    renderX -= ScaledWidth;
+                }
+
+                while (renderX < repeatRight) {
                     SFMLRender(drawable, renderX, renderY);
-                    break;
-                case Repeat.X:
+                    renderX += ScaledWidth;
+                }
+            }
+
+            else if (!RepeatX && RepeatY) {
+                while (renderY > repeatTop) {
+                    renderY -= ScaledHeight;
+                }
+
+                while (renderY < repeatBottom) {
+                    SFMLRender(drawable, renderX, renderY);
+                    renderY += Height;
+                }
+            }
+
+            else if (RepeatX && RepeatY) {
+                float startX = renderX;
+                while (renderY > repeatTop) {
+                    renderY -= ScaledHeight;
+                }
+
+                while (renderY < repeatBottom) {
                     while (renderX > repeatLeft) {
                         renderX -= ScaledWidth;
                     }
@@ -513,41 +582,10 @@ namespace Otter {
                         SFMLRender(drawable, renderX, renderY);
                         renderX += ScaledWidth;
                     }
-
-                    break;
-
-                case Repeat.Y:
-                    while (renderY > repeatTop) {
-                        renderY -= ScaledHeight;
-                    }
-
-                    while (renderY < repeatBottom) {
-                        SFMLRender(drawable, renderX, renderY);
-                        renderY += Height;
-                    }
-                    break;
-
-                case Repeat.XY:
-                    float startX = renderX;
-                    while (renderY > repeatTop) {
-                        renderY -= ScaledHeight;
-                    }
-
-                    while (renderY < repeatBottom) {
-                        while (renderX > repeatLeft) {
-                            renderX -= ScaledWidth;
-                        }
-
-                        while (renderX < repeatRight) {
-                            SFMLRender(drawable, renderX, renderY);
-                            renderX += ScaledWidth;
-                        }
-                        renderY += ScaledHeight;
-
-                    }
-
-                    break;
+                    renderY += ScaledHeight;
+                }
             }
+            
         }
 
         #endregion
@@ -582,16 +620,6 @@ namespace Otter {
         Multiply,
         None,
         Null
-    }
-
-    /// <summary>
-    /// The repeat modes for rendering graphics that support Repeated rendering.
-    /// </summary>
-    public enum Repeat {
-        None,
-        X,
-        Y,
-        XY
     }
 
     #endregion

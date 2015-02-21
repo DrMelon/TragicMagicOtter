@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Otter {
     /// <summary>
     /// Rectangle Collider.
@@ -20,6 +16,11 @@ namespace Otter {
         public BoxCollider(int width, int height, params int[] tags) {
             Width = width;
             Height = height;
+            AddTag(tags);
+        }
+
+        public BoxCollider(int width, int height, Enum tag, params Enum[] tags) : this(width, height) {
+            AddTag(tag);
             AddTag(tags);
         }
 
