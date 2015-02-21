@@ -137,6 +137,15 @@ namespace TragicMagic
 
 			// Start game timer
 			RoundTime.Start();
+
+			// Show tilemap ground
+			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
+			{
+				foreach( Graphic graphic in entity.Value.Graphics )
+				{
+					graphic.Alpha = 1;
+				}
+			}
 		}
 		private void UpdateGame()
 		{
@@ -184,6 +193,15 @@ namespace TragicMagic
 
 			// Cleanup the game scene (spells, etc)
 			CurrentScene.Reset();
+
+			// Hide tilemap ground
+			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
+			{
+				foreach ( Graphic graphic in entity.Value.Graphics )
+				{
+					graphic.Alpha = 0;
+				}
+			}
 		}
 
 		// State: Score

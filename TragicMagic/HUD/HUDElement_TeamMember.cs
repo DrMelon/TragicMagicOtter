@@ -141,7 +141,7 @@ namespace TragicMagic
 			}
 
 			// Update the images to have this initial alpha value
-			foreach ( Graphic graphic in Parent.Graphics )
+			foreach ( Graphic graphic in Graphics )
 			{
 				graphic.Alpha = Alpha.Value;
 			}

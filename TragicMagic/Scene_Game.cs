@@ -43,6 +43,9 @@ namespace TragicMagic
 		// Store a state manager
 		private TragicStateManagerClass TragicStateManager = new TragicStateManagerClass();
 
+		// Test tilemap
+		public OgmoProject test = new OgmoProject( "../../resources/tilemap.oep", "../../resources/" );
+
 		public Scene_GameClass()
 		{
 		}
@@ -53,6 +56,18 @@ namespace TragicMagic
 
 		public void Initialize( Game game )
 		{
+			// Test tile map loading
+			test.LoadLevel( "../../resources/cobble.oel", this );
+
+			// Hide tilemap ground
+			foreach ( KeyValuePair<string, Entity> entity in test.Entities )
+			{
+				foreach ( Graphic graphic in entity.Value.Graphics )
+				{
+					graphic.Alpha = 0;
+				}
+			}
+
 			// Set the reference to LeapController within the GameWands class & add to game update
 			GameWands.LeapController = LeapController;
 			GameWands.OnCast = OnCast;
