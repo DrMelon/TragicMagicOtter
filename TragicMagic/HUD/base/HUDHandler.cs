@@ -137,7 +137,7 @@ namespace TragicMagic
 				HUDElement_Team[hud] = new HUDElement_TeamClass(
 					CurrentScene, // Reference to the current scene
 					0, // Position X
-					200 // Position Y
+					150 // Position Y
 				);
 			}
 

@@ -19,7 +19,13 @@ namespace TragicMagic
 		public Scene CurrentScene;
 
 		// Reference to the parent of this HUD element (which all graphics are added to)
-		public HUDElementClass Parent;
+		public HUDElementClass Parent = null;
+
+		// Whether or not this element has child elements
+		public bool IsParent = false;
+
+		// Store the child elements
+		public HUDElementClass[] HUDElement_Child;
 
 		public HUDElementClass( Scene scene_current )
 			: base()

@@ -47,6 +47,22 @@ namespace TragicMagic
 		{
 			// Must be added to the scene before the graphics exist
 			CurrentScene.Add( entity );
+			entity.OnAdded = new Action( () => OnEntityAdded( entity ) ); // Wait for graphics to be added to the scene
+		}
+
+		// After the HUDElement has been added to the scene, rotate & translate appropriately
+		// IN: (entity) The entity representing the HUD element
+		// OUT: N/A
+		public void OnEntityAdded( HUDElementClass entity )
+		{
+			// Is parent and has children, add logic to rotate and transform them too
+			if ( entity.IsParent && ( entity.HUDElement_Child.Length > 0 ) )
+			{
+				foreach ( HUDElementClass element in entity.HUDElement_Child )
+				{
+					element.OnAdded = new Action( () => OnEntityAdded( element ) ); // Wait for graphics to be added to the scene
+				}
+			}
 
 			// Move each graphic in relation to where this HUD is positioned
 			float x = entity.X;
@@ -76,7 +92,6 @@ namespace TragicMagic
 				}
 				graphic.SetPosition( entity.X + offx, entity.Y + offy );
 				graphic.Angle += -Rotation;
-           
 			}
 		}
 

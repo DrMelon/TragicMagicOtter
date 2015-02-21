@@ -31,78 +31,76 @@ using TragicMagic;
  * TOTAL SIZE: 36 Bytes
  *
  */
- 
+
 
 
 
 namespace TragicMagic.Particles
 {
-    class TragicParticleFile
-    {
-        // Internal particlesystem that gets modified
-        ParticleSystem particleSystemInfo = null;
+	class TragicParticleFile
+	{
+		// Internal particlesystem that gets modified
+		ParticleSystem particleSystemInfo = null;
 
-        // File handle
-        FileStream fileHandle = null;
+		// File handle
+		FileStream fileHandle = null;
 
-        public TragicParticleFile(string filename)
-        {
-            // Attempt to open or create a file with this filename.
-            fileHandle = new FileStream(filename, FileMode.OpenOrCreate);
+		public TragicParticleFile( string filename )
+		{
+			// Attempt to open or create a file with this filename.
+			fileHandle = new FileStream( filename, FileMode.OpenOrCreate );
 
-            // Create new particle system
-            particleSystemInfo = new ParticleSystem(0, 0);
-        }
+			// Create new particle system
+			particleSystemInfo = new ParticleSystem( 0, 0 );
+		}
 
-        public void LoadFile()
-        {
-            // Attempt to read the .tps file.
-            if (fileHandle.CanRead && fileHandle.Length == 36)
-            {
-                // Read first 4 bytes of file, check header.
-                int filePosition = 0;
-                byte[] header = new byte[8];
-                fileHandle.Read(header, filePosition, 8);
-                string headerString = System.Text.Encoding.Default.GetString(header);
+		public void LoadFile()
+		{
+			// Attempt to read the .tps file.
+			if ( fileHandle.CanRead && fileHandle.Length == 36 )
+			{
+				// Read first 4 bytes of file, check header.
+				int filePosition = 0;
+				byte[] header = new byte[8];
+				fileHandle.Read( header, filePosition, 8 );
+				string headerString = System.Text.Encoding.Default.GetString( header );
 
-                if(headerString == "TPSF")
-                {
-                    filePosition += 8;
+				if ( headerString == "TPSF" )
+				{
+					filePosition += 8;
 
-                    // Read Emit Distance
-                    byte[] emitDistance = new byte[4];
-                    fileHandle.Read(emitDistance, filePosition, 4);
-                    particleSystemInfo.emitDistance = System.BitConverter.ToSingle(emitDistance, 0);
-                    filePosition += 4;
+					// Read Emit Distance
+					byte[] emitDistance = new byte[4];
+					fileHandle.Read( emitDistance, filePosition, 4 );
+					particleSystemInfo.emitDistance = System.BitConverter.ToSingle( emitDistance, 0 );
+					filePosition += 4;
 
-                    // Read Emit Jitter
-                    byte[] emitJitter = new byte[4];
-                    fileHandle.Read(emitDistance, filePosition, 4);
-                    particleSystemInfo.emitDistanceJitter = System.BitConverter.ToSingle(emitJitter, 0);
-
-
-                }
-
-            }
-
-        }
-
-        public void SaveFile()
-        {
-
-        }
-
-        ParticleSystem GetParticleSystem()
-        {
-            return particleSystemInfo;
-        }
-
-        //Destructor closes file.
-        public ~TragicParticleFile()
-        {
-            fileHandle.Close();
-        }
+					// Read Emit Jitter
+					byte[] emitJitter = new byte[4];
+					fileHandle.Read( emitDistance, filePosition, 4 );
+					particleSystemInfo.emitDistanceJitter = System.BitConverter.ToSingle( emitJitter, 0 );
 
 
-    }
+				}
+
+			}
+
+		}
+
+		public void SaveFile()
+		{
+
+		}
+
+		ParticleSystem GetParticleSystem()
+		{
+			return particleSystemInfo;
+		}
+
+		//Destructor closes file.
+		~TragicParticleFile()
+		{
+			fileHandle.Close();
+		}
+	}
 }

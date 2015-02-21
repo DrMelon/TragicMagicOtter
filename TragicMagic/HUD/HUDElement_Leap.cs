@@ -108,7 +108,6 @@ namespace TragicMagic
 			foreach ( Graphic graphic in Parent.Graphics )
 			{
 				graphic.Alpha = Alpha.Value;
-                // graphic.Angle works here
 			}
 		}
 

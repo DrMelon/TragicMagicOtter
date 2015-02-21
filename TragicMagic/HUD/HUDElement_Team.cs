@@ -27,9 +27,6 @@ namespace TragicMagic
 		// Defines
 		private const short TEAM_MEMBERS = 5;
 
-		// Store the Team Member credit HUD entities
-		public HUDElementClass[] HUDElement_TeamMember;
-
 		// Store the Team Member information
 		public TeamMemberStruct[] TeamMember;
 
@@ -48,7 +45,7 @@ namespace TragicMagic
 			Y = y;
 
 			// Team Member display objects
-			HUDElement_TeamMember = new HUDElementClass[TEAM_MEMBERS];
+			HUDElement_Child = new HUDElementClass[TEAM_MEMBERS];
 
 			// Initialize Team Member information
 			TeamMember = new TeamMemberStruct[TEAM_MEMBERS];
@@ -92,6 +89,9 @@ namespace TragicMagic
 
 				// Levie
 			}
+
+			// Initialize as parent to TeamMember elements
+			IsParent = true;
 		}
 
 		public override void Added()
@@ -101,17 +101,17 @@ namespace TragicMagic
 			// Add each team member to the screen
 			for ( short member = 0; member < TEAM_MEMBERS; member++ )
 			{
-				HUDElement_TeamMember[member] = new HUDElement_TeamMemberClass(
+				HUDElement_Child[member] = new HUDElement_TeamMemberClass(
 						CurrentScene, // Reference to the current scene
 						TeamMember[member].Name, // Member name
 						TeamMember[member].Username, // Member username
 						TeamMember[member].Role, // Member role
 						TeamMember[member].Website, // Member website
-						150 + ( ( member % 2 ) * 200 ) + X, // Y, Offset even team members for spacing
-						( Game.Instance.Height / ( TEAM_MEMBERS + 1 ) * ( member + 1 ) ) + Y // X
+						( Game.Instance.HalfHeight / ( TEAM_MEMBERS + 1 ) * ( member + 1 ) ) + X, // X
+						150 + ( ( member % 2 ) * 100 ) + Y // Y, Offset even team members for spacing
 				);
-				HUDElement_TeamMember[member].Parent = this;
-				CurrentScene.Add( HUDElement_TeamMember[member] );
+				HUDElement_Child[member].Parent = this;
+				CurrentScene.Add( HUDElement_Child[member] );
 			}
 		}
 
@@ -121,11 +121,11 @@ namespace TragicMagic
 
 			if ( FadeOut ) // Fade out individual team members when removed, then ensure they are deleted
 			{
-				if ( Graphic.Alpha <= 0 ) // Check the first member's first graphic (they all fade the same)
+				if ( ( HUDElement_Child[0] != null ) && ( HUDElement_Child[0].Graphic.Alpha <= 0 ) ) // Check the first member's first graphic (they all fade the same)
 				{
 					for ( short member = 0; member < TEAM_MEMBERS; member++ )
 					{
-						HUDElement_TeamMember[member] = null;
+						HUDElement_Child[member] = null;
 					}
 				}
 			}
@@ -139,7 +139,11 @@ namespace TragicMagic
 		{
 			for ( short member = 0; member < TEAM_MEMBERS; member++ )
 			{
-				HUDElement_TeamMember[member].Remove();
+				HUDElement_Child[member].Remove();
+
+				// Ensure fade out starts at alpha 1 and goes to alpha 0
+				HUDElement_TeamMemberClass teammember = (HUDElement_TeamMemberClass) HUDElement_Child[member];
+				teammember.Alpha.Value = 1;
 			}
 			FadeOut = true;
 
