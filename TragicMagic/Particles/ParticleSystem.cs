@@ -11,7 +11,7 @@ using TragicMagic;
 //@Purpose: This is a particle system for use in spells, etc. These can be loaded from and saved to files. 
 //@Usage: To use in-game, instantiate a particlesystem object and set the parameters manually or load from file. Add to the scene, and call Start or Stop to start/stop emitting.
 
-namespace TragicMagic
+namespace TragicMagic.Particles
 {
     class ParticleSystem : Entity
     {
@@ -34,10 +34,12 @@ namespace TragicMagic
         // Number of particles to emit per frame
         public int emitAmount = 1;
 
-        // Particle image to use
+        // Particle image to use -- not loaded from file!
         public string imageSource;
         public int imageWidth;
         public int imageHeight;
+
+        public float particleShake = 0.0f;
 
         // Particle lifetime
         public float particleLifetime = 30.0f;
@@ -93,9 +95,11 @@ namespace TragicMagic
                     newParticle.FinalX = this.X + (float)Math.Sin(thisAngle) * thisDistance;
                     newParticle.FinalY = this.Y + (float)Math.Cos(thisAngle) * thisDistance;
 
+                    newParticle.Graphic.Shake = particleShake;
+
                     // Add to scene.
                     this.Scene.Add(newParticle);
-
+                    
                 }
             }
         }

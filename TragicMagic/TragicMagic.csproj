@@ -56,6 +56,7 @@
     <Compile Include="HUD\HUDElement_Timer.cs" />
     <Compile Include="math\ClampedSpeedValue.cs" />
     <Compile Include="math\ClampedValue.cs" />
+    <Compile Include="Particles\TragicParticleFile.cs" />
     <Compile Include="TragicStateManager.cs" />
     <Compile Include="wizard\ComboSystem.cs" />
     <Compile Include="wizard\GameWands.cs" />
@@ -66,7 +67,7 @@
     <Compile Include="HUD\HUDElement_Team.cs" />
     <Compile Include="HUD\HUDElement_TeamMember.cs" />
     <Compile Include="HUD\base\HUDHandler.cs" />
-    <Compile Include="ParticleSystem.cs" />
+    <Compile Include="Particles\ParticleSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HUD\PulseCircle.cs" />
