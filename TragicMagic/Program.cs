@@ -120,8 +120,7 @@ namespace TragicMagic
                 game.Session("LightWizard").GetController<ControllerXbox360>().LeftStick.AddAxis(JoyAxis.X, JoyAxis.Y, 1); //Left Stick Movement
                 game.Session("LightWizard").GetController<ControllerXbox360>().RightStick.AddAxis(JoyAxis.U, JoyAxis.R, 1); //Right Stick Movement
 
-                // Note: Otter contains a two-way binding so that the B button can be accessed with Controller.Circle for playstation bindings etc.
-				//game.Session("LightWizard").GetController<ControllerXbox360>().B.AddButton( XBOX_B )
+
                 
                 // Initialize Scene
 				Scene_Game = new Scene_GameClass();
