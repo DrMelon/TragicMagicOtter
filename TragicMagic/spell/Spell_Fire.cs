@@ -38,7 +38,8 @@ namespace TragicMagic
 
 			// Create main fire ball particle system
 			Particle_Fire = new ParticleSystem( X, Y );
-			Particle_Fire.Initialize( 50, 20, 30, 10, 10, 5, "../../resources/team/johnjoemcbob.png", 240, 240, 0.2f );
+			Particle_Fire.Initialize( 50, 20, 0, 360, 5, 15, "../../resources/particle/fire.png", 87, 87, 0.8f );
+			Particle_Fire.endColour.A = 0;
 			Particle_Fire.Start();
 			Scene.Add( Particle_Fire );
 		}
@@ -47,7 +48,9 @@ namespace TragicMagic
 		{
 			base.Update();
 
-			
+			// Main fireball particles need to stay attached to the collider
+			Particle_Fire.X = X;
+			Particle_Fire.Y = Y;
 		}
 
 		public override void Removed()

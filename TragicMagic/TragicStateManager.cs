@@ -24,7 +24,7 @@ namespace TragicMagic
 	class TragicStateManagerClass : Entity
 	{
 		// Defines
-		private const float ROUND_TIME = 10; // Time for a round to last, in seconds
+		private const float ROUND_TIME = 60; // Time for a round to last, in seconds
 		private const float SCORE_TIME = 5; // Time for a round's outcome to display for, in seconds
 
 		// Reference to the current scene

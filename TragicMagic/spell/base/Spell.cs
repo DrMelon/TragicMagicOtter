@@ -71,6 +71,17 @@ namespace TragicMagic
 					}
 				}
 			}
+
+			// Handle cleanup when this spell leaves the game screen area
+			if (
+				( X < 0 ) || // Left
+				( X > Game.Instance.Width ) || // Right
+				( Y < 0 ) || // Top
+				( Y > Game.Instance.Height ) // Bottom
+			)
+			{
+				Scene.Remove( this );
+			}
 		}
 
 		public override void Render()
