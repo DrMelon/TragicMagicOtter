@@ -35,7 +35,7 @@ using TragicMagic;
 
 
 
-namespace TragicMagic.Particles
+namespace TragicMagic
 {
 	class TragicParticleFile
 	{

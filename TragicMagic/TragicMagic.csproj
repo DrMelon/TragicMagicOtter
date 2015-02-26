@@ -57,6 +57,7 @@
     <Compile Include="math\ClampedSpeedValue.cs" />
     <Compile Include="math\ClampedValue.cs" />
     <Compile Include="Particles\TragicParticleFile.cs" />
+    <Compile Include="spell\Spell_Fire.cs" />
     <Compile Include="TragicStateManager.cs" />
     <Compile Include="wizard\ComboSystem.cs" />
     <Compile Include="wizard\GameWands.cs" />
@@ -72,7 +73,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HUD\PulseCircle.cs" />
     <Compile Include="Scene_Game.cs" />
-    <Compile Include="wizard\Spell.cs" />
+    <Compile Include="spell\base\Spell.cs" />
     <Compile Include="wizard\SpellInformation.cs" />
     <Compile Include="Tweetinvi.cs" />
     <Compile Include="wizard\Wizard.cs" />

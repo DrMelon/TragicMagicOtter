@@ -97,6 +97,7 @@ namespace TragicMagic
         // The forward & right facing vectors of this wizard upon creation
         private Vector2 Forward = new Vector2();
         private Vector2 Right = new Vector2();
+		private Vector2 WandForward = new Vector2();
 
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
@@ -387,30 +388,52 @@ namespace TragicMagic
 
 		public void TryToCastSpell()
 		{
-			// Player tried to cast a spell; send their current combo to the spell-checker (lol)
-			SpellInformation whatSpell = ComboSystem.Instance.CheckSpell( ComboInputs );
-
-			this.Game.Debugger.Log( "", LinkedSession.Name + ": Trying to cast with: " + ComboInputs );
-
-			// If we actually cast a spell, do something with it!
-			if ( whatSpell != null )
+			// Check for allowed movement inside to prevent casting using the Leap wand after game ends
+			if ( CanMove )
 			{
-				// Write into ingame debug console (open with @)
+				// Player tried to cast a spell; send their current combo to the spell-checker (lol)
+				SpellInformation whatSpell = ComboSystem.Instance.CheckSpell( ComboInputs );
 
-				this.Game.Debugger.Log( "", LinkedSession.Name + ": " + whatSpell.spellName + " just got cast!\n" );
+				this.Game.Debugger.Log( "", LinkedSession.Name + ": Trying to cast with: " + ComboInputs );
 
-				// Spell test
-				SpellClass spell = new SpellClass( ID, X, Y, Forward );
+				// If we actually cast a spell, do something with it!
+				if ( whatSpell != null )
 				{
-					CurrentScene.Add( spell );
+					// Write into ingame debug console (open with @)
+
+					this.Game.Debugger.Log( "", LinkedSession.Name + ": " + whatSpell.spellName + " just got cast!\n" );
+
+					// Recalculate the forward vector of the wizard's wand only when required
+					double radangle = Math.PI * ( 180 - Wand.Angle ) / 180; // Invert to face other wizard
+					double sin = Math.Sin( radangle );
+					double cos = Math.Cos( radangle );
+
+					Vector2 origin = new Vector2( 0, 1 ); // Default is facing upwards
+					WandForward = new Vector2(
+						(float) ( ( (double) origin.X * cos ) - ( (double) origin.Y * sin ) ),
+						(float) ( ( (double) origin.X * sin ) + ( (double) origin.Y * cos ) )
+					);
+
+					// Spell test
+					Type spelltype = Type.GetType( "TragicMagic." + whatSpell.spellType );
+					SpellClass spell = (SpellClass) Activator.CreateInstance( spelltype );
+					//new SpellClass( ID, X + Wand.X, Y + Wand.Y, WandForward, whatSpell.spellSpeed );
+					{
+						spell.ID = ID;
+						spell.X = X + Wand.X;
+						spell.Y = Y + Wand.Y;
+						spell.Direction = WandForward;
+						spell.SetSpeed( whatSpell.spellSpeed );
+						CurrentScene.Add( spell );
+					}
+					CurrentScene.Projectile.Add( spell );
+
+					//TODO: Here we'd read the spell info and build a spell entity from it & add it to the scene.
 				}
-				CurrentScene.Projectile.Add( spell );
 
-				//TODO: Here we'd read the spell info and build a spell entity from it & add it to the scene.
+				// Now blank out the combo inputs, ready for another go.
+				ComboInputs = "";
 			}
-
-			// Now blank out the combo inputs, ready for another go.
-			ComboInputs = "";
 		}
 
 		// Cleanup any objects belonging solely to this wizard

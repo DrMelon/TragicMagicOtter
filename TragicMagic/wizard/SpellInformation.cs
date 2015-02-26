@@ -21,13 +21,15 @@ namespace TragicMagic
     {
         // Spell properties
         public String spellName;
+        public String spellType;
         public float spellDamage;
         public float spellSpeed;
         
         // Simple constructor
-        public SpellInformation(String name, float damage, float speed)
+        public SpellInformation(String name, String type, float damage, float speed)
         {
             spellName = name;
+            spellType = type;
             spellDamage = damage;
             spellSpeed = speed;
         }

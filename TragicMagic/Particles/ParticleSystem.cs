@@ -11,7 +11,7 @@ using TragicMagic;
 //@Purpose: This is a particle system for use in spells, etc. These can be loaded from and saved to files. 
 //@Usage: To use in-game, instantiate a particlesystem object and set the parameters manually or load from file. Add to the scene, and call Start or Stop to start/stop emitting.
 
-namespace TragicMagic.Particles
+namespace TragicMagic
 {
     class ParticleSystem : Entity
     {
@@ -38,6 +38,7 @@ namespace TragicMagic.Particles
         public string imageSource;
         public int imageWidth;
         public int imageHeight;
+		public float imageScale;
 
         public float particleShake = 0.0f;
 
@@ -58,7 +59,7 @@ namespace TragicMagic.Particles
         }
 
         // Create on the fly whoa
-        public void Initialize(float emitdistance, float emitdistancejitter, float emitangle, float emitanglejitter, int emitamt, float life, string imgsource, int imgwidth, int imgheight)
+        public void Initialize(float emitdistance, float emitdistancejitter, float emitangle, float emitanglejitter, int emitamt, float life, string imgsource, int imgwidth, int imgheight, float imgscale)
         {
             // Set variables yeah
             emitDistance = emitdistance;
@@ -70,6 +71,7 @@ namespace TragicMagic.Particles
             imageSource = imgsource;
             imageWidth = imgwidth;
             imageHeight = imgheight;
+            imageScale = imgscale;
         }
 
         public override void Update()
@@ -84,7 +86,7 @@ namespace TragicMagic.Particles
                     // Create a particle!
                     Particle newParticle = new Particle(this.X, this.Y, imageSource, imageWidth, imageHeight);
                     newParticle.LifeSpan = particleLifetime;
-                    
+
                     // Figure out the final X and Y positions of this particle
                     // Based on angle, distance jitter etc
                     float thisAngle = this.emitAngle + (Rand.Float(-emitAngleJitter, emitAngleJitter));
@@ -95,6 +97,10 @@ namespace TragicMagic.Particles
                     newParticle.FinalX = this.X + (float)Math.Sin(thisAngle) * thisDistance;
                     newParticle.FinalY = this.Y + (float)Math.Cos(thisAngle) * thisDistance;
 
+                    newParticle.ScaleX = imageScale;
+                    newParticle.ScaleY = imageScale;
+
+					newParticle.Start(); // Initialize graphics
                     newParticle.Graphic.Shake = particleShake;
 
                     // Add to scene.

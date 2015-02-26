@@ -23,12 +23,15 @@ namespace TragicMagic
 		// The clamped movement speed of the spell projectile
 		private Speed MovementSpeed = new Speed( 10 );
 
-        public SpellClass( int wizard, float x, float y, Vector2 direction )
+        public SpellClass( int wizard, float x, float y, Vector2 direction, float speed = 1 )
         {
 			ID = wizard;
 			X = x;
 			Y = y;
 			Direction = direction;
+
+			MovementSpeed.X = Direction.X * speed;
+			MovementSpeed.Y = Direction.Y * speed;
         }
         ~SpellClass()
         {
@@ -42,9 +45,6 @@ namespace TragicMagic
 			// Initialie collider
 			SetHitbox( 10, 10, ( (int) ColliderType.Wizard ) + ID );
 			Hitbox.CenterOrigin();
-
-			MovementSpeed.X = Direction.X * 5;
-			MovementSpeed.Y = Direction.Y * 5;
 		}
 
 		public override void Update()
@@ -78,6 +78,12 @@ namespace TragicMagic
 			base.Render();
 
 			Hitbox.Render();
+		}
+
+		public void SetSpeed( float speed )
+		{
+			MovementSpeed.X = Direction.X * speed;
+			MovementSpeed.Y = Direction.Y * speed;
 		}
     }
 }
