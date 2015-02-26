@@ -423,6 +423,7 @@ namespace TragicMagic
 						spell.X = X + Wand.X;
 						spell.Y = Y + Wand.Y;
 						spell.Direction = WandForward;
+						spell.Angle = 180 - Wand.Angle;
 						spell.SetSpeed( whatSpell.spellSpeed );
 						CurrentScene.Add( spell );
 					}

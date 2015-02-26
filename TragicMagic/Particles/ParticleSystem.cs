@@ -45,11 +45,17 @@ namespace TragicMagic
         // Particle lifetime
         public float particleLifetime = 30.0f;
 
+		// Colour changes
+		public Color beginColour;
+		public Color endColour;
 
         public ParticleSystem(float x = 0, float y = 0)
         {
             X = x;
             Y = y;
+
+			beginColour = Color.White;
+			endColour = Color.White;
         }
 
         // Load from file
@@ -99,6 +105,12 @@ namespace TragicMagic
 
                     newParticle.ScaleX = imageScale;
                     newParticle.ScaleY = imageScale;
+
+					newParticle.Color = beginColour;
+					newParticle.FinalColor = endColour;
+
+					newParticle.Alpha = beginColour.A;
+					newParticle.FinalAlpha = endColour.A;
 
 					newParticle.Start(); // Initialize graphics
                     newParticle.Graphic.Shake = particleShake;

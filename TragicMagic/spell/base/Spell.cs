@@ -20,6 +20,9 @@ namespace TragicMagic
 		// The direction of the spell's movement
 		public Vector2 Direction = new Vector2( 0, 0 );
 
+		// The angle of the spell movement
+		public float Angle = 0;
+
 		// The clamped movement speed of the spell projectile
 		private Speed MovementSpeed = new Speed( 10 );
 
@@ -82,13 +85,6 @@ namespace TragicMagic
 			{
 				Scene.Remove( this );
 			}
-		}
-
-		public override void Render()
-		{
-			base.Render();
-
-			Hitbox.Render();
 		}
 
 		public void SetSpeed( float speed )

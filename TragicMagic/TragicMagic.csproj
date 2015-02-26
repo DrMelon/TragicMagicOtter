@@ -57,6 +57,7 @@
     <Compile Include="math\ClampedSpeedValue.cs" />
     <Compile Include="math\ClampedValue.cs" />
     <Compile Include="Particles\TragicParticleFile.cs" />
+    <Compile Include="spell\Spell_Dust.cs" />
     <Compile Include="spell\Spell_Fire.cs" />
     <Compile Include="TragicStateManager.cs" />
     <Compile Include="wizard\ComboSystem.cs" />
