@@ -95,18 +95,6 @@ namespace TragicMagic
 			}
 			AddGraphic( Text_Name );
 
-			// Initialize the Team Member's twitter username
-			Text_Username = new Otter.Text( "@" + Username, FONT_SIZE );
-			{
-				Text_Username.X = X - offsety;
-				Text_Username.Y = Y;
-				Text_Username.CenterOrigin();
-
-				// Add to the offset for the next text
-				offsety += Text_Username.Height * TEXT_OFFSET_SCALE;
-			}
-			AddGraphic( Text_Username );
-
 			// Initialize the Team Member's role
 			Text_Role = new Otter.Text( Role, FONT_SIZE );
 			{
@@ -119,6 +107,21 @@ namespace TragicMagic
 			}
 			AddGraphic( Text_Role );
 
+			// Add extra offset between name&role, and contact details
+			offsety += Text_Role.Height * TEXT_OFFSET_SCALE / 2;
+
+			// Initialize the Team Member's twitter username
+			Text_Username = new Otter.Text( "@" + Username, FONT_SIZE );
+			{
+				Text_Username.X = X - offsety;
+				Text_Username.Y = Y;
+				Text_Username.CenterOrigin();
+
+				// Add to the offset for the next text
+				offsety += Text_Username.Height * TEXT_OFFSET_SCALE;
+			}
+			AddGraphic( Text_Username );
+
 			// Initialize the Team Member's website url
 			Text_Website = new Otter.Text( Website, FONT_SIZE );
 			{
@@ -129,7 +132,7 @@ namespace TragicMagic
 				// Add to the offset for the next text
 				offsety += Text_Website.Height * TEXT_OFFSET_SCALE;
 			}
-			AddGraphic( Text_Website );
+			//AddGraphic( Text_Website );
 
 			// Initialize the cable offset
 			Alpha = new ClampedSpeedValueClass();

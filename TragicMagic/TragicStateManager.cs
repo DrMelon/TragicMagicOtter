@@ -24,8 +24,9 @@ namespace TragicMagic
 	class TragicStateManagerClass : Entity
 	{
 		// Defines
-		private const float ROUND_TIME = 60; // Time for a round to last, in seconds
+		private const float ROUND_TIME = 10; // Time for a round to last, in seconds
 		private const float SCORE_TIME = 5; // Time for a round's outcome to display for, in seconds
+		private const float FADE_SPEED = 0.03f; // Speed at which to fade in/out the ground tiles
 
 		// Reference to the current scene
 		public Scene_GameClass CurrentScene;
@@ -38,6 +39,9 @@ namespace TragicMagic
 
 		// Hold a timer to time the length of each round outcome display (multiply to change the define to seconds)
 		private AutoTimer ScoreTime = new AutoTimer( SCORE_TIME * 60 );
+
+		// The fade in/out animation for the ground
+		private ClampedSpeedValueClass Ground_Alpha;
 
 		public TragicStateManagerClass()
 		{
@@ -75,6 +79,15 @@ namespace TragicMagic
 				wizard.Destination = new Vector2( wizard.X, wizard.Y );
 				wizard.Pause = true; // Pause to stop player movement (nothing to do with Otter Entity pausing, still need some input)
 			}
+
+			// Initialize the fade in/out
+			Ground_Alpha = new ClampedSpeedValueClass();
+			{
+				Ground_Alpha.Value = 0;
+				Ground_Alpha.Minimum = 0;
+				Ground_Alpha.Maximum = 1;
+				Ground_Alpha.Speed = FADE_SPEED;
+			}
 		}
 
 		// State: Menu
@@ -102,6 +115,17 @@ namespace TragicMagic
 			if ( play || Game.Instance.Session( "DarkWizard" ).GetController<ControllerXbox360>().Start.Pressed ) // TODO: Remove temp button start
 			{
 				TragicStateMachine.ChangeState( TragicState.Game );
+			}
+
+			// Update the fade out
+			Ground_Alpha.Direction = -1;
+			Ground_Alpha.Update( false );
+			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
+			{
+				foreach( Graphic graphic in entity.Value.Graphics )
+				{
+					graphic.Alpha = Ground_Alpha.Value;
+				}
 			}
 		}
 		private void ExitMenu()
@@ -139,13 +163,8 @@ namespace TragicMagic
 			RoundTime.Start();
 
 			// Show tilemap ground
-			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
-			{
-				foreach( Graphic graphic in entity.Value.Graphics )
-				{
-					graphic.Alpha = 1;
-				}
-			}
+			Ground_Alpha.Value = 0;
+			Ground_Alpha.Direction = 1;
 		}
 		private void UpdateGame()
 		{
@@ -168,6 +187,17 @@ namespace TragicMagic
 				if ( RoundTime.AtMax )
 				{
 					TragicStateMachine.ChangeState( TragicState.Score );
+				}
+			}
+
+			// Update the fade in
+			Ground_Alpha.Direction = 1;
+			Ground_Alpha.Update( false );
+			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
+			{
+				foreach( Graphic graphic in entity.Value.Graphics )
+				{
+					graphic.Alpha = Ground_Alpha.Value;
 				}
 			}
 		}
@@ -195,13 +225,8 @@ namespace TragicMagic
 			CurrentScene.Reset();
 
 			// Hide tilemap ground
-			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
-			{
-				foreach ( Graphic graphic in entity.Value.Graphics )
-				{
-					graphic.Alpha = 0;
-				}
-			}
+			Ground_Alpha.Value = 1;
+			Ground_Alpha.Direction = -1;
 		}
 
 		// State: Score

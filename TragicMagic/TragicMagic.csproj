@@ -51,7 +51,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HUDElement_Outcome.cs" />
+    <Compile Include="HUD\HUDElement_Outcome.cs" />
     <Compile Include="HUD\HUDElement_Score.cs" />
     <Compile Include="HUD\HUDElement_Timer.cs" />
     <Compile Include="math\ClampedSpeedValue.cs" />

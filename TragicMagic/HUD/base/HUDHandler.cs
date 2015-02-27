@@ -209,7 +209,7 @@ namespace TragicMagic
 				HUDElement_Timer[hud] = new HUDElement_TimerClass(
 					CurrentScene, // Reference to the current scene
 					Game.Instance.HalfHeight / 2, // Position X
-					80 // Position Y
+					20 // Position Y
 				);
 			}
 

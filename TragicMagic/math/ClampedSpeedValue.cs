@@ -21,10 +21,10 @@ namespace TragicMagic
 		// The current direction of travel between the minimum and maximum values (-1 or 1)
 		public short Direction = 1;
 
-		public override void Update()
+		public void Update( bool invert = true )
 		{
 			// Invert direction when out of range
-			if ( ( Value > Maximum ) || ( Value < Minimum ) )
+			if ( invert && ( ( Value > Maximum ) || ( Value < Minimum ) ) )
 			{
 				Direction *= -1;
 			}

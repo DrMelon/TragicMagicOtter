@@ -57,7 +57,7 @@ namespace TragicMagic
 			}
 			Parent.AddGraphic( Text_Time );
 
-			// Initialize the cable offset
+			// Initialize the fade in/out
 			Alpha = new ClampedSpeedValueClass();
 			{
 				Alpha.Value = 0;

@@ -74,7 +74,7 @@ namespace TragicMagic
 				Text_Score.X = X;
 				Text_Score.Y = Y;
 				Text_Score.CenterOrigin();
-				Text_Score.OriginY = 0;
+				Text_Score.OriginY = -Text_Score.Height;
 			}
 			Parent.AddGraphic( Text_Score );
 

@@ -420,8 +420,8 @@ namespace TragicMagic
 					//new SpellClass( ID, X + Wand.X, Y + Wand.Y, WandForward, whatSpell.spellSpeed );
 					{
 						spell.ID = ID;
-						spell.X = X + Wand.X;
-						spell.Y = Y + Wand.Y;
+						spell.X = X + Wand.X + ( WandForward.X * Wand.ScaledHeight); // Offset from wizard to wand base, then to wand tip
+						spell.Y = Y + Wand.Y + ( WandForward.Y * Wand.ScaledHeight );
 						spell.Direction = WandForward;
 						spell.Angle = 180 - Wand.Angle;
 						spell.SetSpeed( whatSpell.spellSpeed );

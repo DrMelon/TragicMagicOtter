@@ -51,11 +51,13 @@ namespace TragicMagic
 				Text_Score.X = X;
 				Text_Score.Y = Y;
 				Text_Score.CenterOrigin();
+				Text_Score.OutlineColor = Color.Black;
+				Text_Score.OutlineThickness = 2;
 				Text_Score.Angle = 20;
 			}
 			Parent.AddGraphic( Text_Score );
 
-			// Initialize the cable offset
+			// Initialize the fade in/out
 			Alpha = new ClampedSpeedValueClass();
 			{
 				Alpha.Value = 0;
