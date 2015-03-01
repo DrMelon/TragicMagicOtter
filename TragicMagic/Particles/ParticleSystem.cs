@@ -58,12 +58,6 @@ namespace TragicMagic
 			endColour = Color.White;
         }
 
-        // Load from file
-        public void InitializeFromFile(string fileName)
-        {
-            // lol no
-        }
-
         // Create on the fly whoa
         public void Initialize(float emitdistance, float emitdistancejitter, float emitangle, float emitanglejitter, int emitamt, float life, string imgsource, int imgwidth, int imgheight, float imgscale)
         {
