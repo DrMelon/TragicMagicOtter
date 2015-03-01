@@ -53,7 +53,7 @@ namespace TragicMagic
             AddSpell("B", new SpellInformation("Fire I", "Spell_FireClass", 0.5f, 5.0f));
             AddSpell("A", new SpellInformation("Earth I", "Spell_DustClass", 0.5f, 10.0f));
             AddSpell("X", new SpellInformation("Water I", "Spell_FireClass", 0.5f, 7.0f));
-            AddSpell("Y", new SpellInformation("Lightning I", "Spell_FireClass", 0.5f, 10.0f));
+            AddSpell("Y", new SpellInformation("Lightning I", "Spell_LightningClass", 0.5f, 10.0f));
 
             AddSpell("XBAYAB", new SpellInformation("xX=FACE OF THE MAKER=Xx", "Spell_FireClass", 9999.0f, 10.0f));
 

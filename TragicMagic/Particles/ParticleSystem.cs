@@ -45,6 +45,11 @@ namespace TragicMagic
         // Particle lifetime
         public float particleLifetime = 30.0f;
 
+        // Animated particles
+        bool particlesAnimated = false;
+        int numParticleFrames = 1;
+        int particleAnimLoops = 1;
+
 		// Colour changes
 		public Color beginColour;
 		public Color endColour;
@@ -59,7 +64,7 @@ namespace TragicMagic
         }
 
         // Create on the fly whoa
-        public void Initialize(float emitdistance, float emitdistancejitter, float emitangle, float emitanglejitter, int emitamt, float life, string imgsource, int imgwidth, int imgheight, float imgscale)
+        public void Initialize(float emitdistance, float emitdistancejitter, float emitangle, float emitanglejitter, int emitamt, float life, string imgsource, int imgwidth, int imgheight, float imgscale, bool animated = false, int numframes = 1, int numloops = 1)
         {
             // Set variables yeah
             emitDistance = emitdistance;
@@ -72,6 +77,9 @@ namespace TragicMagic
             imageWidth = imgwidth;
             imageHeight = imgheight;
             imageScale = imgscale;
+            particlesAnimated = animated;
+            numParticleFrames = numframes;
+            particleAnimLoops = numloops;
         }
 
         public override void Update()
@@ -105,6 +113,13 @@ namespace TragicMagic
 
 					newParticle.Alpha = beginColour.A;
 					newParticle.FinalAlpha = endColour.A;
+
+                    
+                    newParticle.Animate = particlesAnimated;
+                    newParticle.FrameCount = numParticleFrames;
+                    newParticle.FrameOffset = Rand.Int(0, numParticleFrames - 1);
+                    newParticle.Loops = particleAnimLoops;
+                    
 
 					newParticle.Start(); // Initialize graphics
                     newParticle.Graphic.Shake = particleShake;
