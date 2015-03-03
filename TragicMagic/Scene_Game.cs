@@ -43,40 +43,33 @@ namespace TragicMagic
 		// Store a state manager
 		private TragicStateManagerClass TragicStateManager = new TragicStateManagerClass();
 
-		// Test tilemap
-		public OgmoProject test = new OgmoProject( "../../resources/tilemap.oep", "../../resources/" );
-
+		// Ground image
+		public Otter.Image Ground = new Otter.Image( "../../resources/ground.png" );
 
 		public Scene_GameClass()
 		{
 		}
-
-
-
 		~Scene_GameClass()
 		{
 		}
 
 		public void Initialize( Game game )
 		{
-			// Test tile map loading
-			test.LoadLevel( "../../resources/cobble.oel", this );
-
-			// Hide tilemap ground
-			foreach ( KeyValuePair<string, Entity> entity in test.Entities )
-			{
-				foreach ( Graphic graphic in entity.Value.Graphics )
-				{
-					graphic.Alpha = 0;
-				}
-			}
+			// Initialize the ground graphic for fading in
+			AddGraphic( Ground );
+			Ground.Alpha = 0;
+			Ground.Texture.SetRect(
+				0,
+				0,
+				200,
+				200,
+				Color.Red
+			);
 
 			// Set the reference to LeapController within the GameWands class & add to game update
 			GameWands.LeapController = LeapController;
 			GameWands.OnCast = OnCast;
 			Add( GameWands );
-
-            
 
 			// Initialize the two wizard players
 			float wizardoffset = 256;
@@ -142,6 +135,33 @@ namespace TragicMagic
 
 			// Display errors if the Leap device is missing
 			Update_CheckLeap();
+
+			int x = (int) Math.Floor( Wizards[0].X - ( Wizards[0].Graphic.ScaledWidth / 2 ) );
+			int y = (int) Math.Floor( Wizards[0].Y - ( Wizards[0].Graphic.ScaledHeight / 2 ) );
+			int width = 12;//(int) Math.Floor( Wizards[0].Graphic.ScaledWidth );
+			int height = 12;//(int) Math.Floor( Wizards[0].Graphic.ScaledHeight );
+			{
+				x = Math.Max( 0, Math.Min( Ground.Texture.Width, x ) ); // Left
+				y = Math.Max( 0, Math.Min( Ground.Texture.Height, y ) ); // Top
+				if ( ( x + width ) > Ground.Texture.Width ) // Right
+				{
+					width = Ground.Texture.Width - x;
+				}
+				if ( ( y + height ) > Ground.Texture.Height ) // Bottom
+				{
+					height = Ground.Texture.Height - y;
+				}
+			}
+			if ( ( width != 0 ) && ( height != 0 ) )
+			{
+				//Ground.Texture.SetRect(
+				//	x,
+				//	y,
+				//	width,
+				//	height,
+				//	Color.Red
+				//);
+			}
 		}
 
 		// Reset any round specific game objects (i.e. spells) when the round ends

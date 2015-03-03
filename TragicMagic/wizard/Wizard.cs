@@ -392,17 +392,11 @@ namespace TragicMagic
 			if ( CanMove )
 			{
 				// Player tried to cast a spell; send their current combo to the spell-checker (lol)
-				SpellInformation whatSpell = ComboSystem.Instance.CheckSpell( ComboInputs );
-
-				this.Game.Debugger.Log( "", LinkedSession.Name + ": Trying to cast with: " + ComboInputs );
+				SpellInformation spell_description = ComboSystem.Instance.CheckSpell( ComboInputs );
 
 				// If we actually cast a spell, do something with it!
-				if ( whatSpell != null )
+				if ( spell_description != null )
 				{
-					// Write into ingame debug console (open with @)
-
-					this.Game.Debugger.Log( "", LinkedSession.Name + ": " + whatSpell.spellName + " just got cast!\n" );
-
 					// Recalculate the forward vector of the wizard's wand only when required
 					double radangle = Math.PI * ( 180 - Wand.Angle ) / 180; // Invert to face other wizard
 					double sin = Math.Sin( radangle );
@@ -414,22 +408,19 @@ namespace TragicMagic
 						(float) ( ( (double) origin.X * sin ) + ( (double) origin.Y * cos ) )
 					);
 
-					// Spell test
-					Type spelltype = Type.GetType( "TragicMagic." + whatSpell.spellType );
+					// Spell fire
+					Type spelltype = Type.GetType( "TragicMagic." + spell_description.spellType );
 					SpellClass spell = (SpellClass) Activator.CreateInstance( spelltype );
-					//new SpellClass( ID, X + Wand.X, Y + Wand.Y, WandForward, whatSpell.spellSpeed );
 					{
 						spell.ID = ID;
 						spell.X = X + Wand.X + ( WandForward.X * Wand.ScaledHeight); // Offset from wizard to wand base, then to wand tip
 						spell.Y = Y + Wand.Y + ( WandForward.Y * Wand.ScaledHeight );
 						spell.Direction = WandForward;
 						spell.Angle = 180 - Wand.Angle;
-						spell.SetSpeed( whatSpell.spellSpeed );
+						spell.SetSpeed( spell_description.spellSpeed );
 						CurrentScene.Add( spell );
 					}
 					CurrentScene.Projectile.Add( spell );
-
-					//TODO: Here we'd read the spell info and build a spell entity from it & add it to the scene.
 				}
 
 				// Now blank out the combo inputs, ready for another go.

@@ -120,13 +120,7 @@ namespace TragicMagic
 			// Update the fade out
 			Ground_Alpha.Direction = -1;
 			Ground_Alpha.Update( false );
-			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
-			{
-				foreach( Graphic graphic in entity.Value.Graphics )
-				{
-					graphic.Alpha = Ground_Alpha.Value;
-				}
-			}
+			CurrentScene.Ground.Alpha = Ground_Alpha.Value;
 		}
 		private void ExitMenu()
 		{
@@ -193,13 +187,7 @@ namespace TragicMagic
 			// Update the fade in
 			Ground_Alpha.Direction = 1;
 			Ground_Alpha.Update( false );
-			foreach ( KeyValuePair<string, Entity> entity in CurrentScene.test.Entities )
-			{
-				foreach( Graphic graphic in entity.Value.Graphics )
-				{
-					graphic.Alpha = Ground_Alpha.Value;
-				}
-			}
+			CurrentScene.Ground.Alpha = Ground_Alpha.Value;
 		}
 		private void ExitGame()
 		{
