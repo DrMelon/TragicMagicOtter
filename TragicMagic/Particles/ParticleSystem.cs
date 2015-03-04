@@ -34,11 +34,21 @@ namespace TragicMagic
         // Number of particles to emit per frame
         public int emitAmount = 1;
 
+        // Start and End scale
+        public float particleStartScale = 1.0f;
+        public float particleEndScale = 1.0f;
+        
+        // Start and End rotation
+        public float particleStartRotation = 0.0f;
+        public float particleEndRotation = 0.0f;
+
+        // Local/Global particle space
+        public bool particleLocalSpace = false;
+
         // Particle image to use -- not loaded from file!
         public string imageSource;
         public int imageWidth;
         public int imageHeight;
-		public float imageScale;
 
         public float particleShake = 0.0f;
 
@@ -54,13 +64,23 @@ namespace TragicMagic
 		public Color beginColour;
 		public Color endColour;
 
+        // For local particle system
+        public List<Particle> activeLocalParticles;
+        public float oldX, oldY;
+
+   
+
         public ParticleSystem(float x = 0, float y = 0)
         {
             X = x;
             Y = y;
+            oldX = x;
+            oldY = y;
 
 			beginColour = Color.White;
 			endColour = Color.White;
+
+            activeLocalParticles = new List<Particle>();
         }
 
         // Create on the fly whoa
@@ -76,7 +96,7 @@ namespace TragicMagic
             imageSource = imgsource;
             imageWidth = imgwidth;
             imageHeight = imgheight;
-            imageScale = imgscale;
+            particleStartScale = imgscale;
             particlesAnimated = animated;
             numParticleFrames = numframes;
             particleAnimLoops = numloops;
@@ -85,6 +105,7 @@ namespace TragicMagic
         public override void Update()
         {
             base.Update();
+
 
             if(isEmitting)
             {
@@ -105,14 +126,22 @@ namespace TragicMagic
                     newParticle.FinalX = this.X + (float)Math.Sin(thisAngle) * thisDistance;
                     newParticle.FinalY = this.Y + (float)Math.Cos(thisAngle) * thisDistance;
 
-                    newParticle.ScaleX = imageScale;
-                    newParticle.ScaleY = imageScale;
+                    newParticle.ScaleX = particleStartScale;
+                    newParticle.ScaleY = particleStartScale;
+
+                    newParticle.FinalScaleX = particleEndScale;
+                    newParticle.FinalScaleY = particleEndScale;
 
 					newParticle.Color = beginColour;
 					newParticle.FinalColor = endColour;
 
 					newParticle.Alpha = beginColour.A;
 					newParticle.FinalAlpha = endColour.A;
+
+                    newParticle.Angle = particleStartRotation;
+                    newParticle.FinalAngle = particleEndRotation;
+
+                    
 
                     
                     newParticle.Animate = particlesAnimated;
@@ -124,11 +153,33 @@ namespace TragicMagic
 					newParticle.Start(); // Initialize graphics
                     newParticle.Graphic.Shake = particleShake;
 
-                    // Add to scene.
+                    // Add to scene if global, and to system local space if local
+                    if (particleLocalSpace)
+                    {
+                        activeLocalParticles.Add(newParticle);
+                    }
                     this.Scene.Add(newParticle);
                     
                 }
             }
+
+
+
+            // If we have local particles...
+            if(particleLocalSpace)
+            {
+                foreach (Particle particle in activeLocalParticles)
+                {
+                    // Move the particles with the parent system
+                    particle.FinalX += (X - oldX);
+                    particle.FinalY += (Y - oldY);
+                }
+            }
+
+            // Update particle system's old position
+            oldX = X;
+            oldY = Y;
+
         }
 
         public void Start()

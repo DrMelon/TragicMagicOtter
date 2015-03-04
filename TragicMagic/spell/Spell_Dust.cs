@@ -45,6 +45,10 @@ namespace TragicMagic
 			Particle_Dust.Initialize( 50, 20, 0, 360, 5, 15, "../../resources/particle/smoke.png", 87, 87, 0.8f );
 			Particle_Dust.particleShake = 1;
 			Particle_Dust.endColour.A = 0;
+            Particle_Dust.particleEndScale = 5.0f;
+            Particle_Dust.particleStartRotation = Rand.Float(-720, 720);
+            Particle_Dust.particleEndRotation = Rand.Float(-720, 720);
+            Particle_Dust.particleLocalSpace = true;
 			Particle_Dust.Start();
 			Scene.Add( Particle_Dust );
 
