@@ -242,12 +242,6 @@ namespace TragicMagic
 			UpdateDestination();
 		}
 
-		public override void Render()
-		{
-			base.Render();
-			Hitbox.Render(); // Debug draw the hitbox
-		}
-
 		public void CheckControls()
 		{
 			if ( LinkedSession != null )

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 // Matthew Cormack @johnjoemcbob
@@ -19,6 +20,12 @@ namespace TragicMagic
 		Game, // The main state, with gameplay logic
 		Score, // The battle end state, which displays the score of both players & the winner
 		Twitter // The tweet state, allowing players to tweet their battleground
+	}
+
+	struct MatchOutcome
+	{
+		public float Score;
+		public bool Winner;
 	}
 
 	class TragicStateManagerClass : Entity
@@ -43,6 +50,15 @@ namespace TragicMagic
 		// The fade in/out animation for the ground
 		private ClampedSpeedValueClass Ground_Alpha;
 
+		// The tweet finished flag for each wizard
+		private bool[] TweetFinished;
+
+		// The match outcome for each wizard (saved for the Twitter state)
+		private MatchOutcome[] Outcome;
+
+		// The thread to handle tweeting the match image & outcome
+		private Thread TweetThread;
+
 		public TragicStateManagerClass()
 		{
 
@@ -50,7 +66,8 @@ namespace TragicMagic
 
 		~TragicStateManagerClass()
 		{
-
+			// Wait for the image to be tweeted before cleaning up
+			TweetThread.Join();
 		}
 
 		public override void Added()
@@ -88,6 +105,18 @@ namespace TragicMagic
 				Ground_Alpha.Maximum = 1;
 				Ground_Alpha.Speed = FADE_SPEED;
 			}
+
+			// Initialize the tweet finished flag for the wizards
+			TweetFinished = new bool[Scene_GameClass.WIZARDS];
+			{
+				for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
+				{
+					TweetFinished[wizard] = false;
+				}
+			}
+
+			// Initialize the match outcome for the wizards
+			Outcome = new MatchOutcome[Scene_GameClass.WIZARDS];
 		}
 
 		// State: Menu
@@ -95,6 +124,12 @@ namespace TragicMagic
 		{
 			CurrentScene.HUDHandler.AddTeam();
 			CurrentScene.ClearGround();
+			
+			// Move wizards offscreen
+			foreach ( WizardClass wizard in CurrentScene.Wizards )
+			{
+				wizard.Pause = false; // Unpause to allow player movement (nothing to do with Otter Entity pausing, still need some input)
+			}
 		}
 		private void UpdateMenu()
 		{
@@ -208,6 +243,7 @@ namespace TragicMagic
 				}
 				wizard.Destination = new Vector2( wizardoffset, Game.Instance.HalfHeight );
 				wizard.CanMove = false; // Lock into this animation
+				wizard.Pause = true; // Pause to stop major input and update of the player (nothing to do with Otter Entity pausing, still need some input)
 			}
 
 			// Cleanup the game scene (spells, etc)
@@ -225,6 +261,9 @@ namespace TragicMagic
 
 			// Start game timer
 			ScoreTime.Start();
+
+			// Save screenshot
+			TweetinviClass.SaveScreenshot();
 		}
 		private void UpdateScore()
 		{
@@ -232,21 +271,135 @@ namespace TragicMagic
 			{
 				if ( ScoreTime.AtMax )
 				{
-					TragicStateMachine.ChangeState( TragicState.Menu );
+					TragicStateMachine.ChangeState( TragicState.Twitter );
 				}
-			}
-
-			if ( Game.Instance.Session( "DarkWizard" ).GetController<ControllerXbox360>().Start.Pressed ) // TODO: Remove temp tweeting
-			{
-				
 			}
 		}
 		private void ExitScore()
 		{
+			// Save match outcome for each wizard (for Tweet state)
+			for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
+			{
+				HUDElement_OutcomeClass outcome = (HUDElement_OutcomeClass) CurrentScene.HUDHandler.HUDElement_Outcome[wizard];
+				Outcome[wizard].Score = outcome.Score;
+				Outcome[wizard].Winner = outcome.Winner;
+			}
+
 			CurrentScene.HUDHandler.RemoveOutcome();
 		}
 
-        
+		// State: Twitter
+		private void EnterTwitter()
+		{
+			CurrentScene.HUDHandler.AddKeyboard();
+
+			for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
+			{
+				TweetFinished[wizard] = false;
+			}
+		}
+		private void UpdateTwitter()
+		{
+			// Handle input from each wizard to set finished tweeting
+			for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
+			{
+				// Get the controller for this wizard
+				ControllerXbox360 controller = Game.Instance.Sessions[wizard].GetController<ControllerXbox360>();
+				if ( controller.Y.Pressed )
+				{
+					TweetFinished[wizard] = !TweetFinished[wizard];
+				}
+			}
+
+			// Handle switching back to the menu state when all wizards are finished
+			bool finished = true;
+			{
+				for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
+				{
+					if ( !TweetFinished[wizard] )
+					{
+						finished = false;
+						break;
+					}
+				}
+			}
+			if ( finished )
+			{
+				TragicStateMachine.ChangeState( TragicState.Menu );
+			}
+		}
+		private void ExitTwitter()
+		{
+			// Cleanup old thread
+			if ( TweetThread != null )
+			{
+				TweetThread.Abort();
+				TweetThread.Join();
+				TweetThread = null;
+			}
+
+			// Start the thread to tweet the outcome
+			TweetThread = new Thread( new ThreadStart( this.TweetInThread ) );
+			TweetThread.Start();
+		}
+
+		private void TweetInThread()
+		{
+			// Setup tweet text
+			HUDElement_KeyboardClass[] keyboard = new HUDElement_KeyboardClass[2];
+			{
+				keyboard[0] = (HUDElement_KeyboardClass) CurrentScene.HUDHandler.HUDElement_Keyboard[0];
+				keyboard[1] = (HUDElement_KeyboardClass) CurrentScene.HUDHandler.HUDElement_Keyboard[1];
+			}
+			string tweet = "";
+			{
+				// 1. First wizard's twitter handle
+				{
+					string username = "Player 1";
+					if ( keyboard[1].UserString.Length > 0 )
+					{
+						username = "@" + keyboard[1].UserString;
+					}
+					tweet += "" + username;
+				}
+				// 2. First wizard's score
+				{
+					tweet += " (" + Outcome[1].Score + ")";
+				}
+				// 3. Match outcome
+				{
+					if ( Outcome[1].Winner )
+					{
+						tweet += " beat";
+					}
+					else if ( Outcome[0].Winner )
+					{
+						tweet += " lost to";
+					}
+					else
+					{
+						tweet += " drew with";
+					}
+				}
+				// 4. Second wizard's twitter handle
+				{
+					string username = "Player 2";
+					if ( keyboard[0].UserString.Length > 0 )
+					{
+						username = "@" + keyboard[0].UserString;
+					}
+					tweet += " " + username;
+				}
+				// 5. Second wizard's score
+				{
+					tweet += " (" + Outcome[0].Score + ")!";
+				}
+			}
+			// Remove HUD keyboards
+			CurrentScene.HUDHandler.RemoveKeyboard();
+
+			// Tweet the image & text
+			TweetinviClass.TweetImage( tweet );
+		}
 	}
-       
 }

@@ -42,6 +42,9 @@ namespace TragicMagic
 		// Store the game round end outcome HUD entities
 		public HUDElementClass[] HUDElement_Outcome;
 
+		// Store the virtual keyboard HUD entities
+		public HUDElementClass[] HUDElement_Keyboard;
+
 		// Setup the HUD objects, and their element containers
 		// IN: (scene_current) The current scene
 		// OUT: N/A
@@ -75,6 +78,9 @@ namespace TragicMagic
 
 			// Outcome objects
 			HUDElement_Outcome = new HUDElementClass[HUDs];
+
+			// Keyboard objects
+			HUDElement_Keyboard = new HUDElementClass[HUDs];
 		}
 
 		public override void Added()
@@ -316,6 +322,44 @@ namespace TragicMagic
 				HUDElement_Outcome[hud] = null;
 			}
 		}
+
+		// Add the virtual keyboard to the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void AddKeyboard()
+		{
+			if ( HUDElement_Keyboard[0] != null ) { return; }; // Already added
+
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Keyboard[hud] = new HUDElement_KeyboardClass(
+					CurrentScene, // Reference to the current scene
+					Game.Instance.HalfHeight / 2, // Position X
+					Game.Instance.HalfWidth / 3, // Position Y
+					hud // The HUD index, for the player the keyboard belongs to
+				);
+			}
+
+			Add( HUDElement_Keyboard[0], HUDElement_Keyboard[1] );
+		}
+
+		// Remove the virtual keyboard from the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void RemoveKeyboard()
+		{
+			if ( HUDElement_Keyboard[0] == null ) { return; }; // Already removed
+
+			Remove( HUDElement_Keyboard[0], HUDElement_Keyboard[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Keyboard[hud] = null;
+			}
+		}
+
 		// Add an entity to both HUDs
 		// IN: (entity1) The entity representing the first HUD element, (entity2) The entity representing the second HUD element
 		// OUT: N/A

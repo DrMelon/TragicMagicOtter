@@ -60,7 +60,11 @@ namespace TragicMagic
 			{
 				foreach ( HUDElementClass element in entity.HUDElement_Child )
 				{
-					element.OnAdded = new Action( () => OnEntityAdded( element ) ); // Wait for graphics to be added to the scene
+					// Check that this element exists (there may be gaps in the array)
+					if ( element != null )
+					{
+						element.OnAdded = new Action( () => OnEntityAdded( element ) ); // Wait for graphics to be added to the scene
+					}
 				}
 			}
 

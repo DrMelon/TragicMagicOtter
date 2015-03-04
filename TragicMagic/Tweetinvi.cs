@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Otter;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,18 +32,21 @@ namespace TragicMagic
 		{
 			string OAuthAccessToken = "3037861589-POUB49lcqUSE4Stlci2c6OvSQjJwbfILny9kGw2";
 			string OAuthAccessTokenSecret = "";
-			string ConsumerKey = "AIfr1m8jogiO9M62xX5FFkiwM";
+			string ConsumerKey = "HOFJ5kSINAG0u3frgqDGPYpok";
 			string ConsumerSecret = "";
 
-			//IOAuthCredentials credentials = TwitterCredentials.CreateCredentials( OAuthAccessToken, OAuthAccessTokenSecret, ConsumerKey, ConsumerSecret );
-			//TwitterCredentials.SetCredentials( credentials );
-
-			//Tweet_PublishTweetWithImage( "Tragic Magic", "../../resources/leap/leapcableback.png" );
+			IOAuthCredentials credentials = TwitterCredentials.CreateCredentials( OAuthAccessToken, OAuthAccessTokenSecret, ConsumerKey, ConsumerSecret );
+			TwitterCredentials.SetCredentials( credentials );
 		}
 
-		private static void Tweet_PublishTweetWithImage( string text, string filePath )
+		public static void SaveScreenshot( string filepath = "roundcomplete" )
 		{
-			byte[] file = File.ReadAllBytes( filePath );
+			Game.Instance.Surface.SaveToFile( filepath + ".png" );
+		}
+
+		public static void TweetImage( string text, string filepath = "roundcomplete" )
+		{
+			byte[] file = File.ReadAllBytes( filepath + ".png" );
 
 			// Create a tweet with a single image
 			var tweet = Tweet.CreateTweetWithMedia( text, file );
