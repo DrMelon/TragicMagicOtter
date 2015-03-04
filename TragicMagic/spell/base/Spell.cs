@@ -14,6 +14,10 @@ namespace TragicMagic
 {
     class SpellClass : Entity
     {
+		// Defines
+		private const float TRAIL_BETWEEN = 0.2f; // Time between leaving trail marks
+		private const float TRAIL_BETWEEN_RANDOM = 0.05f; // Random addition to time between leaving trail marks
+
 		// The ID of the wizard this spell was cast by
 		public int ID = 0;
 
@@ -25,6 +29,14 @@ namespace TragicMagic
 
 		// The clamped movement speed of the spell projectile
 		private Speed MovementSpeed = new Speed( 10 );
+
+		// The trail graphic to render to the ground each frame
+		protected Otter.Image GroundTrail;
+
+		// The time between leaving trail marks
+		private float NextTrail = 0;
+		protected float TrailBetween;
+		protected float TrailBetweenRandom;
 
         public SpellClass( int wizard, float x, float y, Vector2 direction, float speed = 1 )
         {
@@ -48,6 +60,10 @@ namespace TragicMagic
 			// Initialie collider
 			SetHitbox( 10, 10, ( (int) ColliderType.Wizard ) + ID );
 			Hitbox.CenterOrigin();
+
+			// Initialize trail mark timers to seconds
+			TrailBetween = TRAIL_BETWEEN * 60;
+			TrailBetweenRandom = TRAIL_BETWEEN_RANDOM * 60;
 		}
 
 		public override void Update()
@@ -71,6 +87,33 @@ namespace TragicMagic
 						// Increment score of spell caster
 						Scene_GameClass scene = (Scene_GameClass) Scene;
 						scene.Wizards[ID].Score++;
+					}
+				}
+			}
+
+			// Render the trail particle for this frame onto the ground
+			if ( GroundTrail != null )
+			{
+				// Is time to lay a new trail
+				if ( NextTrail < Game.Instance.Timer )
+				{
+					// Is in the scene
+					if ( Scene != null )
+					{
+						// Cast to appropriate scene for Tragic Magic
+						Scene_GameClass scenegame = (Scene_GameClass ) Scene;
+						// Check the ground surface render target exists
+						if ( scenegame.GroundSurface != null )
+						{
+							// Randomly rotate the trail mark
+							GroundTrail.Angle = Rand.Float( 0, 360 );
+
+							// Draw the trail mark
+							scenegame.GroundSurface.Draw( GroundTrail, X, Y );
+
+							// Set timer for next mark
+							NextTrail = Game.Instance.Timer + TrailBetween + Rand.Float( -TrailBetweenRandom, TrailBetweenRandom );
+						}
 					}
 				}
 			}

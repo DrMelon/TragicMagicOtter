@@ -14,6 +14,10 @@ namespace TragicMagic
 {
 	class Spell_DustClass : SpellClass
 	{
+		// Defines
+		private const float TRAIL_BETWEEN = 0.1f; // Time between leaving trail marks
+		private const float TRAIL_BETWEEN_RANDOM = 0.05f; // Random addition to time between leaving trail marks
+
 		// The main particle system of this dust cloud
 		private ParticleSystem Particle_Dust;
 
@@ -43,6 +47,13 @@ namespace TragicMagic
 			Particle_Dust.endColour.A = 0;
 			Particle_Dust.Start();
 			Scene.Add( Particle_Dust );
+
+			// Intitialize the ground trail mark image
+			GroundTrail = new Otter.Image( "../../resources/particle/scorch.png" );
+
+			// Initialize trail mark timers to seconds
+			TrailBetween = TRAIL_BETWEEN * 60;
+			TrailBetweenRandom = TRAIL_BETWEEN_RANDOM * 60;
 		}
 
 		public override void Update()

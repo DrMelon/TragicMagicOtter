@@ -94,6 +94,7 @@ namespace TragicMagic
 		private void EnterMenu()
 		{
 			CurrentScene.HUDHandler.AddTeam();
+			CurrentScene.ClearGround();
 		}
 		private void UpdateMenu()
 		{
@@ -120,7 +121,7 @@ namespace TragicMagic
 			// Update the fade out
 			Ground_Alpha.Direction = -1;
 			Ground_Alpha.Update( false );
-			CurrentScene.Ground.Alpha = Ground_Alpha.Value;
+			CurrentScene.GroundSurface.Alpha = Ground_Alpha.Value;
 		}
 		private void ExitMenu()
 		{
@@ -187,7 +188,7 @@ namespace TragicMagic
 			// Update the fade in
 			Ground_Alpha.Direction = 1;
 			Ground_Alpha.Update( false );
-			CurrentScene.Ground.Alpha = Ground_Alpha.Value;
+			CurrentScene.GroundSurface.Alpha = Ground_Alpha.Value;
 		}
 		private void ExitGame()
 		{

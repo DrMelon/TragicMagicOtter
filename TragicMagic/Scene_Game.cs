@@ -44,7 +44,8 @@ namespace TragicMagic
 		private TragicStateManagerClass TragicStateManager = new TragicStateManagerClass();
 
 		// Ground image
-		public Otter.Image Ground = new Otter.Image( "../../resources/ground.png" );
+		public Surface GroundSurface;
+		private Otter.Image Ground;
 
 		public Scene_GameClass()
 		{
@@ -55,16 +56,13 @@ namespace TragicMagic
 
 		public void Initialize( Game game )
 		{
-			// Initialize the ground graphic for fading in
-			AddGraphic( Ground );
-			Ground.Alpha = 0;
-			Ground.Texture.SetRect(
-				0,
-				0,
-				200,
-				200,
-				Color.Red
-			);
+			// Initialize the ground surface render target
+			GroundSurface = new Surface( 1920, 1080 );
+			GroundSurface.AutoClear = false;
+			AddGraphic( GroundSurface );
+
+			// Initialize the ground graphic (Added in ClearGround)
+			Ground = new Otter.Image( "../../resources/ground.png" );
 
 			// Set the reference to LeapController within the GameWands class & add to game update
 			GameWands.LeapController = LeapController;
@@ -135,33 +133,6 @@ namespace TragicMagic
 
 			// Display errors if the Leap device is missing
 			Update_CheckLeap();
-
-			int x = (int) Math.Floor( Wizards[0].X - ( Wizards[0].Graphic.ScaledWidth / 2 ) );
-			int y = (int) Math.Floor( Wizards[0].Y - ( Wizards[0].Graphic.ScaledHeight / 2 ) );
-			int width = 12;//(int) Math.Floor( Wizards[0].Graphic.ScaledWidth );
-			int height = 12;//(int) Math.Floor( Wizards[0].Graphic.ScaledHeight );
-			{
-				x = Math.Max( 0, Math.Min( Ground.Texture.Width, x ) ); // Left
-				y = Math.Max( 0, Math.Min( Ground.Texture.Height, y ) ); // Top
-				if ( ( x + width ) > Ground.Texture.Width ) // Right
-				{
-					width = Ground.Texture.Width - x;
-				}
-				if ( ( y + height ) > Ground.Texture.Height ) // Bottom
-				{
-					height = Ground.Texture.Height - y;
-				}
-			}
-			if ( ( width != 0 ) && ( height != 0 ) )
-			{
-				//Ground.Texture.SetRect(
-				//	x,
-				//	y,
-				//	width,
-				//	height,
-				//	Color.Red
-				//);
-			}
 		}
 
 		// Reset any round specific game objects (i.e. spells) when the round ends
@@ -200,6 +171,15 @@ namespace TragicMagic
 		{
 			Wizards[wizard].TryToCastSpell();
 			return 0;
+		}
+
+		// Clears the ground surface render target at the start of a new round
+		// IN: N/A
+		// OUT: N/A
+		public void ClearGround()
+		{
+			GroundSurface.Clear();
+			GroundSurface.Draw( Ground );
 		}
 	}
 }
