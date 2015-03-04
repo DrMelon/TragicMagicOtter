@@ -68,6 +68,8 @@ namespace TragicMagic
         public List<Particle> activeLocalParticles;
         public float oldX, oldY;
 
+		// The angle of the particle system as a whole
+		public float Angle = 0;
    
 
         public ParticleSystem(float x = 0, float y = 0)
@@ -173,6 +175,7 @@ namespace TragicMagic
                     // Move the particles with the parent system
                     particle.FinalX += (X - oldX);
                     particle.FinalY += (Y - oldY);
+					particle.Angle = Angle;
                 }
             }
 

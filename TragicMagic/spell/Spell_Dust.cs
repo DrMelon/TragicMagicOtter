@@ -44,6 +44,8 @@ namespace TragicMagic
 			Particle_Dust = new ParticleSystem( X, Y );
 			Particle_Dust.Initialize( 50, 20, 0, 360, 5, 15, "../../resources/particle/smoke.png", 87, 87, 0.8f );
 			Particle_Dust.particleShake = 1;
+			Particle_Dust.beginColour = Color.Gray * Color.Gray * Color.Orange + Color.Gray;
+			Particle_Dust.endColour = Color.Black;
 			Particle_Dust.endColour.A = 0;
             Particle_Dust.particleEndScale = 5.0f;
             Particle_Dust.particleStartRotation = Rand.Float(-720, 720);
@@ -65,8 +67,9 @@ namespace TragicMagic
 			base.Update();
 
 			// Main dust particles need to stay attached to the collider
-			Particle_Dust.X = X;
-			Particle_Dust.Y = Y;
+			Particle_Dust.X = X + (float) Math.Sin( Particle_Dust.Angle / 90 ) * 25;
+			Particle_Dust.Y = Y + (float) Math.Cos( Particle_Dust.Angle / 90 ) * 25;
+			Particle_Dust.Angle += 10;
 		}
 
 		public override void Removed()
