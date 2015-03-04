@@ -47,13 +47,16 @@ namespace TragicMagic
             Particle_Lightning.endColour = (Color.Blue * Color.Gray * Color.Gray);
             Particle_Lightning.endColour.A = 0;
             Particle_Lightning.particleShake = 4;
-            Particle_Lightning.Start();
+            //Particle_Lightning.Start();
             Scene.Add(Particle_Lightning);
-
+			Image middle = new Image( "../../resources/particle/star.png" );
+			middle.CenterOrigin();
+			middle.Color = Color.Cyan;
+			AddGraphic( middle );
 
             // Add crackle
             Particle_LightningCrackle = new ParticleSystem(X, Y);
-            Particle_LightningCrackle.Initialize(40, 40, 0, 360, 4, 5, "../../resources/particle/crackle_sheet.png", 87, 87, 0.2f, true, 6, 4);
+            Particle_LightningCrackle.Initialize(60, 40, 0, 360, 8, 5, "../../resources/particle/crackle_sheet.png", 87, 87, 0.1f, true, 6, 4);
             Particle_LightningCrackle.beginColour = Color.Cyan;
             Particle_LightningCrackle.endColour = Color.White;
             Particle_LightningCrackle.endColour.A = 0;
