@@ -67,7 +67,10 @@ namespace TragicMagic
 		~TragicStateManagerClass()
 		{
 			// Wait for the image to be tweeted before cleaning up
-			TweetThread.Join();
+			if ( TweetThread != null )
+			{
+				TweetThread.Join();
+			}
 		}
 
 		public override void Added()
