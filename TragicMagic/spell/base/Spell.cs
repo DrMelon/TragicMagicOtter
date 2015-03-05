@@ -17,6 +17,7 @@ namespace TragicMagic
 		// Defines
 		private const float TRAIL_BETWEEN = 0.2f; // Time between leaving trail marks
 		private const float TRAIL_BETWEEN_RANDOM = 0.05f; // Random addition to time between leaving trail marks
+		private const float AUDIO_OFFSET = 10; // The offset to exaggerate the effect of the positional audio
 
 		// The ID of the wizard this spell was cast by
 		public int ID = 0;
@@ -28,7 +29,7 @@ namespace TragicMagic
 		public float Angle = 0;
 
 		// The clamped movement speed of the spell projectile
-		private Speed MovementSpeed = new Speed( 10 );
+		private Speed MovementSpeed = new Speed( 100 );
 
 		// The trail graphic to render to the ground each frame
 		protected Otter.Image GroundTrail;
@@ -37,6 +38,9 @@ namespace TragicMagic
 		private float NextTrail = 0;
 		protected float TrailBetween;
 		protected float TrailBetweenRandom;
+
+		// The audio to loop while the spell is travelling
+		protected Sound AudioLoop;
 
         public SpellClass( int wizard, float x, float y, Vector2 direction, float speed = 1 )
         {
@@ -64,6 +68,11 @@ namespace TragicMagic
 			// Initialize trail mark timers to seconds
 			TrailBetween = TRAIL_BETWEEN * 60;
 			TrailBetweenRandom = TRAIL_BETWEEN_RANDOM * 60;
+
+			// Initialize the default audio loop
+			AudioLoop = new Sound( "../../resources/audio/magichappens.wav", true );
+			AudioLoop.Attenuation = 0.1f;
+			AudioLoop.Play();
 		}
 
 		public override void Update()
@@ -128,6 +137,18 @@ namespace TragicMagic
 			{
 				Scene.Remove( this );
 			}
+
+			// Move the audio's position to be that of the spell's, with an offset to exaggerate the effect
+			AudioLoop.X = ( X - Game.Instance.HalfWidth ) / Game.Instance.Width * AUDIO_OFFSET;
+		}
+
+		public override void Removed()
+		{
+			base.Removed();
+
+			// Cleanup the main audio loop
+			AudioLoop.Stop();
+			AudioLoop = null;
 		}
 
 		public void SetSpeed( float speed )

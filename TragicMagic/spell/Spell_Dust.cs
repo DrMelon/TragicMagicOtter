@@ -60,6 +60,15 @@ namespace TragicMagic
 			// Initialize trail mark timers to seconds
 			TrailBetween = TRAIL_BETWEEN * 60;
 			TrailBetweenRandom = TRAIL_BETWEEN_RANDOM * 60;
+
+			// Remove default audio sample
+			AudioLoop.Stop();
+			AudioLoop = null;
+
+			// Initialize the dust storm audio loop
+			AudioLoop = new Sound( "../../resources/audio/dust.wav", true );
+			AudioLoop.Attenuation = 0.1f;
+			AudioLoop.Play();
 		}
 
 		public override void Update()
