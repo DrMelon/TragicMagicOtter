@@ -60,6 +60,7 @@
     <Compile Include="math\ClampedValue.cs" />
     <Compile Include="Particles\TragicParticleFile.cs" />
     <Compile Include="spell\Spell_Dust.cs" />
+    <Compile Include="spell\Spell_Earth.cs" />
     <Compile Include="spell\Spell_Fire.cs" />
     <Compile Include="spell\Spell_Lightning.cs" />
     <Compile Include="TragicStateManager.cs" />

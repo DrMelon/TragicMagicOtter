@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 // Matthew Cormack @johnjoemcbob
 // 26/02/2015
 // A basic fireball projectile
-// Depends on: Spell
+// Depends on: Spell, ParticleSystem
 
 namespace TragicMagic
 {

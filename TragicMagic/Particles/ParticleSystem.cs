@@ -146,9 +146,6 @@ namespace TragicMagic
                     newParticle.Angle = particleStartRotation;
                     newParticle.FinalAngle = particleEndRotation;
 
-                    
-
-                    
                     newParticle.Animate = particlesAnimated;
                     newParticle.FrameCount = numParticleFrames;
                     newParticle.FrameOffset = Rand.Int(0, numParticleFrames - 1);
