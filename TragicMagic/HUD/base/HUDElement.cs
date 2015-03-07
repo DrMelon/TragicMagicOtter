@@ -27,11 +27,15 @@ namespace TragicMagic
 		// Store the child elements
 		public HUDElementClass[] HUDElement_Child;
 
-		public HUDElementClass( Scene scene_current )
+		// The wizard this HUD element belongs to
+		public short Wizard;
+
+		public HUDElementClass( Scene scene_current, short wizard = 0 )
 			: base()
 		{
 			CurrentScene = scene_current;
 			Parent = this;
+			Wizard = wizard;
 		}
 
 		// Return whether or not the element should actually be removed at this point

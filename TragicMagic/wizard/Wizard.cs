@@ -69,7 +69,7 @@ namespace TragicMagic
 		public float WandAngleDirection = 1; // Light & dark wands rotate differently
 
 		// The speed for the wizard to move at
-		public float Speed = 20;
+		public float Speed = 40;
 
 		// The current score of this wizard for this round
 		public float Score = 0;
@@ -107,9 +107,6 @@ namespace TragicMagic
 
 		// The array of sounds which can be played when the wizard is hurt
 		private Sound[] Hurt;
-
-		// Warn the player if their
-		private Text test = new Text( 48 );
 
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
@@ -150,8 +147,8 @@ namespace TragicMagic
 			//TestShader = new Shader( "../../shaders/video.fs" );
 
 			// Initialize the position interpolation objects
-			ClampedPosition_X.Speed = 5;
-			ClampedPosition_Y.Speed = 5;
+			ClampedPosition_X.Speed = 10;
+			ClampedPosition_Y.Speed = 10;
 
 			// Initialize the position of the wizard
 			Position = new Vector2( 0, 0 );
@@ -196,8 +193,6 @@ namespace TragicMagic
 			// Add the graphics to the scene
 			AddGraphic( Wand ); // Add wand below wizard robes
 			AddGraphic( Body );
-			test.OutlineThickness = 4;
-			AddGraphic( test );
 
 			// Add a hitbox to the wizard
 			int size = (int) Math.Floor( Body.Width * Body.ScaleX * HITBOX_SCALE );
@@ -261,7 +256,6 @@ namespace TragicMagic
 			Body.SetPosition( Position.X, Position.Y );
 			Wand.SetPosition( Position.X + WandOffset.X, Position.Y + WandOffset.Y );
 			Wand.Angle = Angle + ( WandAngle * WandAngleDirection );
-			test.String = GameWands.Wand[ID].ID.ToString();
 
 			// Combo input
 			CheckControls();

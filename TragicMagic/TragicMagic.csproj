@@ -57,6 +57,7 @@
     <Compile Include="HUD\HUDElement_Score.cs" />
     <Compile Include="HUD\HUDElement_SpellCastText.cs" />
     <Compile Include="HUD\HUDElement_Timer.cs" />
+    <Compile Include="HUD\HUDElement_Tool.cs" />
     <Compile Include="math\ClampedSpeedValue.cs" />
     <Compile Include="math\ClampedValue.cs" />
     <Compile Include="Particles\TragicParticleFile.cs" />
