@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Leap;
+using TragicMagic;
 
 // Matthew Cormack @johnjoemcbob
 // 14/02/15
@@ -14,6 +15,10 @@ using Leap;
 // Sean Thurmond @_inu_
 // 21/02/15
 // GamePad Support
+
+// J. Brown @DrMelon
+// 07/03/15
+// Camera Shaking on Wizard Hurt
 
 // TODO:
 // Movement functions
@@ -432,6 +437,15 @@ namespace TragicMagic
 						CurrentScene.Add( spell );
 					}
 					CurrentScene.Projectile.Add( spell );
+
+                    // Create text
+                    HUDHandlerClass hudHandler = this.Scene.GetEntity<HUDHandlerClass>();
+                    if(hudHandler != null)
+                    {
+                        // Create new score text
+                        HUDElement_SpellCastText newText = new HUDElement_SpellCastText(this.Scene, (Game.Instance.HalfHeight / 2), (Game.Instance.HalfWidth / 8), spell_description);
+                        hudHandler.HUD[ID].Add(newText);
+                    }
 				}
 
 				// Now blank out the combo inputs, ready for another go.
@@ -461,6 +475,14 @@ namespace TragicMagic
 			int effect = Rand.Int( 0, SOUND_HURT );
 			Hurt[effect].X = ( X - Game.Instance.HalfWidth ) / Game.Instance.Width * 10; // Should have a function to handle this, it is also used inside Spell.cs
 			Hurt[effect].Play();
+
+            // Screen shake!
+            TragicStateManagerClass theStateManager = this.Scene.GetEntity<TragicStateManagerClass>();
+            if(theStateManager != null)
+            {
+                theStateManager.ScreenShake.ShakeCamera(20, 5);
+            }
+
 		}
 	}
 }

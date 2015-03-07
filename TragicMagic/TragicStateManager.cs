@@ -38,6 +38,9 @@ namespace TragicMagic
 		// Reference to the current scene
 		public Scene_GameClass CurrentScene;
 
+        // Reference to screen shaker
+        public ScreenShaker ScreenShake;
+
 		// Manage the state of the game
 		private StateMachine<TragicState> TragicStateMachine = new StateMachine<TragicState>();
 
@@ -108,6 +111,10 @@ namespace TragicMagic
 				Ground_Alpha.Maximum = 1;
 				Ground_Alpha.Speed = FADE_SPEED;
 			}
+
+            // Initialize the camera shaker
+            ScreenShake = new ScreenShaker();
+            this.Scene.Add(ScreenShake);
 
 			// Initialize the tweet finished flag for the wizards
 			TweetFinished = new bool[Scene_GameClass.WIZARDS];

@@ -56,7 +56,7 @@ namespace TragicMagic
 				Text_Score.Angle = 20;
 			}
 			Parent.AddGraphic( Text_Score );
-
+            
 			// Initialize the fade in/out
 			Alpha = new ClampedSpeedValueClass();
 			{

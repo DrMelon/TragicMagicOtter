@@ -33,6 +33,8 @@ namespace TragicMagic
 
 		// The trail graphic to render to the ground each frame
 		protected Otter.Image GroundTrail;
+        // The graphic to render to the ground on spell death
+        protected Otter.Image GroundSplat;
 
 		// The time between leaving trail marks
 		private float NextTrail = 0;
@@ -99,6 +101,28 @@ namespace TragicMagic
 
 						// Play hurt sound on the wizard hit
 						scene.Wizards[wizard].Hit();
+
+                        // Add a splat to the ground
+                        if(GroundSplat != null)
+                        {
+                            if (Scene != null)
+                            {
+                                // Cast to game scene
+                                Scene_GameClass scenegame = (Scene_GameClass)Scene;
+                                if (scenegame.GroundSurface != null)
+                                {
+                                    // Randomly rotate the trail mark
+                                    GroundSplat.Angle = Rand.Float(0, 360);
+
+                                    GroundSplat.CenterOrigin();
+
+                                    // Draw the trail mark
+                                    scenegame.GroundSurface.Draw(GroundSplat, X, Y);
+
+                                }
+                            }
+                        }
+
 					}
 				}
 			}

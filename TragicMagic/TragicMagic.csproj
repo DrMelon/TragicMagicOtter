@@ -55,10 +55,12 @@
     <Compile Include="HUD\HUDElement_Keyboard.cs" />
     <Compile Include="HUD\HUDElement_Outcome.cs" />
     <Compile Include="HUD\HUDElement_Score.cs" />
+    <Compile Include="HUD\HUDElement_SpellCastText.cs" />
     <Compile Include="HUD\HUDElement_Timer.cs" />
     <Compile Include="math\ClampedSpeedValue.cs" />
     <Compile Include="math\ClampedValue.cs" />
     <Compile Include="Particles\TragicParticleFile.cs" />
+    <Compile Include="ScreenShaker.cs" />
     <Compile Include="spell\Spell_Dust.cs" />
     <Compile Include="spell\Spell_Earth.cs" />
     <Compile Include="spell\Spell_Fire.cs" />

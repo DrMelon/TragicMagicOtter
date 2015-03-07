@@ -57,6 +57,11 @@ namespace TragicMagic
 			Particle_Fire_Trail.endColour.A = 0;
 			Particle_Fire_Trail.Start();
 			Scene.Add( Particle_Fire_Trail );
+
+
+            GroundSplat = new Otter.Image("../../resources/particle/ground_explosion.png");
+
+
 		}
 
 		public override void Update()
