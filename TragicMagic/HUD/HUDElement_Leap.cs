@@ -35,11 +35,12 @@ namespace TragicMagic
 		private bool FadeOut = false;
 
 		// Constructor for this HUD element, hold a reference to the scene and setup positioning
-		// IN: (scene_current) Reference to the current scene, (x) The x position of the element,
+		// IN: (scene_current) Reference to the current scene, (wizard) The ID of the wizard this
+		//     HUD element belongs to, (x) The x position of the element,
 		//     (y) The y position of the element
 		// OUT: N/A
-		public HUDElement_LeapClass( Scene scene_current, float x = 0, float y = 0 )
-			: base( scene_current )
+		public HUDElement_LeapClass( Scene scene_current, short wizard = 0, float x = 0, float y = 0 )
+			: base( scene_current, wizard )
 		{
 			X = x;
 			Y = y;

@@ -27,6 +27,9 @@ namespace TragicMagic
 		// Store the Leap Motion Controller warning HUD entities
 		public HUDElementClass[] HUDElement_Leap;
 
+		// Store the Leap Tool warning HUD entities
+		public HUDElementClass[] HUDElement_Tool;
+
 		// Store the Team Member credit HUD entities
 		public HUDElementClass[] HUDElement_Team;
 
@@ -63,6 +66,9 @@ namespace TragicMagic
 
 			// Leap Motion Controller warning objects
 			HUDElement_Leap = new HUDElementClass[HUDs];
+
+			// Leap Tool warning objects
+			HUDElement_Tool = new HUDElementClass[HUDs];
 
 			// Team display objects
 			HUDElement_Team = new HUDElementClass[HUDs];
@@ -105,10 +111,10 @@ namespace TragicMagic
 			{
 				HUDElement_Leap[hud] = new HUDElement_LeapClass(
 					CurrentScene, // Reference to the current scene
+					hud, // The wizard it belongs to
 					Game.Instance.HalfHeight / 2, // Position X
 					25 // Position Y
 				);
-               
 			}
 
 			Add( HUDElement_Leap[0], HUDElement_Leap[1] );
@@ -127,6 +133,44 @@ namespace TragicMagic
 			for ( short hud = 0; hud < HUDs; hud++ )
 			{
 				HUDElement_Leap[hud] = null;
+			}
+		}
+
+		// Add the Leap Tool inappropriate use warning to the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void AddToolWarning()
+		{
+			if ( HUDElement_Tool[0] != null ) { return; }; // Already added
+
+			// Display the HUD elements
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Tool[hud] = new HUDElement_ToolClass(
+					CurrentScene, // Reference to the current scene
+					hud, // The wizard it belongs to
+					Game.Instance.HalfHeight / 2, // Position X
+					72 // Position Y
+				);
+
+			}
+
+			Add( HUDElement_Tool[0], HUDElement_Tool[1] );
+		}
+
+		// Remove the Leap Tool inappropriate use warning from the HUDs
+		// IN: N/A
+		// OUT: N/A
+		public void RemoveToolWarning()
+		{
+			if ( HUDElement_Tool[0] == null ) { return; }; // Already removed
+
+			Remove( HUDElement_Tool[0], HUDElement_Tool[1] );
+
+			// Flag both HUD elements for garbage collection
+			for ( short hud = 0; hud < HUDs; hud++ )
+			{
+				HUDElement_Tool[hud] = null;
 			}
 		}
 
@@ -289,6 +333,7 @@ namespace TragicMagic
 				if ( CurrentScene.Wizards[hud].Score > maxscore ) // Player with the highest score wins
 				{
 					winner = hud;
+					maxscore = CurrentScene.Wizards[hud].Score;
 				}
 			}
 

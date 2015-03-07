@@ -23,7 +23,7 @@ namespace TragicMagic
 	{
 		// Defines
 		public const short WIZARDS = 2;
-		private const float WAND_ROTATE_MAX = 45;
+		private const float WAND_ROTATE_MAX = 70;
 
 		// Store a reference to the LeapController object to pass to children
 		public Leap.Controller LeapController;
