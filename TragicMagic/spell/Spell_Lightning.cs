@@ -78,6 +78,24 @@ namespace TragicMagic
 				}
 				AddGraphic( middle );
 			}
+			// Add extra clouds
+			{
+				Image middle = new Image( "../../resources/particle/smoke.png" );
+				{
+					middle.CenterOrigin();
+					middle.OriginY = 0;
+					middle.Alpha = 0.95f;
+				}
+				AddGraphic( middle );
+			}
+			// Add extra clouds
+			{
+				Image middle = new Image( "../../resources/particle/smoke.png" );
+				{
+					middle.Alpha = 0.95f;
+				}
+				AddGraphic( middle );
+			}
 		}
 
 		public override void Update()
@@ -91,6 +109,13 @@ namespace TragicMagic
 			Particle_LightningCrackle.X = X;
 			Particle_LightningCrackle.Y = Y;
 
+			// Rotate the clouds
+			foreach ( Graphic graphic in Graphics )
+			{
+				float move = 10;
+				graphic.Shake = 10;
+				graphic.Angle += 5;
+			}
 		}
 
 		public override void Removed()

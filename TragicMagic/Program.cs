@@ -76,15 +76,15 @@ namespace TragicMagic
 				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().RB.AddKey( Key.E ); // Cast Spell
 
 				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().B.AddKey( Key.Num1 ); // Fire Element Key for Player 1
-				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().A.AddKey( Key.Num2 ); // Earth Element Key for Player 1
-				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().Y.AddKey( Key.Num3 ); // Lightning Element Key for Player 1
+				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().A.AddKey( Key.Num3 ); // Earth Element Key for Player 1
+				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().Y.AddKey( Key.Num2 ); // Lightning Element Key for Player 1
 				game.Session( "DarkWizard" ).GetController<ControllerXbox360>().X.AddKey( Key.Num4 ); // Water Element Key for Player 1
 
 				game.Session( "LightWizard" ).GetController<ControllerXbox360>().RB.AddKey( Key.PageDown ); // Cast spell
 
 				game.Session( "LightWizard" ).GetController<ControllerXbox360>().B.AddKey( Key.Num7 ); // Fire Element Key for Player 2
-				game.Session( "LightWizard" ).GetController<ControllerXbox360>().A.AddKey( Key.Num8 ); // Earth Element Key for Player 2
-				game.Session( "LightWizard" ).GetController<ControllerXbox360>().Y.AddKey( Key.Num9 ); // Lightning Element Key for Player 2
+				game.Session( "LightWizard" ).GetController<ControllerXbox360>().A.AddKey( Key.Num9 ); // Earth Element Key for Player 2
+				game.Session( "LightWizard" ).GetController<ControllerXbox360>().Y.AddKey( Key.Num8 ); // Lightning Element Key for Player 2
 				game.Session( "LightWizard" ).GetController<ControllerXbox360>().X.AddKey( Key.Num0 ); // Water Element Key for Player 2
 
 

@@ -78,8 +78,6 @@ namespace TragicMagic
 					{
 						if ( frame.Tools.Count > 1 ) // Two tools, find closest to each side
 						{
-							// NOTE: Works with only two tools
-
 							// Check whether the second tool is closest to the player with the Leap cable extending to their right (default light wizard)
 							short closest = 0; // Store the id of the closest tool
 							{
