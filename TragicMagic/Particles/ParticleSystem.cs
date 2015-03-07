@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Management;
 using TragicMagic;
 
 //@Author: J. Brown (DrMelon)
@@ -44,6 +45,9 @@ namespace TragicMagic
 
         // Local/Global particle space
         public bool particleLocalSpace = false;
+
+        // Inverse particle system - goes to the centre from the outside
+        public bool particleMovementInverted = false;
 
         // Particle image to use -- not loaded from file!
         public string imageSource;
@@ -130,6 +134,17 @@ namespace TragicMagic
 
                     newParticle.FinalX = this.X + (float)Math.Sin(thisAngle) * thisDistance;
                     newParticle.FinalY = this.Y + (float)Math.Cos(thisAngle) * thisDistance;
+
+                    if(particleMovementInverted) // Move from outside inwards
+                    {
+                        // Can't pass properties by reference in C#
+                        float finalX = newParticle.FinalX;
+                        float finalY = newParticle.FinalY;
+                        Utilities.Swap(ref finalX, ref this.X);
+                        Utilities.Swap(ref finalY, ref this.Y);
+                        newParticle.FinalX = finalX;
+                        newParticle.FinalY = finalY;
+                    }
 
                     newParticle.ScaleX = particleStartScale;
                     newParticle.ScaleY = particleStartScale;

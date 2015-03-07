@@ -66,6 +66,7 @@
     <Compile Include="spell\Spell_Fire.cs" />
     <Compile Include="spell\Spell_Lightning.cs" />
     <Compile Include="TragicStateManager.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="wizard\ComboSystem.cs" />
     <Compile Include="wizard\GameWands.cs" />
     <Compile Include="HUD\base\HUD.cs" />

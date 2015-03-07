@@ -22,6 +22,9 @@ namespace TragicMagic
 		// The ID of the wizard this spell was cast by
 		public int ID = 0;
 
+        // The spell's own information
+        public SpellInformation spellInformation;
+
 		// The direction of the spell's movement
 		public Vector2 Direction = new Vector2( 0, 0 );
 
@@ -97,7 +100,7 @@ namespace TragicMagic
 
 						// Increment score of spell caster
 						Scene_GameClass scene = (Scene_GameClass) Scene;
-						scene.Wizards[ID].Score++;
+						scene.Wizards[ID].Score += spellInformation.spellDamage;
 
 						// Play hurt sound on the wizard hit
 						scene.Wizards[wizard].Hit();

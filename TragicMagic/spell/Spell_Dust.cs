@@ -52,7 +52,7 @@ namespace TragicMagic
 			Particle_Dust.particleStartRotation = Rand.Float( -720, 720 );
 			Particle_Dust.particleEndRotation = Rand.Float( -720, 720 );
 			Particle_Dust.particleLocalSpace = true;
-			Particle_Dust.Start();
+            Particle_Dust.Start();
 			Scene.Add( Particle_Dust );
 
 			// Intitialize the ground trail mark image

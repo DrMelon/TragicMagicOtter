@@ -434,6 +434,7 @@ namespace TragicMagic
 						spell.Direction = WandForward;
 						spell.Angle = 180 - Wand.Angle;
 						spell.SetSpeed( spell_description.spellSpeed );
+                        spell.spellInformation = spell_description;
 						CurrentScene.Add( spell );
 					}
 					CurrentScene.Projectile.Add( spell );
