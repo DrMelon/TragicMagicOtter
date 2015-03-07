@@ -108,6 +108,9 @@ namespace TragicMagic
 		// The array of sounds which can be played when the wizard is hurt
 		private Sound[] Hurt;
 
+		// Warn the player if their
+		private Text test = new Text( 48 );
+
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
 		// OUT: N/A
@@ -193,6 +196,8 @@ namespace TragicMagic
 			// Add the graphics to the scene
 			AddGraphic( Wand ); // Add wand below wizard robes
 			AddGraphic( Body );
+			test.OutlineThickness = 4;
+			AddGraphic( test );
 
 			// Add a hitbox to the wizard
 			int size = (int) Math.Floor( Body.Width * Body.ScaleX * HITBOX_SCALE );
@@ -256,6 +261,7 @@ namespace TragicMagic
 			Body.SetPosition( Position.X, Position.Y );
 			Wand.SetPosition( Position.X + WandOffset.X, Position.Y + WandOffset.Y );
 			Wand.Angle = Angle + ( WandAngle * WandAngleDirection );
+			test.String = GameWands.Wand[ID].ID.ToString();
 
 			// Combo input
 			CheckControls();
