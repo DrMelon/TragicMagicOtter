@@ -21,20 +21,20 @@ namespace TragicMagic
 		// The main particle system of this dust cloud
 		private ParticleSystem Particle_Dust;
 
-        public Spell_DustClass()
+		public Spell_DustClass()
 			: base( 0, 0, 0, new Vector2( 0, 0 ), 0 )
-        {
-			
+		{
+
 		}
-        public Spell_DustClass( int wizard, float x, float y, Vector2 direction, float speed = 1 )
+		public Spell_DustClass( int wizard, float x, float y, Vector2 direction, float speed = 1 )
 			: base( wizard, x, y, direction, speed )
-        {
-			
+		{
+
 		}
-        ~Spell_DustClass()
-        {
-			
-        }
+		~Spell_DustClass()
+		{
+
+		}
 
 		public override void Added()
 		{
@@ -45,12 +45,13 @@ namespace TragicMagic
 			Particle_Dust.Initialize( 50, 20, 0, 360, 5, 15, "../../resources/particle/smoke.png", 87, 87, 0.8f );
 			Particle_Dust.particleShake = 1;
 			Particle_Dust.beginColour = Color.Gray * Color.Gray * Color.Orange + Color.Gray;
+			Particle_Dust.beginColour.A = 0.5f;
 			Particle_Dust.endColour = Color.Black;
 			Particle_Dust.endColour.A = 0;
-            Particle_Dust.particleEndScale = 5.0f;
-            Particle_Dust.particleStartRotation = Rand.Float(-720, 720);
-            Particle_Dust.particleEndRotation = Rand.Float(-720, 720);
-            Particle_Dust.particleLocalSpace = true;
+			Particle_Dust.particleEndScale = 5.0f;
+			Particle_Dust.particleStartRotation = Rand.Float( -720, 720 );
+			Particle_Dust.particleEndRotation = Rand.Float( -720, 720 );
+			Particle_Dust.particleLocalSpace = true;
 			Particle_Dust.Start();
 			Scene.Add( Particle_Dust );
 

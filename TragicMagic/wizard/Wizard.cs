@@ -34,6 +34,7 @@ namespace TragicMagic
 		private const float COLLISION_SCALE = 0.4f; // Scale down the wizard collision for (ONLY) clamping onscreen
 		private const float HITBOX_SCALE = 0.5f; // Scale down the wizard hitbox
 		private const short COMBO_MAX = 10; // The maximum string of button presses held in a combo
+		private const short SOUND_HURT = 5; // The number of sounds the wizard can choose from when hurt
 
 		// Store a reference to the current scene
 		public Scene_GameClass CurrentScene;
@@ -98,6 +99,9 @@ namespace TragicMagic
         private Vector2 Forward = new Vector2();
         private Vector2 Right = new Vector2();
 		private Vector2 WandForward = new Vector2();
+
+		// The array of sounds which can be played when the wizard is hurt
+		private Sound[] Hurt;
 
 		// If using this constructor you must afterwards set the public variable GameWands
 		// IN: N/A
@@ -218,6 +222,16 @@ namespace TragicMagic
 				float halfheight = Body.Height * Body.ScaleY * COLLISION_SCALE; // Image is centered, ensure the whole thing stays onscreen
 				ClampedY.Minimum = halfheight;
 				ClampedY.Maximum = Game.Instance.Height - halfheight;
+			}
+
+			// Initialize the hurt sound effects
+			Hurt = new Sound[SOUND_HURT];
+			{
+				for ( short effect = 0; effect < SOUND_HURT; effect++ )
+				{
+					Hurt[effect] = new Sound( "../../resources/audio/hurt" + ( effect + 1 ) + ".wav" );
+					Hurt[effect].Attenuation = 0.1f;
+				}
 			}
 		}
 
@@ -433,6 +447,17 @@ namespace TragicMagic
 				RemoveGraphic( Body );
 				Body = null;
 			}
+		}
+
+		// Called when this wizard is hit with a spell
+		// IN: N/A
+		// OUT: N/A
+		public void Hit()
+		{
+			// Play random hit sound effect
+			int effect = Rand.Int( 0, SOUND_HURT );
+			Hurt[effect].X = ( X - Game.Instance.HalfWidth ) / Game.Instance.Width * 10; // Should have a function to handle this, it is also used inside Spell.cs
+			Hurt[effect].Play();
 		}
 	}
 }

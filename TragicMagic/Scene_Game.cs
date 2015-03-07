@@ -15,8 +15,8 @@ namespace TragicMagic
 {
 	enum ColliderType
 	{
-		Enviroment = 0,
-		Wizard, // This and the values after are used for separate wizard tags
+		Spell = 0, // Two values, one for each wizard
+		Wizard = 2, // This and the values after are used for separate wizard tags
 	}
 
 	class Scene_GameClass : Scene

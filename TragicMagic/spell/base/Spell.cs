@@ -62,7 +62,7 @@ namespace TragicMagic
 			base.Added();
 
 			// Initialie collider
-			SetHitbox( 10, 10, ( (int) ColliderType.Wizard ) + ID );
+			SetHitbox( 10, 10, ( (int) ColliderType.Spell ) + ID );
 			Hitbox.CenterOrigin();
 
 			// Initialize trail mark timers to seconds
@@ -96,6 +96,9 @@ namespace TragicMagic
 						// Increment score of spell caster
 						Scene_GameClass scene = (Scene_GameClass) Scene;
 						scene.Wizards[ID].Score++;
+
+						// Play hurt sound on the wizard hit
+						scene.Wizards[wizard].Hit();
 					}
 				}
 			}

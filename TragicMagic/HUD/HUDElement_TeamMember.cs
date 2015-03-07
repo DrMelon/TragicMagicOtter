@@ -69,6 +69,8 @@ namespace TragicMagic
 		{
 			base.Added();
 
+			float height = 16;
+
 			// Initialize the Team Member's image
 			Image_Avatar = new Otter.Image( "../../resources/team/" + Username + ".png" );
 			{
@@ -91,7 +93,7 @@ namespace TragicMagic
 				Text_Name.CenterOrigin();
 
 				// Add to the offset for the next text
-				offsety += Text_Name.Height * TEXT_OFFSET_SCALE;
+				offsety += height * TEXT_OFFSET_SCALE;
 			}
 			AddGraphic( Text_Name );
 
@@ -103,7 +105,7 @@ namespace TragicMagic
 				Text_Role.CenterOrigin();
 
 				// Add to the offset for the next text
-				offsety += Text_Role.Height * TEXT_OFFSET_SCALE;
+				offsety += height * TEXT_OFFSET_SCALE;
 			}
 			AddGraphic( Text_Role );
 
@@ -118,7 +120,7 @@ namespace TragicMagic
 				Text_Username.CenterOrigin();
 
 				// Add to the offset for the next text
-				offsety += Text_Username.Height * TEXT_OFFSET_SCALE;
+				offsety += height * TEXT_OFFSET_SCALE;
 			}
 			AddGraphic( Text_Username );
 
@@ -130,7 +132,7 @@ namespace TragicMagic
 				Text_Website.CenterOrigin();
 
 				// Add to the offset for the next text
-				offsety += Text_Website.Height * TEXT_OFFSET_SCALE;
+				offsety += height * TEXT_OFFSET_SCALE;
 			}
 			//AddGraphic( Text_Website );
 
