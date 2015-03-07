@@ -55,6 +55,9 @@ namespace TragicMagic
 		// OUT: N/A
 		public void OnEntityAdded( HUDElementClass entity )
 		{
+			// Draw HUD on top of all else
+			Layer = 10;
+
 			// Is parent and has children, add logic to rotate and transform them too
 			if ( entity.IsParent && ( entity.HUDElement_Child.Length > 0 ) )
 			{

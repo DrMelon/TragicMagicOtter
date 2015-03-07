@@ -135,6 +135,9 @@ namespace TragicMagic
 		{
 			base.Added();
 
+			// Draw wizard on top of all but the HUD & particles
+			Layer = 8 + ID;
+
 			// Initialize the wizard's shader
 			//TestShader = new Shader( "../../shaders/video.fs" );
 

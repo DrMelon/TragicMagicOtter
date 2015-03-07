@@ -82,7 +82,10 @@ namespace TragicMagic
 			beginColour = Color.White;
 			endColour = Color.White;
 
-            activeLocalParticles = new List<Particle>();
+			activeLocalParticles = new List<Particle>();
+
+			// Draw particles on top of all but the HUD
+			Layer = 6;
         }
 
         // Create on the fly whoa
@@ -150,7 +153,9 @@ namespace TragicMagic
                     newParticle.FrameCount = numParticleFrames;
                     newParticle.FrameOffset = Rand.Int(0, numParticleFrames - 1);
                     newParticle.Loops = particleAnimLoops;
-                    
+
+					// Draw particles on top of all but the HUD
+					newParticle.Layer = 7;
 
 					newParticle.Start(); // Initialize graphics
                     newParticle.Graphic.Shake = particleShake;
