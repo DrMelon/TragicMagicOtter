@@ -22,6 +22,7 @@ namespace TragicMagic
 		public float Height;
 		public float Time_Recorded; // The time this data was recorded at
 		public float Time_Cast; // The time the last spell was cast at
+		public int ID; // The ID of the tool that this wand represents
 	}
 
 	class GameWandsClass : Entity
@@ -76,6 +77,7 @@ namespace TragicMagic
 				{
 					if ( frame.Tools.Count > 0 ) // Detecting tools
 					{
+						Console.WriteLine( "Tools: " + frame.Tools.Count );
 						if ( frame.Tools.Count > 1 ) // Two tools, find closest to each side
 						{
 							// Check whether the second tool is closest to the player with the Leap cable extending to their right (default light wizard)
@@ -95,13 +97,13 @@ namespace TragicMagic
 
 							// Store the position of this wand as the appropriate player (default light wizard)
 							short wand = 0;
+							short tool = closest; // The tool to look up
 							{
 								if ( Inverted ) // Invert the wand id if the Leap device is inverted, to correct it
 								{
 									wand = Convert.ToSByte( !Convert.ToBoolean( wand ) ); // Convert to bool, invert, convert back to short
 								}
 
-								short tool = closest; // The tool to look up
 								position = frame.Tools[tool].StabilizedTipPosition;
 								direction = frame.Tools[tool].Direction;
 							}
@@ -109,19 +111,17 @@ namespace TragicMagic
 							Wand[wand].Height = position.y;
 							Wand[wand].Direction = new Vector2( direction.x, direction.z );
 							Wand[wand].Time_Recorded = Game.Instance.Timer;
+							Wand[wand].ID = tool;
 
 							// Store the position of this wand as the appropriate player (default dark wizard)
 							wand = 1;
+							tool = Convert.ToSByte( !Convert.ToBoolean( closest ) ); // The tool to look up, inverted to get the opposite of the closest
 							{
 								if ( Inverted ) // Invert the wand id if the Leap device is inverted, to correct it
 								{
 									wand = Convert.ToSByte( !Convert.ToBoolean( wand ) ); // Convert to bool, invert, convert back to short
 								}
 
-								short tool = closest; // The tool to look up, inverted to get the opposite of the closest
-								{
-									tool = Convert.ToSByte( !Convert.ToBoolean( wand ) ); // Convert to bool, invert, convert back to short
-								}
 								position = frame.Tools[tool].StabilizedTipPosition;
 								direction = frame.Tools[tool].Direction;
 							}
@@ -129,6 +129,7 @@ namespace TragicMagic
 							Wand[wand].Height = position.y;
 							Wand[wand].Direction = new Vector2( direction.x, direction.z );
 							Wand[wand].Time_Recorded = Game.Instance.Timer;
+							Wand[wand].ID = tool;
 						}
 						else // One tool, split the Leap in half to find the side it's more likely to belong to
 						{
@@ -152,6 +153,7 @@ namespace TragicMagic
 							Wand[wand].Height = position.y;
 							Wand[wand].Direction = new Vector2( direction.x, direction.z );
 							Wand[wand].Time_Recorded = Game.Instance.Timer;
+							Wand[wand].ID = 0;
 						}
 
 						// Ensure the wands point in the right direction
