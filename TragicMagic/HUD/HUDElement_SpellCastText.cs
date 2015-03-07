@@ -20,11 +20,14 @@ namespace TragicMagic
 		private const float FADE_SPEED = 0.03f;
 
 		// The text displaying the spell's name
-		private Otter.Text Text_SpellName;
+		public Otter.Text Text_SpellName;
         private String spellName;
 
 		// The clamped value of the fade amount 
 		private ClampedSpeedValueClass Alpha;
+
+        // Color of text
+        private Color textCol = Color.White;
 
 		// The flag for fading out this element when removed
 		private bool FadeOut = false;
@@ -40,7 +43,8 @@ namespace TragicMagic
             }
             else
             {
-                spellName = "No Name For Spell!";
+                spellName = "Not a Spell!";
+                textCol = Color.Red;
             }
         }
 
@@ -55,6 +59,7 @@ namespace TragicMagic
                 Text_SpellName.CenterOrigin();
                 Text_SpellName.OutlineColor = Color.Black;
                 Text_SpellName.OutlineThickness = 2;
+                Text_SpellName.Color = textCol;
             }
             Parent.AddGraphic(Text_SpellName);
             // Initialize the fade in/out

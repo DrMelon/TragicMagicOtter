@@ -54,10 +54,11 @@ namespace TragicMagic
 			AddSpell( "XBA", new SpellInformation( "Earth", "Spell_EarthClass", 5.0f, 10.0f ) );
 			AddSpell( "XAB", new SpellInformation( "Earth", "Spell_EarthClass", 5.0f, 10.0f ) );
 			AddSpell( "BX", new SpellInformation( "Dust", "Spell_DustClass", 2.0f, 7.0f ) );
-			AddSpell( "X", new SpellInformation( "Water Wave", "Spell_EarthClass", 1.0f, 7.0f ) );
+			AddSpell( "BA", new SpellInformation( "Water Wave", "Spell_WaterClass", 1.0f, 7.0f ) );
 			AddSpell( "Y", new SpellInformation( "Lightning", "Spell_LightningClass", 1.0f, 10.0f ) );
+            AddSpell("X", new SpellInformation("Wild Ivy", "Spell_VinesClass", 15.0f, 10.0f));
 
-			AddSpell( "XBAYAB", new SpellInformation( "xX=FACE OF THE MAKER=Xx", "Spell_FireClass", 50.0f, 10.0f ) );
+			AddSpell( "XBYAYB", new SpellInformation( "FACE OF THE MAKER", "Spell_FireClass", 50.0f, 10.0f ) );
 
 
 		}

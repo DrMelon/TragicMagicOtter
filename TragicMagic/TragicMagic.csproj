@@ -65,6 +65,8 @@
     <Compile Include="spell\Spell_Earth.cs" />
     <Compile Include="spell\Spell_Fire.cs" />
     <Compile Include="spell\Spell_Lightning.cs" />
+    <Compile Include="spell\Spell_Vines.cs" />
+    <Compile Include="spell\Spell_Water.cs" />
     <Compile Include="TragicStateManager.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="wizard\ComboSystem.cs" />

@@ -168,15 +168,16 @@ namespace TragicMagic
 
 					// Draw particles on top of all but the HUD
 					newParticle.Layer = 7;
+                    newParticle.CenterOrigin = true;
 
 					newParticle.Start(); // Initialize graphics
                     newParticle.Graphic.Shake = particleShake;
 
                     // Add to scene if global, and to system local space if local
-                    if (particleLocalSpace)
-                    {
+                    //if (particleLocalSpace)
+                   // {
                         activeLocalParticles.Add(newParticle);
-                    }
+                   // }
                     this.Scene.Add(newParticle);
                     
                 }

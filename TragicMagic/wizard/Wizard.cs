@@ -448,6 +448,18 @@ namespace TragicMagic
                         hudHandler.HUD[ID].Add(newText);
                     }
 				}
+                else
+                {
+
+                    // Create text
+                    HUDHandlerClass hudHandler = this.Scene.GetEntity<HUDHandlerClass>();
+                    if (hudHandler != null)
+                    {
+                        // Create new score text
+                        HUDElement_SpellCastText newText = new HUDElement_SpellCastText(this.Scene, (Game.Instance.HalfHeight / 2), (Game.Instance.HalfWidth / 8), spell_description);
+                        hudHandler.HUD[ID].Add(newText);
+                    }
+                }
 
 				// Now blank out the combo inputs, ready for another go.
 				ComboInputs = "";

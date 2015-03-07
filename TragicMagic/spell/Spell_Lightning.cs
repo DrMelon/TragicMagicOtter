@@ -65,6 +65,7 @@ namespace TragicMagic
 				{
 					middle.CenterOrigin();
 					middle.Alpha = 0.95f;
+                    middle.Shake = 5;
 				}
 				AddGraphic( middle );
 			}
@@ -75,6 +76,7 @@ namespace TragicMagic
 					middle.CenterOrigin();
 					middle.OriginX = 0;
 					middle.Alpha = 0.95f;
+                    middle.Shake = 5;
 				}
 				AddGraphic( middle );
 			}
@@ -85,6 +87,7 @@ namespace TragicMagic
 					middle.CenterOrigin();
 					middle.OriginY = 0;
 					middle.Alpha = 0.95f;
+                    middle.Shake = 5;
 				}
 				AddGraphic( middle );
 			}
@@ -93,6 +96,7 @@ namespace TragicMagic
 				Image middle = new Image( "../../resources/particle/smoke.png" );
 				{
 					middle.Alpha = 0.95f;
+                    middle.Shake = 5;
 				}
 				AddGraphic( middle );
 			}
