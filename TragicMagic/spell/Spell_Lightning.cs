@@ -12,83 +12,99 @@ using System.Threading.Tasks;
 
 namespace TragicMagic
 {
-    class Spell_LightningClass : SpellClass
-    {
-        // The main particle system acts like a fireball, so that the spell's motion/travel is easy to see.
-        private ParticleSystem Particle_Lightning;
+	class Spell_LightningClass : SpellClass
+	{
+		// The main particle system acts like a fireball, so that the spell's motion/travel is easy to see.
+		private ParticleSystem Particle_Lightning;
 
 
-        // The lightning crackle is a smaller subsystem of particles, with animated lightning bolts
-        private ParticleSystem Particle_LightningCrackle;
+		// The lightning crackle is a smaller subsystem of particles, with animated lightning bolts
+		private ParticleSystem Particle_LightningCrackle;
 
-        public Spell_LightningClass()
-            : base(0, 0, 0, new Vector2(0, 0), 0)
-        {
+		public Spell_LightningClass()
+			: base( 0, 0, 0, new Vector2( 0, 0 ), 0 )
+		{
 
-        }
-        public Spell_LightningClass(int wizard, float x, float y, Vector2 direction, float speed = 2)
-            : base(wizard, x, y, direction, speed)
-        {
+		}
+		public Spell_LightningClass( int wizard, float x, float y, Vector2 direction, float speed = 2 )
+			: base( wizard, x, y, direction, speed )
+		{
 
-        }
-        ~Spell_LightningClass()
-        {
+		}
+		~Spell_LightningClass()
+		{
 
-        }
+		}
 
-        public override void Added()
-        {
-            base.Added();
+		public override void Added()
+		{
+			base.Added();
 
-            // Create main spell particle system
-            Particle_Lightning = new ParticleSystem(X, Y);
-            Particle_Lightning.Initialize(0, 0, 0, 360, 5, 10, "../../resources/particle/star.png", 87, 87, 0.8f);
-            Particle_Lightning.beginColour = Color.Cyan;
-            Particle_Lightning.endColour = (Color.Blue * Color.Gray * Color.Gray);
-            Particle_Lightning.endColour.A = 0;
-            Particle_Lightning.particleShake = 4;
-            //Particle_Lightning.Start();
-            Scene.Add(Particle_Lightning);
-			Image middle = new Image( "../../resources/particle/star.png" );
-			middle.CenterOrigin();
-			middle.Color = Color.Cyan;
-			AddGraphic( middle );
+			// Create main spell particle system
+			Particle_Lightning = new ParticleSystem( X, Y );
+			Particle_Lightning.Initialize( 0, 0, 0, 360, 5, 10, "../../resources/particle/star.png", 87, 87, 0.8f );
+			Particle_Lightning.beginColour = Color.Cyan;
+			Particle_Lightning.endColour = ( Color.Blue * Color.Gray * Color.Gray );
+			Particle_Lightning.endColour.A = 0;
+			Particle_Lightning.particleShake = 4;
+			//Particle_Lightning.Start();
+			Scene.Add( Particle_Lightning );
 
-            // Add crackle
-            Particle_LightningCrackle = new ParticleSystem(X, Y);
-            Particle_LightningCrackle.Initialize(60, 40, 0, 360, 8, 5, "../../resources/particle/crackle_sheet.png", 87, 87, 0.1f, true, 6, 4);
-            Particle_LightningCrackle.beginColour = Color.Cyan;
-            Particle_LightningCrackle.endColour = Color.White;
-            Particle_LightningCrackle.endColour.A = 0;
-            Particle_LightningCrackle.Start();
-            Scene.Add(Particle_LightningCrackle);
-        }
+			// Add crackle
+			Particle_LightningCrackle = new ParticleSystem( X, Y );
+			Particle_LightningCrackle.Initialize( 60, 40, 0, 360, 8, 5, "../../resources/particle/crackle_sheet.png", 87, 87, 0.1f, true, 6, 4 );
+			Particle_LightningCrackle.beginColour = Color.Cyan;
+			Particle_LightningCrackle.endColour = Color.White;
+			Particle_LightningCrackle.endColour.A = 0;
+			Particle_LightningCrackle.Start();
+			Scene.Add( Particle_LightningCrackle );
 
-        public override void Update()
-        {
-            base.Update();
+			// Add extra clouds
+			{
+				Image middle = new Image( "../../resources/particle/smoke.png" );
+				{
+					middle.CenterOrigin();
+					middle.Alpha = 0.95f;
+				}
+				AddGraphic( middle );
+			}
+			// Add extra clouds
+			{
+				Image middle = new Image( "../../resources/particle/smoke.png" );
+				{
+					middle.CenterOrigin();
+					middle.OriginX = 0;
+					middle.Alpha = 0.95f;
+				}
+				AddGraphic( middle );
+			}
+		}
 
-            // Main fireball particles need to stay attached to the collider
-            Particle_Lightning.X = X;
-            Particle_Lightning.Y = Y;
+		public override void Update()
+		{
+			base.Update();
 
-            Particle_LightningCrackle.X = X;
-            Particle_LightningCrackle.Y = Y;
+			// Main fireball particles need to stay attached to the collider
+			Particle_Lightning.X = X;
+			Particle_Lightning.Y = Y;
 
-        }
+			Particle_LightningCrackle.X = X;
+			Particle_LightningCrackle.Y = Y;
 
-        public override void Removed()
-        {
-            base.Removed();
+		}
 
-            // Cleanup all particles
-            Particle_Lightning.ClearGraphics();
-            Scene.Remove(Particle_Lightning);
-            Particle_Lightning = null;
+		public override void Removed()
+		{
+			base.Removed();
 
-            Particle_LightningCrackle.ClearGraphics();
-            Scene.Remove(Particle_LightningCrackle);
-            Particle_LightningCrackle = null;
-        }
-    }
+			// Cleanup all particles
+			Particle_Lightning.ClearGraphics();
+			Scene.Remove( Particle_Lightning );
+			Particle_Lightning = null;
+
+			Particle_LightningCrackle.ClearGraphics();
+			Scene.Remove( Particle_LightningCrackle );
+			Particle_LightningCrackle = null;
+		}
+	}
 }

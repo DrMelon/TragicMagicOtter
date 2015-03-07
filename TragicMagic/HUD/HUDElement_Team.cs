@@ -25,7 +25,7 @@ namespace TragicMagic
 	class HUDElement_TeamClass : HUDElementClass
 	{
 		// Defines
-		private const short TEAM_MEMBERS = 5;
+		private const short TEAM_MEMBERS = 5; // The number of team members to display
 
 		// Store the Team Member information
 		public TeamMemberStruct[] TeamMember;
@@ -86,8 +86,6 @@ namespace TragicMagic
 				TeamMember[member].Role = "Artist";
 				TeamMember[member].Website = "";
 				member++;
-
-				// Levie
 			}
 
 			// Initialize as parent to TeamMember elements
@@ -113,21 +111,43 @@ namespace TragicMagic
 				HUDElement_Child[member].Parent = this;
 				CurrentScene.Add( HUDElement_Child[member] );
 			}
+
+			// Add the title text to the credits
+			Text title = new Text( "TRAGIC MAGIC", 128 );
+			{
+				title.Y = Game.Instance.HalfHeight / 2;
+			}
+			AddGraphic( title );
 		}
 
 		public override void Update()
 		{
 			base.Update();
 
-			if ( FadeOut ) // Fade out individual team members when removed, then ensure they are deleted
+			// Fade out individual team members when removed, then ensure they are deleted
+			if ( FadeOut )
 			{
-				if ( ( HUDElement_Child[0] != null ) && ( HUDElement_Child[0].Graphic.Alpha <= 0 ) ) // Check the first member's first graphic (they all fade the same)
+				// Check the first member's first graphic (they all fade the same)
+				if ( ( HUDElement_Child[0] != null ) && ( HUDElement_Child[0].Graphic.Alpha <= 0 ) )
 				{
+					// Then cleanup
 					for ( short member = 0; member < TEAM_MEMBERS; member++ )
 					{
 						HUDElement_Child[member] = null;
 					}
+
+					// Remove any extra graphics
+					for ( short graphic = 0; graphic < Graphics.Count; graphic++ )
+					{
+						RemoveGraphic( Graphics[graphic] );
+					}
 				}
+			}
+
+			// Fade in/out the title text based on the team member elements
+			foreach( Graphic graphic in Graphics )
+			{
+				graphic.Alpha = HUDElement_Child[0].Graphic.Alpha;
 			}
 		}
 

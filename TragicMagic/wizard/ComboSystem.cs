@@ -50,10 +50,12 @@ namespace TragicMagic
 			//TODO: Make these load from files or spell creator or something.
 
 			// Magic number values because no balance/tweaking information available yet
-			AddSpell( "B", new SpellInformation( "Fire I", "Spell_FireClass", 0.5f, 20.0f ) );
-			AddSpell( "A", new SpellInformation( "Earth I", "Spell_DustClass", 0.5f, 7.0f ) );
-			AddSpell( "X", new SpellInformation( "Water I", "Spell_EarthClass", 0.5f, 7.0f ) );
-			AddSpell( "Y", new SpellInformation( "Lightning I", "Spell_LightningClass", 0.5f, 10.0f ) );
+			AddSpell( "YAB", new SpellInformation( "Fire", "Spell_FireClass", 0.5f, 20.0f ) );
+			AddSpell( "XBA", new SpellInformation( "Earth", "Spell_EarthClass", 0.5f, 10.0f ) );
+			AddSpell( "XAB", new SpellInformation( "Earth", "Spell_EarthClass", 0.5f, 10.0f ) );
+			AddSpell( "BX", new SpellInformation( "Dust", "Spell_DustClass", 0.5f, 7.0f ) );
+			AddSpell( "X", new SpellInformation( "Water Wave", "Spell_EarthClass", 0.5f, 7.0f ) );
+			AddSpell( "Y", new SpellInformation( "Lightning", "Spell_LightningClass", 0.5f, 10.0f ) );
 
 			AddSpell( "XBAYAB", new SpellInformation( "xX=FACE OF THE MAKER=Xx", "Spell_FireClass", 9999.0f, 10.0f ) );
 
