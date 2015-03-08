@@ -312,23 +312,13 @@ namespace TragicMagic
 		}
 		private void UpdateTwitter()
 		{
-			// Handle input from each wizard to set finished tweeting
-			for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
-			{
-				// Get the controller for this wizard
-				ControllerXbox360 controller = Game.Instance.Sessions[wizard].GetController<ControllerXbox360>();
-				if ( controller.Y.Pressed )
-				{
-					TweetFinished[wizard] = !TweetFinished[wizard];
-				}
-			}
-
 			// Handle switching back to the menu state when all wizards are finished
 			bool finished = true;
 			{
 				for ( short wizard = 0; wizard < Scene_GameClass.WIZARDS; wizard++ )
 				{
-					if ( !TweetFinished[wizard] )
+					HUDElement_KeyboardClass keyboard = (HUDElement_KeyboardClass) CurrentScene.HUDHandler.HUDElement_Keyboard[wizard];
+					if ( !keyboard.Ready )
 					{
 						finished = false;
 						break;

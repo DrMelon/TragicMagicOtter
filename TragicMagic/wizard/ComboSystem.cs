@@ -26,9 +26,9 @@ using TragicMagic;
 //       *  An example combo would be "XXYA"
 //       *  Elements are mapped to the relevant colour on an xbox controller
 //       *  Fire: B (Red)
+//       *  Lightning: Y (Yellow)
 //       *  Earth: A (Green)
 //       *  Water: X (Blue)
-//       *  Lightning: Y (Yellow)
 //
 // 
 

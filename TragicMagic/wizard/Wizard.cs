@@ -68,7 +68,7 @@ namespace TragicMagic
 		public float WandAngle = 0;
 		public float WandAngleDirection = 1; // Light & dark wands rotate differently
 
-		// The speed for the wizard to move at
+		// The speed for the desination of the wizard to move at
 		public float Speed = 40;
 
 		// The current score of this wizard for this round
@@ -147,8 +147,8 @@ namespace TragicMagic
 			//TestShader = new Shader( "../../shaders/video.fs" );
 
 			// Initialize the position interpolation objects
-			ClampedPosition_X.Speed = 10;
-			ClampedPosition_Y.Speed = 10;
+			ClampedPosition_X.Speed = 7;
+			ClampedPosition_Y.Speed = 7;
 
 			// Initialize the position of the wizard
 			Position = new Vector2( 0, 0 );
@@ -369,12 +369,27 @@ namespace TragicMagic
 			ClampedPosition_X.Minimum = min;
 			ClampedPosition_X.Maximum = max;
 			ClampedPosition_X.Direction = dir;
-			if ( Math.Abs( min - max ) > 2 ) // Small range in which the wizard gets rounded to the target point
+			if ( Math.Abs( max - min ) > 2 ) // Small range in which the wizard gets rounded to the target point
 			{
 				ClampedPosition_X.Update();
 				X = ClampedPosition_X.Value;
 
-				CanMove = false; // Lock into the intro walk-in animation
+				// Doing cinematic animation
+				if ( Pause )
+				{
+					CanMove = false; // Lock into the intro walk-in animation
+				}
+
+				// Clamp if undershot
+				if ( ( dir < 0 ) && ( X < Destination.X ) )
+				{
+					X = Destination.X;
+				}
+				// Clamp if overshot
+				if ( ( dir > 0 ) && ( X > Destination.X ) )
+				{
+					X = Destination.X;
+				}
 			}
 
 			// Position Y
@@ -393,12 +408,27 @@ namespace TragicMagic
 			ClampedPosition_Y.Minimum = min;
 			ClampedPosition_Y.Maximum = max;
 			ClampedPosition_Y.Direction = dir;
-			if ( Math.Abs( min - max ) > 2 ) // Small range in which the wizard gets rounded to the target point
+			if ( Math.Abs( max - min ) > 2 ) // Small range in which the wizard gets rounded to the target point
 			{
 				ClampedPosition_Y.Update();
 				Y = ClampedPosition_Y.Value;
 
-				CanMove = false; // Lock into the intro walk-in animation
+				// Doing cinematic animation
+				if ( Pause )
+				{
+					CanMove = false; // Lock into the intro walk-in animation
+				}
+
+				// Clamp if undershot
+				if ( ( dir < 0 ) && ( Y < Destination.Y ) )
+				{
+					Y = Destination.Y;
+				}
+				// Clamp if overshot
+				if ( ( dir > 0 ) && ( Y > Destination.Y ) )
+				{
+					Y = Destination.Y;
+				}
 			}
 		}
 

@@ -98,7 +98,7 @@ namespace TragicMagic
 			Text_Warning.CenterOrigin();
 
 			// Display warning about wand height
-			if ( ( !wanddetected ) || wandclose || ( GameWands.Wand[Wizard].Height < 100 ) ) // Fade in at the start of the animation
+			if ( ( !FadeOut ) && ( ( !wanddetected ) || wandclose || ( GameWands.Wand[Wizard].Height < 100 ) ) ) // Fade in at the start of the animation
 			{
 				if ( Parent.Graphic.Alpha < 1 ) // Still fading in
 				{
