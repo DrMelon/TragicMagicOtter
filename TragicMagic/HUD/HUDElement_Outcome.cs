@@ -66,6 +66,7 @@ namespace TragicMagic
 				Text_Outcome.Y = Y;
 				Text_Outcome.CenterOrigin();
 				Text_Outcome.OriginY = Text_Outcome.Height;
+				Text_Outcome.OutlineThickness = 4;
 			}
 			Parent.AddGraphic( Text_Outcome );
 
@@ -75,6 +76,7 @@ namespace TragicMagic
 				Text_Score.Y = Y;
 				Text_Score.CenterOrigin();
 				Text_Score.OriginY = -Text_Score.Height;
+				Text_Score.OutlineThickness = 4;
 			}
 			Parent.AddGraphic( Text_Score );
 

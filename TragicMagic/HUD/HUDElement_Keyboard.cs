@@ -55,11 +55,10 @@ namespace TragicMagic
 		private Text Text_Remove;
 		private Text Text_Ready;
 
-		// The screenshot graphic to display as part of the preview tweet
-		private Otter.Image Screenshot;
-
-		// The preview tweet text
-		private Text Text_Tweet;
+		// The ui clicking sound effects
+		private Sound UI_Select = new Sound( "../../resources/audio/ui_select.wav" );
+		private Sound UI_Accept = new Sound( "../../resources/audio/ui_accept.wav" );
+		private Sound UI_Decline = new Sound( "../../resources/audio/ui_decline.wav" );
 
 		// The ready flag for this keyboard entry
 		public bool Ready;
@@ -281,26 +280,6 @@ namespace TragicMagic
 			}
 			offsetx += Button_Earth.Width * 1.1f;
 
-			// Initialize the screenshot image
-			Screenshot = new Otter.Image( "roundcomplete.png" );
-			{
-				Screenshot.Scale = 0.4f;
-				Screenshot.CenterOrigin();
-				Screenshot.X = X;
-				Screenshot.Y = Y;
-				Screenshot.Alpha = 0;
-			}
-			AddGraphic( Screenshot );
-
-			// Initialize the tweet text
-			Text_Tweet = new Text( "roundcomplete.png", 16 );
-			{
-				Text_Tweet.X = X;
-				Text_Tweet.Y = Y;
-				Text_Tweet.Alpha = 0;
-			}
-			AddGraphic( Text_Tweet );
-
 			// Initialize as parent to Key elements
 			IsParent = true;
 
@@ -369,6 +348,9 @@ namespace TragicMagic
 					// Enter the selected key into the current string
 					if ( ControllerSession.GetController<ControllerXbox360>().B.Pressed )
 					{
+						// Play sound
+						UI_Accept.Play();
+
 						// Hasn't reached the max
 						if ( UserString.Length < MaxLength )
 						{
@@ -380,6 +362,9 @@ namespace TragicMagic
 					// Remove the last character from the current string
 					if ( ControllerSession.GetController<ControllerXbox360>().Y.Pressed )
 					{
+						// Play sound
+						UI_Decline.Play();
+
 						// Still has entered data
 						if ( UserString.Length > 1 )
 						{
@@ -408,6 +393,9 @@ namespace TragicMagic
 				// Update keyboard graphics to match
 				if ( Ready )
 				{
+					// Play sound
+					UI_Accept.Play();
+
 					// Gray out buttons
 					for ( short key = 0; key < KEYS; key++ )
 					{
@@ -421,19 +409,14 @@ namespace TragicMagic
 							}
 						}
 					}
-
-					// Display preview tweet
-					Screenshot.Alpha = 1;
-					Text_Tweet.Alpha = 1;
 				}
 				else
 				{
+					// Play sound
+					UI_Decline.Play();
+
 					// Colour buttons
 					UpdateKeySelected();
-
-					// Hide preview tweet
-					Screenshot.Alpha = 0;
-					Text_Tweet.Alpha = 0;
 				}
 			}
 		}
@@ -444,6 +427,12 @@ namespace TragicMagic
 		// OUT: N/A
 		private void UpdateKeySelected( short x = 0, short y = 0 )
 		{
+			// Play sound
+			if ( ( x != 0 ) || ( y != 0 ) )
+			{
+				UI_Select.Play();
+			}
+
 			// Ensure the key selected exists graphically
 			while( true )
 			{

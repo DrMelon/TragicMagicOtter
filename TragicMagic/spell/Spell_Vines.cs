@@ -82,6 +82,14 @@ namespace TragicMagic
 			TrailBetween = 5;
 			TrailBetweenRandom = 5;
 
+			// Remove default audio sample
+			AudioLoop.Stop();
+			AudioLoop = null;
+
+			// Initialize the fire audio loop
+			AudioLoop = new Sound( "../../resources/audio/vine.wav", true );
+			AudioLoop.Attenuation = 0.1f;
+			AudioLoop.Play();
 		}
 
 		public override void Update()

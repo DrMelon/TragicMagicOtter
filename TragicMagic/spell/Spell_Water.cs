@@ -57,8 +57,16 @@ namespace TragicMagic
 
             GroundTrail = new Otter.Image("../../resources/particle/splash.png");
             GroundTrail.Color = Color.Cyan;
-            GroundTrail.Color.A = 0.2f;
+			GroundTrail.Color.A = 0.2f;
 
+			// Remove default audio sample
+			AudioLoop.Stop();
+			AudioLoop = null;
+
+			// Initialize the fire audio loop
+			AudioLoop = new Sound( "../../resources/audio/water.wav", true );
+			AudioLoop.Attenuation = 0.1f;
+			AudioLoop.Play();
 		}
 
 		public override void Update()

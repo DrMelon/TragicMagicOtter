@@ -58,10 +58,16 @@ namespace TragicMagic
 			Particle_Fire_Trail.Start();
 			Scene.Add( Particle_Fire_Trail );
 
+			GroundSplat = new Otter.Image( "../../resources/particle/ground_explosion.png" );
 
-            GroundSplat = new Otter.Image("../../resources/particle/ground_explosion.png");
+			// Remove default audio sample
+			AudioLoop.Stop();
+			AudioLoop = null;
 
-
+			// Initialize the fire audio loop
+			AudioLoop = new Sound( "../../resources/audio/fire.wav", true );
+			AudioLoop.Attenuation = 0.1f;
+			AudioLoop.Play();
 		}
 
 		public override void Update()

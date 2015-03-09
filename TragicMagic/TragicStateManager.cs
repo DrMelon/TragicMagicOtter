@@ -31,7 +31,7 @@ namespace TragicMagic
 	class TragicStateManagerClass : Entity
 	{
 		// Defines
-		private const float ROUND_TIME = 5; // Time for a round to last, in seconds
+		private const float ROUND_TIME = 10; // Time for a round to last, in seconds
 		private const float SCORE_TIME = 5; // Time for a round's outcome to display for, in seconds
 		private const float FADE_SPEED = 0.03f; // Speed at which to fade in/out the ground tiles
 
@@ -61,6 +61,10 @@ namespace TragicMagic
 
 		// The thread to handle tweeting the match image & outcome
 		private Thread TweetThread;
+
+		// The state specific sound effects
+		private Music Ambience = new Music( "../../resources/audio/ambience.wav" );
+		private Sound RoundEnd = new Sound( "../../resources/audio/roundend.wav" );
 
 		public TragicStateManagerClass()
 		{
@@ -206,6 +210,9 @@ namespace TragicMagic
 			// Show tilemap ground
 			Ground_Alpha.Value = 0;
 			Ground_Alpha.Direction = 1;
+
+			// Start ambience track
+			Ambience.Play();
 		}
 		private void UpdateGame()
 		{
@@ -264,6 +271,12 @@ namespace TragicMagic
 			// Hide tilemap ground
 			Ground_Alpha.Value = 1;
 			Ground_Alpha.Direction = -1;
+
+			// Stop ambience track
+			Ambience.Stop();
+
+			// Play one shot round end
+			RoundEnd.Play();
 		}
 
 		// State: Score
